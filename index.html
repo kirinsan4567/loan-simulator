@@ -389,10 +389,10 @@ const interestEvents = [
 let eventSteps = defaultEventOffsets.map(e => ({ ...e }));
 
 // ★追加：借入開始からのオフセット(月数) ⇔ 年月文字列 の相互変換
-function offsetToYm(startYM, offsetMonths) {
-  const [sy, sm] = startYM.split('-').map(Number);
-  const d = new Date(sy, sm - 1 + offsetMonths, 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+function getYMFromOffset(startYM, offsetMonths) {
+    const [sy, sm] = startYM.split('-').map(Number);
+    const d = new Date(sy, sm - 1 + offsetMonths, 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
 // ★追加：初期シナリオに戻す（誤って削除・編集してしまった場合用）
@@ -423,7 +423,7 @@ function renderSteps() {
 
   eventSteps.forEach((s, i) => {
     runningRate += s.bump;
-    const ym = offsetToYm(startYM, s.offsetMonths);
+    const ym = s.ym; // 直接保持している年月を使う
     const isPast = ym <= BASE_YM;
     const statusText = isPast ? "実績" : "予測";
     const statusColor = isPast ? "#1a1a1a" : "#9a9590";
@@ -592,23 +592,17 @@ function onRule125Change() {
 }
 
 function getRateAtMonth(startYM, targetMonthIndex) {
+  // 1. 今のループ月(targetMonthIndex)がどの年月かを取得
+  const currentYM = getYMFromOffset(startYM, targetMonthIndex);
+  
+  // 2. その年月がリストにあるか確認
+  const event = interestEvents.find(e => e.ym === currentYM);
+  
+  // 3. リストにあればその金利(rate)を、なければ初期金利(initRate)を返す
   const initRate = parseFloat(document.getElementById('initRate').value) || 0;
-  const delay = parseInt(document.getElementById('applyDelay').value) || 0;
-
-  let activeBumpSum = 0;
-
-  // eventStepsは「借入開始からの相対月数」で持っているのでそのまま使える
-  for (let i = 0; i < eventSteps.length; i++) {
-    const s = eventSteps[i];
-    const executionMonthIndex = s.offsetMonths + delay;
-
-    // 借入開始より前に実行されてしまうイベントは、当初契約金利に既に
-    // 織り込まれているとみなし、計算には反映しない（過去の二重カウント防止）
-    if (executionMonthIndex >= 0 && targetMonthIndex >= executionMonthIndex) {
-      activeBumpSum += s.bump;
-    }
-  }
-  return Math.max(0, initRate + activeBumpSum) / 100 / 12;
+  const targetRate = event ? event.rate : initRate;
+  
+  return targetRate / 100 / 12; // 月利に変換
 }
 
 // ★追加：getRateAtMonth()が返すのは「その時点で反映可能な生の金利」（毎月変動しうる）。
