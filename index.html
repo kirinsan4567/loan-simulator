@@ -464,17 +464,23 @@ function getRateAtMonth(startYM, targetMonthIndex) {
   if (!startYM) return initRate / 100 / 12;
   const [sy, sm] = startYM.split('-').map(Number);
 
+  // targetMonthIndexの時点での実年月を算出
+  const targetDate = new Date(sy, sm - 1 + targetMonthIndex, 1);
+  const targetYear = targetDate.getFullYear();
+  const targetMonthNum = targetDate.getMonth() + 1;
+
   let activeBumpSum = 0;
+  
+  // 過去に確定した金利上昇イベントのみを積み上げる
   for (let i = 0; i < eventSteps.length; i++) {
     const s = eventSteps[i];
-    const eventMonthIndex = getDiffMonths(startYM, s.ym);
+    const [ey, em] = s.ym.split('-').map(Number);
+    const eventMonthIndex = (ey - sy) * 12 + (em - sm);
     const executionMonthIndex = eventMonthIndex + delay;
 
+    // 「その月」が「適用開始月」以降である場合のみ、その上昇分をカウントする
     if (targetMonthIndex >= executionMonthIndex) {
-      const currentMonthNum = ((sm - 1 + targetMonthIndex) % 12) + 1;
-      if ([4,10].includes(currentMonthNum) || targetMonthIndex > executionMonthIndex) {
-        activeBumpSum += s.bump;
-      }
+      activeBumpSum += s.bump;
     }
   }
   return Math.max(0, initRate + activeBumpSum) / 100 / 12;
