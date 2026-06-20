@@ -659,15 +659,40 @@ function renderResults(d) {
   // ③ ローン残高推移（正規スタック：元本残高の上に未払い利息が正しく積み重なる仕様）
   charts.balance = new Chart(document.getElementById('balanceChart'), {
     type: 'line',
-    data: { labels: d.labels, datasets: [
-      { label: '元本残高', data: d.balancePrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', fill: true, pointRadius: 0 },
-      { label: '残利息額（未払い利息）', data: d.balanceUnpaidData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', fill: true, pointRadius: 0 }
-    ]},
+    data: { 
+      labels: d.labels, 
+      datasets: [
+        { 
+          label: '元本残高', 
+          data: d.balancePrincipalData, 
+          backgroundColor: '#c8c5be', 
+          borderColor: '#404040', 
+          fill: true, // 下まで塗りつぶし
+          pointRadius: 0 
+        },
+        { 
+          label: '残利息額（未払い利息）', 
+          data: d.balanceUnpaidData, 
+          backgroundColor: 'rgba(255, 180, 180, 0.75)', 
+          borderColor: '#e84040', 
+          fill: '-1', // 【重要】ここを '-1' にすることで、直前のデータセット(元本)の上までを塗りつぶす設定になります
+          pointRadius: 0 
+        }
+      ]
+    },
     options: {
       responsive: true,
-      scales: { y: { stacked: true, min: 0, ticks: { callback: v => (v/10000).toFixed(0)+'万' } }, x: xScales }
+      scales: { 
+        y: { 
+          stacked: true, // スタックを有効化
+          min: 0, 
+          ticks: { callback: v => (v/10000).toFixed(0)+'万' } 
+        }, 
+        x: xScales 
+      }
     }
   });
+ 
 
   // ④ 総支払額推移（完全復活）
   charts.cum = new Chart(document.getElementById('cumChart'), {
