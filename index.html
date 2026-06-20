@@ -430,9 +430,18 @@ function renderSteps() {
     const statusText = isPast ? "実績" : "予測";
     const statusColor = isPast ? "#1a1a1a" : "#9a9590";
     const diff = s.offsetMonths;
-    const execIdx = diff + delay; // 会合＋遅延月数＝この上昇が「反映可能」になる月
-    const isBeforeStart = execIdx < 0;
-    const nextReviewIdx = isBeforeStart ? null : getNextReviewMonthIndex(startYM, execIdx, reviewSet);
+    const reviewIdx =
+      getNextReviewMonthIndex(
+        startYM,
+        diff,
+        reviewSet
+      );
+
+    const applyIdx =
+      reviewIdx + delay;
+
+    const isBeforeStart =
+      applyIdx < 0;
     
     const row = document.createElement('div');
     row.className = 'rate-row';
@@ -459,7 +468,7 @@ function renderSteps() {
       <div style="font-size:10px; color:${isBeforeStart ? 'var(--accent)' : 'var(--gray)'}; margin-top:6px; text-align:right;">
         ${isBeforeStart
           ? `借入開始前のため計算には反映されません（借入開始の ${Math.abs(diff)} ヶ月前）`
-          : `借入から ${diff} ヶ月目に会合 → ${execIdx} ヶ月目に反映可能 → 借入から ${nextReviewIdx} ヶ月目の見直し月でローンに適用`}
+          : `借入から ${diff} ヶ月目に会合→ 借入から ${reviewIdx} ヶ月目の見直し月で採用→ 借入から ${applyIdx} ヶ月目にローン金利へ反映`}
       </div>
     `;
     cont.appendChild(row);
@@ -602,14 +611,25 @@ function getRateAtMonth(startYM, targetMonthIndex) {
   // eventStepsは「借入開始からの相対月数」で持っているのでそのまま使える
   for (let i = 0; i < eventSteps.length; i++) {
     const s = eventSteps[i];
-    const executionMonthIndex = s.offsetMonths + delay;
+  
+    const reviewMonthIndex =
+      getNextReviewMonthIndex(
+        startYM,
+        s.offsetMonths,
+        reviewSet
+      );
 
-    // 借入開始より前に実行されてしまうイベントは、当初契約金利に既に
-    // 織り込まれているとみなし、計算には反映しない（過去の二重カウント防止）
-    if (executionMonthIndex >= 0 && targetMonthIndex >= executionMonthIndex) {
+    const executionMonthIndex =
+      reviewMonthIndex + delay;
+
+    if (
+      executionMonthIndex >= 0 &&
+      targetMonthIndex >= executionMonthIndex
+    ) {
       activeBumpSum += s.bump;
     }
   }
+
   return Math.max(0, initRate + activeBumpSum) / 100 / 12;
 }
 
