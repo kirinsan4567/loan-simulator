@@ -684,16 +684,18 @@ function renderResults(d) {
           data: d.balancePrincipalData,
           backgroundColor: '#c8c5be',
           borderColor: '#404040',
-          fill: true,
-          pointRadius: 0
+          fill: true, // 下まで塗りつぶし
+          pointRadius: 0,
+          order: 2 // 順番を後ろにする（下に描画）
         },
         {
           label: '未払い利息',
-          data: d.balanceUnpaidData, // ここに未払い利息のみのデータを渡す
+          data: d.balanceUnpaidData.map((val, i) => d.balancePrincipalData[i] + val),
           backgroundColor: 'rgba(255, 180, 180, 0.75)',
           borderColor: '#e84040',
-          fill: true, // stacked: true により元本の上に積み上がる
-          pointRadius: 0
+          fill: { target: 1 }, // target: 1 で「元本残高」のラインまでを塗りつぶす
+          pointRadius: 0,
+          order: 1 // 順番を前にする（上に描画）
         }
       ]
     },
@@ -701,7 +703,7 @@ function renderResults(d) {
       responsive: true,
       scales: {
         y: {
-          stacked: true, // ★重要：ここがONなら、データセット2はデータセット1の数値の上に積み上がる
+          stacked: false, 
           min: 0,
           ticks: { callback: v => (v/10000).toFixed(0)+'万' }
         },
