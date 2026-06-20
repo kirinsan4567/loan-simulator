@@ -144,7 +144,6 @@
   }
   .rule-note b { color: var(--orange); }
 
-  /* 利上げシナリオ入力欄の構造修正 */
   .rate-steps { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
   .rate-row {
     background: #fdfdfd;
@@ -171,7 +170,6 @@
     border-radius: 7px; font-size: 13px;
     background: var(--bg);
   }
-  /* 前回の美しい赤の点線表記スタイルを完全復元 */
   .calc-rate-box {
     font-size: 13px; font-weight: 700; color: var(--accent);
     padding: 6px 4px; text-align: center; background: #fff1f1;
@@ -363,7 +361,6 @@ function onBaseDataChange() {
   calculate();
 }
 
-// 必要情報の表記・構成を完全復元
 function renderSteps() {
   const cont = document.getElementById('rateSteps');
   if (!cont) return;
@@ -497,35 +494,6 @@ function getRateAtMonth(startYM, targetMonthIndex) {
 
 let charts = {};
 
-// プラグインで文字位置を線から右上に「ずらす」設計に完全修正
-const textLabelPlugin = {
-  id: 'textLabelPlugin',
-  afterDatasetsDraw(chart, args, pluginOptions) {
-    const { ctx, scales: { x, y } } = chart;
-    if (!pluginOptions || !pluginOptions.labels) return;
-    
-    ctx.save();
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textBaseline = 'bottom';
-    
-    pluginOptions.labels.forEach(lbl => {
-      const xPixel = x.getPixelForValue(lbl.x);
-      const yPixel = y.getPixelForValue(lbl.y);
-      if (xPixel === undefined || yPixel === undefined) return;
-
-      ctx.fillStyle = lbl.color || '#1a1a1a';
-      // 線やドットと絶対に重ならないよう、右に10px、上に15px完全にシフト
-      ctx.fillText(lbl.text, xPixel + 10, yPixel - 15);
-      
-      ctx.beginPath();
-      ctx.arc(xPixel, yPixel, 4, 0, 2 * Math.PI);
-      ctx.fill();
-    });
-    ctx.restore();
-  }
-};
-Chart.register(textLabelPlugin);
-
 function calculate() {
   const principal = parseFloat(document.getElementById('principal').value) * 10000;
   const term = parseInt(document.getElementById('term').value);
@@ -540,14 +508,15 @@ function calculate() {
   const labels = [];
   const rateData = [];
   
-  const payTotalData = [];      
-  const payPrincipalData = [];  
+  // 完全に独立した純粋な個別積み上げ用配列に修正
+  const payPrincipalData = [];  // 下：元本充当額
+  const payInterestData = [];   // 上：利息充当額
 
-  const balanceTotalData = [];  
-  const balancePrincipalData = []; 
+  const balancePrincipalData = []; // 下：元本残高
+  const balanceUnpaidData = [];    // 上：未払い利息（発生分のみ純粋にスタック）
 
-  const cumTotalData = [];      
-  const cumPrincipalData = [];  
+  const cumPrincipalData = [];  // 下：元本支払累計
+  const cumInterestData = [];   // 上：利息支払累計
 
   let balance = principal;
   let unpaidInterest = 0;
@@ -563,11 +532,6 @@ function calculate() {
   if (repayType === 'equal_payment') {
     currentPayment = r0 === 0 ? (balance / totalMonths) : (balance * r0) / (1 - Math.pow(1 + r0, -totalMonths));
   }
-
-  let initialPayText = "";
-  let lastPayment = 0;
-
-  const payLabels = [];
 
   for (let m = 0; m < totalMonths; m++) {
     const monthlyRate = getRateAtMonth(startYM, m);
@@ -632,37 +596,18 @@ function calculate() {
       balance -= principalPart;
     }
 
-    if (m === 0) {
-      initialPayText = (payment / 10000).toFixed(1) + "万円";
-      payLabels.push({ x: 0, y: Math.round(principalPart + interestPart), text: `当初契約時金額: ${initialPayText}`, color: '#1a1a1a' });
-      lastPayment = payment;
-    }
-
-    // 返済額に「金額変化（改定）」がある場合のみラベルを追加するよう厳密化
-    if (m > 0 && m % 60 === 0) {
-      if (Math.abs(payment - lastPayment) > 10) { 
-        payLabels.push({
-          x: m,
-          y: Math.round(principalPart + interestPart),
-          text: `${(m/12)}年目改定: ${(payment/10000).toFixed(1)}万円`,
-          color: '#f97316'
-        });
-        lastPayment = payment;
-      }
-    }
-
     cumPrincipal += principalPart;
     cumInterest += interestPart;
 
+    // 【最重要】オーバーレイを完全廃止し、Chart.js本来の積み上げ用に値を分離格納
     payPrincipalData.push(Math.round(principalPart));
-    payTotalData.push(Math.round(principalPart + interestPart));
+    payInterestData.push(Math.round(interestPart));
 
-    // 残高面グラフの重ね順修正：グレー（元本）の上に赤（未払い利息）が乗るレイヤー構造
     balancePrincipalData.push(Math.round(balance));
-    balanceTotalData.push(Math.round(balance + unpaidInterest));
+    balanceUnpaidData.push(Math.round(unpaidInterest)); // 元本の上に「未払い利息」の額だけを純粋に積み上げる
 
     cumPrincipalData.push(Math.round(cumPrincipal));
-    cumTotalData.push(Math.round(cumPrincipal + cumInterest));
+    cumInterestData.push(Math.round(cumInterest));
 
     totalInterest += interestPart;
     totalPayment += payment;
@@ -673,9 +618,9 @@ function calculate() {
   }
 
   renderResults({
-    labels, rateData, payPrincipalData, payTotalData, balancePrincipalData, balanceTotalData, cumPrincipalData, cumTotalData,
+    labels, rateData, payPrincipalData, payInterestData, balancePrincipalData, balanceUnpaidData, cumPrincipalData, cumInterestData,
     totalInterest, totalPayment, totalUnpaid: unpaidInterest, unpaidCount,
-    principal, term, use5yr, use125, finalBalance: balance, initialPayText, startYM, payLabels
+    principal, term, use5yr, use125, finalBalance: balance, startYM
   });
 }
 
@@ -727,66 +672,56 @@ function renderResults(d) {
   destroyCharts();
 
   const xScales = { ticks: { maxTicksLimit: 12, font: { size: 10 } } };
-  const delay = parseInt(document.getElementById('applyDelay').value) || 0;
-  
-  // ① 金利グラフ注記
-  const rateLabels = eventSteps.map(s => {
-    const [y, m] = s.ym.split('-').map(Number);
-    const dTarget = new Date(y, m - 1 + delay, 1);
-    const targetLabelStr = `${dTarget.getFullYear()}/${String(dTarget.getMonth() + 1).padStart(2, '0')}`;
-    const idx = d.labels.indexOf(targetLabelStr);
-    const val = idx !== -1 ? d.rateData[idx] : 0;
-    return { x: idx !== -1 ? idx : 0, y: val, text: `利上げ(+${s.bump}%)`, color: '#e84040' };
-  }).filter(l => l.x > 0);
 
-  // ③ 残高グラフ注記
-  const balanceLabels = [
-    { x: 0, y: d.balanceTotalData[0], text: `借入当初元本: ${(d.principal/10000).toFixed(0)}万円`, color: '#1a1a1a' }
-  ];
-
-  // ① 変動金利グラフ
+  // ① 変動金利グラフ（ごちゃつく文字プラグインを完全削除し、ツールチップのみで常にクリアに確認可能）
   charts.rate = new Chart(document.getElementById('rateChart'), {
     type: 'line',
     data: { labels: d.labels, datasets: [{
       label: '適用金利', data: d.rateData,
       fill: true, backgroundColor: 'rgba(232,64,64,0.12)',
-      borderColor: '#e84040', borderWidth: 2, pointRadius: 0, tension: 0
+      borderColor: '#e84040', borderWidth: 2, pointRadius: 2, hoverRadius: 5, tension: 0
     }]},
     options: {
       responsive: true,
-      plugins: { legend: { display: false }, textLabelPlugin: { labels: rateLabels } },
+      plugins: { 
+        legend: { display: false },
+        tooltip: { enabled: true, callbacks: { label: ctx => `適用金利: ${ctx.raw.toFixed(2)}%` } }
+      },
       scales: { y: { min: 0, max: 4, ticks: { callback: v => v.toFixed(2)+'%' } }, x: xScales }
     }
   });
 
-  // ② 返済額グラフ（凡例被り回避のために上部マージン35%を完全強制）
+  // ② 返済額グラフ（完全な個別積み上げ仕様）
   charts.pay = new Chart(document.getElementById('payChart'), {
     type: 'line',
     data: { labels: d.labels, datasets: [
-      { label: '利息充当額', data: d.payTotalData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 1.5, fill: true, pointRadius: 0 },
-      { label: '元本充当額', data: d.payPrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 1.5, fill: true, pointRadius: 0 }
+      { label: '利息充当額', data: d.payInterestData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 1, fill: true, pointRadius: 0 },
+      { label: '元本充当額', data: d.payPrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 1, fill: true, pointRadius: 0 }
     ]},
     options: {
       responsive: true,
-      plugins: { legend: { position: 'top' }, textLabelPlugin: { labels: d.payLabels } },
+      plugins: { legend: { position: 'top' } },
       scales: { 
         x: xScales, 
-        y: { min: 0, grace: '35%', ticks: { callback: v => (v/10000).toFixed(1)+'万' } } 
+        y: { stacked: true, min: 0, grace: '35%', ticks: { callback: v => (v/10000).toFixed(1)+'万' } } 
       }
     }
   });
 
-  // ③ ローン残高推移（元本の上に残利息が乗る正しいレイヤー構造へ100%修正）
+  // ③ ローン残高推移（完全積み上げに完全修正。グレーの元本の上に、赤の未払い利息が寸分狂わず乗る構造）
   charts.balance = new Chart(document.getElementById('balanceChart'), {
     type: 'line',
     data: { labels: d.labels, datasets: [
-      { label: '残利息額（未払い利息）', data: d.balanceTotalData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 1.5, fill: true, pointRadius: 0 },
-      { label: '元本残高', data: d.balancePrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 1.5, fill: true, pointRadius: 0 }
+      { label: '残利息額（未払い利息）', data: d.balanceUnpaidData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 1, fill: true, pointRadius: 0 },
+      { label: '元本残高', data: d.balancePrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 1, fill: true, pointRadius: 0 }
     ]},
     options: {
       responsive: true,
-      plugins: { legend: { position: 'top' }, textLabelPlugin: { labels: balanceLabels } },
-      scales: { x: xScales, y: { min: 0, ticks: { callback: v => (v/10000).toFixed(0)+'万' } } }
+      plugins: { legend: { position: 'top' } },
+      scales: { 
+        x: xScales, 
+        y: { stacked: true, min: 0, ticks: { callback: v => (v/10000).toFixed(0)+'万' } } 
+      }
     }
   });
 
@@ -794,13 +729,16 @@ function renderResults(d) {
   charts.cum = new Chart(document.getElementById('cumChart'), {
     type: 'line',
     data: { labels: d.labels, datasets: [
-      { label: '総支払額（利息）', data: d.cumTotalData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 1.5, fill: true, pointRadius: 0 },
-      { label: '総支払額（元本）', data: d.cumPrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 1.5, fill: true, pointRadius: 0 }
+      { label: '総支払額（利息）', data: d.cumInterestData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 1, fill: true, pointRadius: 0 },
+      { label: '総支払額（元本）', data: d.cumPrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 1, fill: true, pointRadius: 0 }
     ]},
     options: {
       responsive: true,
       plugins: { legend: { position: 'top' } },
-      scales: { x: xScales, y: { min: 0, ticks: { callback: v => (v/10000).toFixed(0)+'万' } } }
+      scales: { 
+        x: xScales, 
+        y: { stacked: true, min: 0, ticks: { callback: v => (v/10000).toFixed(0)+'万' } } 
+      }
     }
   });
 }
