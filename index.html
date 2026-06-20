@@ -377,15 +377,13 @@ const BASE_YM = "2026-06";
 // ★変更：会合イベントは絶対年月ではなく「借入開始から何ヶ月後か（オフセット）」で保持する。
 //         こうすることで借入開始年月を変えても自動的にシナリオ全体が追従し、
 //         借入開始より前の日付になってしまうことがなくなる。
-const defaultEventOffsets = [
-  { offsetMonths: 5,  bump: 0.00 },
-  { offsetMonths: 9,  bump: 0.25 },
-  { offsetMonths: 15, bump: 0.25 },
-  { offsetMonths: 26, bump: 0.25 },
-  { offsetMonths: 38, bump: 0.25 },
-  { offsetMonths: 44, bump: 0.25 },
-  { offsetMonths: 50, bump: 0.25 },
-  { offsetMonths: 62, bump: 0.25 }
+// 「どの年月になったら金利をいくらにするか」を定義
+const interestEvents = [
+  { ym: "2024-03", rate: 0.10 },
+  { ym: "2024-08", rate: 0.25 },
+  { ym: "2025-01", rate: 0.50 },
+  { ym: "2025-12", rate: 0.75 },
+  { ym: "2026-06", rate: 1.00 }
 ];
 
 let eventSteps = defaultEventOffsets.map(e => ({ ...e }));
