@@ -590,7 +590,7 @@ function calculate() {
     
     // 積み上げグラフ用にピュアな数値をそれぞれ格納
     balancePrincipalData.push(Math.round(balance));
-    balanceUnpaidData.push(Math.round(unpaidInterest)); 
+    balanceUnpaidData.push(Math.round(unpaidInterest + balance));
 
     cumPrincipalData.push(Math.round(cumPrincipal));
     cumInterestData.push(Math.round(cumInterest));
@@ -664,7 +664,7 @@ function renderResults(d) {
   });
 
   // ③ ローン残高推移（理想のグラフを実現するロジック）
-  charts.balance = new Chart(document.getElementById('balanceChart'), {
+charts.balance = new Chart(document.getElementById('balanceChart'), {
     type: 'line',
     data: { 
       labels: d.labels, 
@@ -679,10 +679,10 @@ function renderResults(d) {
         },
         { 
           label: '残利息額（未払い利息）', 
-          data: d.balanceUnpaidData, 
+          data: d.balanceUnpaidData, // 【重要】合計値が入っている
           backgroundColor: 'rgba(255, 180, 180, 0.75)', 
           borderColor: '#e84040', 
-          fill: true, // 下（＝元本データの上）まで塗りつぶし
+          fill: true, // 0から合計値まで塗りつぶす
           pointRadius: 0 
         }
       ]
@@ -691,7 +691,7 @@ function renderResults(d) {
       responsive: true,
       scales: { 
         y: { 
-          stacked: true, // ここをtrueにすることで、元本の上に利息が乗ります
+          stacked: false, // 【重要】自動スタックは使わない（データ側で足し合わせ済みのため）
           min: 0, 
           ticks: { callback: v => (v/10000).toFixed(0)+'万' } 
         }, 
