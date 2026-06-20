@@ -602,8 +602,15 @@ function calculate() {
     totalPayment += payment;
 
     if (balance <= 0 && unpaidInterest <= 0) {
-      labels.splice(m + 1);
-      rateData.splice(m + 1);
+      const cutAt = m + 1;
+      labels.splice(cutAt);
+      rateData.splice(cutAt);
+      payPrincipalData.splice(cutAt);
+      payInterestData.splice(cutAt);
+      balancePrincipalData.splice(cutAt);
+      balanceUnpaidData.splice(cutAt);
+      cumPrincipalData.splice(cutAt);
+      cumInterestData.splice(cutAt);
       break;
     }
   }
