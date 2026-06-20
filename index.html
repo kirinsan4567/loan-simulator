@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>住宅ローン返済シミュレーター</title>
+<title>住宅ローン返済シミュレーター（確定版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
@@ -22,229 +22,65 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
+    background: var(--bg); color: var(--text); min-height: 100vh;
   }
   header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 18px 32px;
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 18px 32px; display: flex; align-items: baseline; gap: 12px;
   }
-  header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  header h1 { font-size: 20px; font-weight: 700; }
   header span { font-size: 13px; color: var(--sub); }
-
-  .layout {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    min-height: calc(100vh - 57px);
-  }
-
-  .panel {
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 22px 18px;
-    overflow-y: auto;
-  }
+  .layout { display: grid; grid-template-columns: 360px 1fr; min-height: calc(100vh - 57px); }
+  .panel { background: var(--surface); border-right: 1px solid var(--border); padding: 22px 18px; overflow-y: auto; }
   .section-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--sub);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    margin-top: 22px;
-    padding-top: 18px;
-    border-top: 1px solid var(--border);
+    font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase;
+    margin-bottom: 12px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border);
   }
   .section-title:first-child { margin-top: 0; border-top: none; padding-top: 0; }
-
   .field { margin-bottom: 12px; }
-  .field label {
-    display: block;
-    font-size: 12px;
-    color: var(--sub);
-    margin-bottom: 4px;
-    font-weight: 500;
+  .field label { display: block; font-size: 12px; color: var(--sub); margin-bottom: 4px; font-weight: 500; }
+  .field input[type="number"], .field input[type="month"], .field select {
+    width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; background: var(--bg); color: var(--text); outline: none;
   }
-  .field input[type="number"],
-  .field input[type="month"],
-  .field select {
-    width: 100%;
-    padding: 8px 11px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    background: var(--bg);
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .field input:focus, .field select:focus { border-color: var(--accent); }
-
   .range-wrap { position: relative; }
-  .range-val {
-    position: absolute; right: 0; top: 0;
-    font-size: 13px; font-weight: 600; color: var(--accent);
-  }
+  .range-val { position: absolute; right: 0; top: 0; font-size: 13px; font-weight: 600; color: var(--accent); }
   input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: 8px; }
-
   .toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 8px;
-    background: var(--bg);
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 8px; background: var(--bg); cursor: pointer;
   }
-  .toggle-row:hover { border-color: var(--orange); background: var(--orange-light); }
   .toggle-row.active { border-color: var(--orange); background: var(--orange-light); }
-  .toggle-label { font-size: 13px; font-weight: 600; color: var(--text); }
-  .toggle-desc { font-size: 10px; color: var(--sub); margin-top: 1px; }
-  .toggle-switch {
-    position: relative;
-    width: 36px; height: 20px;
-    flex-shrink: 0;
-  }
+  .toggle-label { font-size: 13px; font-weight: 600; }
+  .toggle-desc { font-size: 10px; color: var(--sub); }
+  .toggle-switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .slider {
-    position: absolute; inset: 0;
-    background: #ccc; border-radius: 20px;
-    transition: background 0.2s;
-    cursor: pointer;
-  }
-  .slider::before {
-    content: '';
-    position: absolute;
-    width: 14px; height: 14px;
-    left: 3px; top: 3px;
-    background: #fff;
-    border-radius: 50%;
-    transition: transform 0.2s;
-  }
+  .slider { position: absolute; inset: 0; background: #ccc; border-radius: 20px; transition: background 0.2s; }
+  .slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
   input:checked + .slider { background: var(--orange); }
   input:checked + .slider::before { transform: translateX(16px); }
-  input:disabled + .slider { opacity: 0.4; cursor: not-allowed; }
-
-  .rule-note {
-    font-size: 11px; color: var(--sub);
-    background: #fffbf0;
-    border: 1px solid #fde68a;
-    border-radius: 7px;
-    padding: 8px 10px;
-    margin-bottom: 10px;
-    line-height: 1.5;
-  }
-  .rule-note b { color: var(--orange); }
-
   .rate-steps { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
-  .rate-row {
-    background: #fdfdfd;
-    border: 1px solid var(--border);
-    padding: 12px;
-    border-radius: 8px;
-  }
-  .rate-inputs-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 1.1fr 1fr auto;
-    gap: 8px;
-    align-items: flex-end;
-  }
-  .rate-inputs-grid label {
-    display: block;
-    font-size: 10px;
-    color: var(--sub);
-    margin-bottom: 3px;
-    font-weight: bold;
-  }
-  .rate-row input {
-    width: 100%; padding: 6px 8px;
-    border: 1px solid var(--border);
-    border-radius: 7px; font-size: 13px;
-    background: var(--bg);
-  }
-  .calc-rate-box {
-    font-size: 13px; font-weight: 700; color: var(--accent);
-    padding: 6px 4px; text-align: center; background: #fff1f1;
-    border-radius: 6px; border: 1px dashed rgba(232,64,64,0.6);
-  }
-  .btn-del {
-    background: none; border: 1px solid var(--border);
-    border-radius: 6px; width: 28px; height: 28px;
-    cursor: pointer; font-size: 14px; color: var(--sub);
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.1s;
-  }
+  .rate-row { background: #fdfdfd; border: 1px solid var(--border); padding: 12px; border-radius: 8px; }
+  .rate-inputs-grid { display: grid; grid-template-columns: 1.2fr 1.1fr 1fr auto; gap: 8px; align-items: flex-end; }
+  .rate-inputs-grid label { display: block; font-size: 10px; color: var(--sub); margin-bottom: 3px; font-weight: bold; }
+  .calc-rate-box { font-size: 13px; font-weight: 700; color: var(--accent); padding: 6px 4px; text-align: center; background: #fff1f1; border-radius: 6px; border: 1px dashed rgba(232,64,64,0.6); }
+  .btn-del { background: none; border: 1px solid var(--border); border-radius: 6px; width: 28px; height: 28px; cursor: pointer; color: var(--sub); }
   .btn-del:hover { background: #fee2e2; color: var(--accent); }
-  .btn-add {
-    margin-top: 6px; width: 100%; padding: 7px;
-    border: 1px dashed var(--border); border-radius: 8px;
-    background: none; font-size: 13px; color: var(--sub);
-    cursor: pointer; transition: all 0.15s;
-  }
-  .btn-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-
-  .btn-calc {
-    width: 100%; padding: 12px;
-    background: var(--accent); color: #fff;
-    border: none; border-radius: 10px;
-    font-size: 15px; font-weight: 700;
-    cursor: pointer; letter-spacing: 0.03em;
-    transition: opacity 0.15s;
-  }
-  .btn-calc:hover { opacity: 0.88; }
-  .btn-calc.top-btn { margin-top: 10px; margin-bottom: 5px; }
-  .btn-calc.bottom-btn { margin-top: 18px; }
-
-  .results {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    overflow-y: auto;
-  }
-  .summary-cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-  }
+  .btn-add { margin-top: 6px; width: 100%; padding: 7px; border: 1px dashed var(--border); border-radius: 8px; background: none; font-size: 13px; color: var(--sub); cursor: pointer; }
+  .btn-calc { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .results { padding: 24px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+  .summary-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
   .card.warn { border-color: #fde68a; background: #fffbf0; }
   .card .label { font-size: 10px; color: var(--sub); margin-bottom: 3px; }
-  .card .value { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .card .value { font-size: 20px; font-weight: 700; }
   .card .value.red { color: var(--accent); }
   .card .value.orange { color: var(--orange); }
   .card .sub-val { font-size: 11px; color: var(--sub); margin-top: 2px; }
-
-  .chart-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-  }
-  .chart-box h3 {
-    font-size: 13px; font-weight: 700;
-    margin-bottom: 14px; color: var(--text);
-  }
+  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+  .chart-box h3 { font-size: 13px; font-weight: 700; margin-bottom: 14px; }
   canvas { max-height: 240px; }
-
-  @media (max-width: 900px) {
-    .layout { grid-template-columns: 1fr; }
-    .panel { border-right: none; border-bottom: 1px solid var(--border); }
-    .summary-cards { grid-template-columns: repeat(2, 1fr); }
-  }
 </style>
 </head>
 <body>
@@ -252,248 +88,98 @@
   <h1>住宅ローン返済シミュレーター</h1>
   <span>変動金利 / 5年ルール / 125%ルール対応</span>
 </header>
-
 <div class="layout">
   <aside class="panel">
     <div class="section-title">ローン基本情報</div>
-    <div class="field">
-      <label>借入金額（万円）</label>
-      <input type="number" id="principal" value="5000" min="0" max="1000000" step="100" onchange="calculate()">
-    </div>
-    <div class="field">
-      <label>借入開始年月（契約）</label>
-      <input type="month" id="startDate" value="2023-10" onchange="onBaseDataChange()">
-    </div>
-    <div class="field">
-      <label>当初契約金利（%）</label>
-      <input type="number" id="initRate" value="0.35" step="0.01" min="0" onchange="onBaseDataChange()">
-    </div>
+    <div class="field"><label>借入金額（万円）</label><input type="number" id="principal" value="5000" onchange="calculate()"></div>
+    <div class="field"><label>借入開始年月</label><input type="month" id="startDate" value="2023-10" onchange="onBaseDataChange()"></div>
+    <div class="field"><label>当初契約金利（%）</label><input type="number" id="initRate" value="0.35" step="0.01" onchange="onBaseDataChange()"></div>
     <div class="field">
       <label>返済期間（年）</label>
-      <div class="range-wrap">
-        <span class="range-val" id="termVal">35年</span>
-        <input type="range" id="term" min="5" max="50" value="35" step="1"
-               oninput="document.getElementById('termVal').textContent=this.value+'年'" onchange="calculate()">
-      </div>
+      <div class="range-wrap"><span class="range-val" id="termVal">35年</span><input type="range" id="term" min="5" max="50" value="35" oninput="document.getElementById('termVal').textContent=this.value+'年'" onchange="calculate()"></div>
     </div>
     <div class="field">
       <label>返済方法</label>
-      <select id="repayType" onchange="calculate()">
-        <option value="equal_payment">元利均等返済</option>
-        <option value="equal_principal">元金均等返済</option>
-      </select>
+      <select id="repayType" onchange="calculate()"><option value="equal_payment">元利均等返済</option><option value="equal_principal">元金均等返済</option></select>
     </div>
-
-    <button class="btn-calc top-btn" onclick="calculate()">シミュレーション実行</button>
-
+    <button class="btn-calc" onclick="calculate()">シミュレーション実行</button>
     <div class="section-title">返済ルール設定</div>
-    <div class="rule-note">
-      <b>5年ルール：</b>金利が変わっても返済額は5年間固定<br>
-      <b>125%ルール：</b>見直し後の返済額は前回の125%が上限
-    </div>
-
     <div class="toggle-row" id="row5yr" onclick="toggle5yr()">
-      <div>
-        <div class="toggle-label">5年ルール</div>
-        <div class="toggle-desc">返済額を5年ごとに見直し</div>
-      </div>
-      <div class="toggle-switch" onclick="event.stopPropagation()">
-        <input type="checkbox" id="rule5yr" onchange="onRule5yrChange(); calculate();" checked>
-        <span class="slider"></span>
-      </div>
+      <div><div class="toggle-label">5年ルール</div><div class="toggle-desc">返済額を5年ごとに見直し</div></div>
+      <div class="toggle-switch" onclick="event.stopPropagation()"><input type="checkbox" id="rule5yr" onchange="onRule5yrChange(); calculate();" checked><span class="slider"></span></div>
     </div>
-
     <div class="toggle-row" id="row125" onclick="toggle125()">
-      <div>
-        <div class="toggle-label">125%ルール</div>
-        <div class="toggle-desc">返済額増加を前回の125%に制限</div>
-      </div>
-      <div class="toggle-switch" onclick="event.stopPropagation()">
-        <input type="checkbox" id="rule125" onchange="onRule125Change(); calculate();" checked>
-        <span class="slider"></span>
-      </div>
+      <div><div class="toggle-label">125%ルール</div><div class="toggle-desc">返済額増加を前回の125%に制限</div></div>
+      <div class="toggle-switch" onclick="event.stopPropagation()"><input type="checkbox" id="rule125" onchange="onRule125Change(); calculate();" checked><span class="slider"></span></div>
     </div>
-
-    <div class="section-title">金利見直し・適用タイミング</div>
+    <div class="section-title">金利見直しタイミング</div>
     <div class="field">
-      <label>金利見直し月（基準月）</label>
-      <select id="reviewMonths" onchange="calculate()">
-        <option value="4,10">毎年の4月・10月（一般的な変動）</option>
-        <option value="1,7">毎年の1月・7月</option>
-        <option value="all">毎月見直し</option>
-      </select>
+      <select id="reviewMonths" onchange="calculate()"><option value="4,10">毎年の4月・10月（一般的な変動）</option></select>
     </div>
     <div class="field">
-      <label>新金利の適用タイミング（遅延月数）</label>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <input type="number" id="applyDelay" value="3" min="0" max="12" step="1" style="width:70px;" onchange="calculate()">
-        <span style="font-size:13px; color:var(--sub);">ヶ月後の返済から適用</span>
-      </div>
+      <label>新金利の適用遅延（月数）</label>
+      <input type="number" id="applyDelay" value="3" style="width:70px;" onchange="calculate()"> ヶ月後から適用
     </div>
-
-    <div class="section-title">日銀政策決定会合・利上げシナリオ</div>
+    <div class="section-title">利上げシナリオ</div>
     <div class="rate-steps" id="rateSteps"></div>
     <button class="btn-add" onclick="addRateStep()">＋ 金利変更イベントを追加</button>
-
-    <button class="btn-calc bottom-btn" onclick="calculate()">シミュレーション実行</button>
   </aside>
-
-  <main class="results" id="results">
-    </main>
+  <main class="results" id="results"></main>
 </div>
-
 <script>
-const BASE_YM = "2026-06";
-
 let eventSteps = [
-  { ym: "2024-03", bump: 0.25 }, 
-  { ym: "2024-07", bump: 0.25 }, 
-  { ym: "2025-01", bump: 0.25 }, 
-  { ym: "2025-12", bump: 0.25 }, 
-  { ym: "2026-12", bump: 0.25 }, 
-  { ym: "2027-06", bump: 0.25 }, 
-  { ym: "2027-12", bump: 0.25 }, 
-  { ym: "2028-12", bump: 0.25 }  
+  { ym: "2024-03", bump: 0.25 }, { ym: "2024-07", bump: 0.25 }, { ym: "2025-01", bump: 0.25 },
+  { ym: "2025-12", bump: 0.25 }, { ym: "2026-12", bump: 0.25 }, { ym: "2027-06", bump: 0.25 },
+  { ym: "2027-12", bump: 0.25 }, { ym: "2028-12", bump: 0.25 }
 ];
-
-function onBaseDataChange() {
-  renderSteps();
-  calculate();
+function onBaseDataChange() { renderSteps(); calculate(); }
+function getDiffMonths(start, current) {
+  const [sy, sm] = start.split('-').map(Number); const [cy, cm] = current.split('-').map(Number);
+  return (cy - sy) * 12 + (cm - sm);
 }
-
 function renderSteps() {
-  const cont = document.getElementById('rateSteps');
-  if (!cont) return;
-  cont.innerHTML = '';
-
-  const initRate = parseFloat(document.getElementById('initRate').value) || 0;
-  let runningRate = initRate;
-
+  const cont = document.getElementById('rateSteps'); if (!cont) return; cont.innerHTML = '';
+  const initRate = parseFloat(document.getElementById('initRate').value) || 0; let runningRate = initRate;
   eventSteps.sort((a,b) => a.ym.localeCompare(b.ym));
-
   eventSteps.forEach((s, i) => {
-    runningRate += s.bump; 
-    const isPast = s.ym <= BASE_YM;
-    const statusText = isPast ? "確定" : "予測";
-    const diff = getDiffMonths(document.getElementById('startDate').value, s.ym);
-    
-    const row = document.createElement('div');
-    row.className = 'rate-row';
-    row.innerHTML = `
-      <div class="rate-inputs-grid">
-        <div>
-          <label>会合年月</label>
-          <input type="month" value="${s.ym}"
-                 onchange="eventSteps[${i}].ym=this.value; renderSteps(); calculate();">
-        </div>
-        <div>
-          <label>政策金利変更幅(%)</label>
-          <input type="number" value="${s.bump}" step="0.01"
-                 onchange="eventSteps[${i}].bump=parseFloat(this.value)||0; renderSteps(); calculate();">
-        </div>
-        <div>
-          <label>適用金利</label>
-          <div class="calc-rate-box">${runningRate.toFixed(2)}%</div>
-        </div>
-        <div>
-          <button class="btn-del" onclick="removeStep(${i})">×</button>
-        </div>
-      </div>
-      <div style="font-size:10px; color:var(--gray); margin-top:6px; text-align:right;">
-        【${statusText}】借入から ${diff} ヶ月目
-      </div>
-    `;
+    runningRate += s.bump;
+    const row = document.createElement('div'); row.className = 'rate-row';
+    row.innerHTML = `<div class="rate-inputs-grid">
+      <div><label>年月</label><input type="month" value="${s.ym}" onchange="eventSteps[${i}].ym=this.value; renderSteps(); calculate();"></div>
+      <div><label>幅(%)</label><input type="number" value="${s.bump}" step="0.01" onchange="eventSteps[${i}].bump=parseFloat(this.value)||0; renderSteps(); calculate();"></div>
+      <div><label>金利</label><div class="calc-rate-box">${runningRate.toFixed(2)}%</div></div>
+      <div><button class="btn-del" onclick="removeStep(${i})">×</button></div>
+    </div>`;
     cont.appendChild(row);
   });
 }
-
-function getDiffMonths(start, current) {
-  if (!start || !current) return 0;
-  const [sy, sm] = start.split('-').map(Number);
-  const [cy, cm] = current.split('-').map(Number);
-  return (cy - sy) * 12 + (cm - sm);
-}
-
-function addRateStep() {
-  let lastYm = "2029-01";
-  if (eventSteps.length > 0) {
-    const [y, m] = eventSteps[eventSteps.length - 1].ym.split('-').map(Number);
-    const d = new Date(y, m + 5, 1);
-    lastYm = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-  }
-  eventSteps.push({ ym: lastYm, bump: 0.25 });
-  renderSteps();
-  calculate();
-}
-
-function removeStep(i) {
-  eventSteps.splice(i, 1);
-  renderSteps();
-  calculate();
-}
-
-function toggle5yr() {
-  const cb = document.getElementById('rule5yr');
-  if (cb) { cb.checked = !cb.checked; onRule5yrChange(); calculate(); }
-}
-function toggle125() {
-  const cb5 = document.getElementById('rule5yr');
-  if (cb5 && !cb5.checked) return;
-  const cb = document.getElementById('rule125');
-  if (cb) { cb.checked = !cb.checked; onRule125Change(); calculate(); }
-}
+function addRateStep() { eventSteps.push({ ym: "2029-01", bump: 0.25 }); renderSteps(); calculate(); }
+function removeStep(i) { eventSteps.splice(i, 1); renderSteps(); calculate(); }
+function toggle5yr() { const cb = document.getElementById('rule5yr'); cb.checked = !cb.checked; onRule5yrChange(); calculate(); }
+function toggle125() { const cb = document.getElementById('rule125'); if(cb.disabled) return; cb.checked = !cb.checked; onRule125Change(); calculate(); }
 function onRule5yrChange() {
-  const cb5 = document.getElementById('rule5yr');
-  if (!cb5) return;
-  const on = cb5.checked;
-  document.getElementById('row5yr').classList.toggle('active', on);
-  const cb125 = document.getElementById('rule125');
-  if (cb125) {
-    cb125.disabled = !on;
-    if (!on) cb125.checked = false;
-    onRule125Change();
-  }
+  const on = document.getElementById('rule5yr').checked; document.getElementById('row5yr').classList.toggle('active', on);
+  document.getElementById('rule125').disabled = !on; if(!on) document.getElementById('rule125').checked = false;
+  onRule125Change();
 }
-function onRule125Change() {
-  const cb125 = document.getElementById('rule125');
-  if (!cb125) return;
-  document.getElementById('row125').classList.toggle('active', cb125.checked && !cb125.disabled);
-}
+function onRule125Change() { const cb = document.getElementById('rule125'); document.getElementById('row125').classList.toggle('active', cb.checked && !cb.disabled); }
 
 function getRateAtMonth(startYM, targetMonthIndex) {
   const initRate = parseFloat(document.getElementById('initRate').value) || 0;
   const delay = parseInt(document.getElementById('applyDelay').value) || 0;
-  const reviewMode = document.getElementById('reviewMonths').value;
-
-  if (!startYM) return initRate / 100 / 12;
-
   const [sy, sm] = startYM.split('-').map(Number);
-  const currentMonthNum = ((sm - 1 + targetMonthIndex) % 12) + 1;
-
   let activeBumpSum = 0;
-
   for (let i = 0; i < eventSteps.length; i++) {
-    const s = eventSteps[i];
-    const eventMonthIndex = getDiffMonths(startYM, s.ym);
-    const executionMonthIndex = eventMonthIndex + delay;
-
+    const s = eventSteps[i]; const eventMonthIndex = getDiffMonths(startYM, s.ym); const executionMonthIndex = eventMonthIndex + delay;
     if (targetMonthIndex >= executionMonthIndex) {
-      if (reviewMode === 'all') {
-        activeBumpSum += s.bump;
-      } else {
-        const allowedMonths = reviewMode.split(',').map(Number);
-        if (allowedMonths.includes(currentMonthNum) || targetMonthIndex > executionMonthIndex) {
-          activeBumpSum += s.bump;
-        }
-      }
+      const currentMonthNum = ((sm - 1 + targetMonthIndex) % 12) + 1;
+      if ([4,10].includes(currentMonthNum) || targetMonthIndex > executionMonthIndex) { activeBumpSum += s.bump; }
     }
   }
-
   return Math.max(0, initRate + activeBumpSum) / 100 / 12;
 }
 
 let charts = {};
-
 function calculate() {
   const principal = parseFloat(document.getElementById('principal').value) * 10000;
   const term = parseInt(document.getElementById('term').value);
@@ -503,256 +189,114 @@ function calculate() {
   const use125 = document.getElementById('rule125').checked;
   const totalMonths = term * 12;
 
-  if (!principal || !term || !startYM) return;
+  const labels = []; const rateData = []; const payPrincipalData = []; const payInterestData = [];
+  const balancePrincipalData = []; const balanceUnpaidData = [];
 
-  const labels = [];
-  const rateData = [];
-  
-  // 完全に独立した純粋な個別積み上げ用配列に修正
-  const payPrincipalData = [];  // 下：元本充当額
-  const payInterestData = [];   // 上：利息充当額
-
-  const balancePrincipalData = []; // 下：元本残高
-  const balanceUnpaidData = [];    // 上：未払い利息（発生分のみ純粋にスタック）
-
-  const cumPrincipalData = [];  // 下：元本支払累計
-  const cumInterestData = [];   // 上：利息支払累計
-
-  let balance = principal;
-  let unpaidInterest = 0;
-  
-  let currentPayment = 0;
-  let totalInterest = 0;
-  let totalPayment = 0;
-  let unpaidCount = 0;
-  let cumPrincipal = 0;
-  let cumInterest = 0;
+  let balance = principal; let unpaidInterest = 0; let currentPayment = 0; let lastFixedPayment = 0;
+  let totalInterest = 0; let totalPayment = 0; let unpaidCount = 0;
 
   const r0 = getRateAtMonth(startYM, 0);
   if (repayType === 'equal_payment') {
     currentPayment = r0 === 0 ? (balance / totalMonths) : (balance * r0) / (1 - Math.pow(1 + r0, -totalMonths));
+    lastFixedPayment = currentPayment;
   }
 
   for (let m = 0; m < totalMonths; m++) {
     const monthlyRate = getRateAtMonth(startYM, m);
-    const annualRate = monthlyRate * 12 * 100;
-
     const [y, mm] = startYM.split('-').map(Number);
     const d = new Date(y, mm - 1 + m, 1);
-    const labelYM = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-    labels.push(labelYM);
-    rateData.push(+annualRate.toFixed(4));
-
-    const remainingMonths = totalMonths - m;
+    labels.push(`${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`);
+    rateData.push(+(monthlyRate * 12 * 100).toFixed(4));
 
     if (repayType === 'equal_payment' && use5yr && m > 0 && m % 60 === 0) {
-      const effectiveBalance = balance + unpaidInterest;
+      const effectiveBalance = balance + unpaidInterest; const remainingMonths = totalMonths - m;
       let nextPayment = monthlyRate === 0 ? (effectiveBalance / remainingMonths) : (effectiveBalance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -remainingMonths));
-      
-      if (use125) {
-        const upperLimit = currentPayment * 1.25;
-        if (nextPayment > upperLimit) {
-          nextPayment = upperLimit;
-        }
-      }
-      currentPayment = nextPayment;
+      if (use125 && nextPayment > lastFixedPayment * 1.25) { nextPayment = lastFixedPayment * 1.25; }
+      currentPayment = nextPayment; lastFixedPayment = currentPayment;
     }
 
     let interestPart = balance * monthlyRate;
-    let principalPart = 0;
-    let payment = 0;
+    let principalPart = 0; let payment = currentPayment;
 
     if (repayType === 'equal_payment') {
       if (!use5yr) {
-        currentPayment = monthlyRate === 0 ? (balance / remainingMonths) : (balance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -remainingMonths));
+        const remainingMonths = totalMonths - m;
+        payment = monthlyRate === 0 ? (balance / remainingMonths) : (balance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -remainingMonths));
       }
-      payment = currentPayment;
-
-      if (payment <= interestPart) {
-        unpaidInterest += (interestPart - payment);
-        interestPart = payment; 
-        principalPart = 0;
+      
+      // 【厳密な未払い利息ロジック】
+      if (payment < interestPart) {
+        unpaidInterest += (interestPart - payment); // 払い切れなかった利息が「未払い利息」へ
+        interestPart = payment;
+        principalPart = 0; // 元本は1円も減らない
         unpaidCount++;
       } else {
-        const surplus = payment - interestPart;
+        let surplus = payment - interestPart;
+        // 過去の未払い利息があればそちらの返済に優先充当
         if (unpaidInterest > 0) {
-          const clearUnpaid = Math.min(surplus, unpaidInterest);
-          unpaidInterest -= clearUnpaid;
-          principalPart = surplus - clearUnpaid;
-        } else {
-          principalPart = surplus;
+          const clear = Math.min(surplus, unpaidInterest);
+          unpaidInterest -= clear; surplus -= clear;
         }
+        principalPart = surplus;
       }
     } else {
-      principalPart = principal / totalMonths;
-      payment = principalPart + interestPart;
+      principalPart = principal / totalMonths; payment = principalPart + interestPart;
     }
 
-    if (balance <= principalPart) {
-      principalPart = balance;
-      payment = principalPart + interestPart;
-      balance = 0;
-    } else {
-      balance -= principalPart;
-    }
+    if (balance <= principalPart) { principalPart = balance; balance = 0; } else { balance -= principalPart; }
 
-    cumPrincipal += principalPart;
-    cumInterest += interestPart;
+    payPrincipalData.push(Math.round(principalPart)); payInterestData.push(Math.round(interestPart));
+    balancePrincipalData.push(Math.round(balance)); balanceUnpaidData.push(Math.round(unpaidInterest));
 
-    // 【最重要】オーバーレイを完全廃止し、Chart.js本来の積み上げ用に値を分離格納
-    payPrincipalData.push(Math.round(principalPart));
-    payInterestData.push(Math.round(interestPart));
-
-    balancePrincipalData.push(Math.round(balance));
-    balanceUnpaidData.push(Math.round(unpaidInterest)); // 元本の上に「未払い利息」の額だけを純粋に積み上げる
-
-    cumPrincipalData.push(Math.round(cumPrincipal));
-    cumInterestData.push(Math.round(cumInterest));
-
-    totalInterest += interestPart;
-    totalPayment += payment;
-
-    if (balance <= 0 && unpaidInterest <= 0) {
-      break;
-    }
+    totalInterest += interestPart; totalPayment += payment;
+    if (balance <= 0 && unpaidInterest <= 0) { labels.splice(m+1); rateData.splice(m+1); break; }
   }
 
   renderResults({
-    labels, rateData, payPrincipalData, payInterestData, balancePrincipalData, balanceUnpaidData, cumPrincipalData, cumInterestData,
-    totalInterest, totalPayment, totalUnpaid: unpaidInterest, unpaidCount,
-    principal, term, use5yr, use125, finalBalance: balance, startYM
+    labels, rateData, payPrincipalData, payInterestData, balancePrincipalData, balanceUnpaidData,
+    totalInterest, totalPayment, totalUnpaid: unpaidInterest, unpaidCount, principal, finalBalance: balance + unpaidInterest
   });
 }
 
 function renderResults(d) {
-  const hasUnpaid = d.totalUnpaid > 0 || d.unpaidCount > 0;
-
   document.getElementById('results').innerHTML = `
     <div class="summary-cards">
-      <div class="card">
-        <div class="label">総返済額</div>
-        <div class="value red">${(d.totalPayment/10000).toFixed(0)}万円</div>
-        <div class="sub-val">借入元の ${(d.totalPayment/d.principal).toFixed(2)}倍</div>
-      </div>
-      <div class="card">
-        <div class="label">利息総額</div>
-        <div class="value">${(d.totalInterest/10000).toFixed(0)}万円</div>
-        <div class="sub-val">元金 ${(d.principal/10000).toFixed(0)}万円</div>
-      </div>
-      <div class="card">
-        <div class="label">最終残高</div>
-        <div class="value ${d.finalBalance > 1000 ? 'orange' : ''}">${(d.finalBalance/10000).toFixed(0)}万円</div>
-        <div class="sub-val">${d.finalBalance > 1000 ? '⚠ 完済できず残債あり' : '完済'}</div>
-      </div>
-      <div class="card ${hasUnpaid ? 'warn' : ''}">
-        <div class="label">未払い利息（最終残）</div>
-        <div class="value orange">${(d.totalUnpaid/10000).toFixed(0)}万円</div>
-        <div class="sub-val">${d.unpaidCount > 0 ? `${d.unpaidCount}ヶ月間発生` : '発生なし'}</div>
-      </div>
+      <div class="card"><div class="label">総返済額</div><div class="value red">${(d.totalPayment/10000).toFixed(0)}万</div></div>
+      <div class="card"><div class="label">利息総額</div><div class="value">${(d.totalInterest/10000).toFixed(0)}万</div></div>
+      <div class="card"><div class="label">最終残高</div><div class="value">${(d.finalBalance/10000).toFixed(0)}万</div></div>
+      <div class="card ${d.totalUnpaid > 0 ? 'warn' : ''}"><div class="label">未払い利息残</div><div class="value orange">${(d.totalUnpaid/10000).toFixed(0)}万</div></div>
     </div>
-
-    <div class="chart-box">
-      <h3>変動金利（適用金利）の想定推移</h3>
-      <canvas id="rateChart"></canvas>
-    </div>
-    <div class="chart-box">
-      <h3>毎月の返済額推移</h3>
-      <canvas id="payChart"></canvas>
-    </div>
-    <div class="chart-box">
-      <h3>ローン残高推移</h3>
-      <canvas id="balanceChart"></canvas>
-    </div>
-    <div class="chart-box">
-      <h3>ローン総支払額</h3>
-      <canvas id="cumChart"></canvas>
-    </div>
+    <div class="chart-box"><h3>変動金利推移（文字なし）</h3><canvas id="rateChart"></canvas></div>
+    <div class="chart-box"><h3>毎月の返済額推移</h3><canvas id="payChart"></canvas></div>
+    <div class="chart-box"><h3>ローン残高推移（完全積み上げ仕様）</h3><canvas id="balanceChart"></canvas></div>
   `;
-
-  destroyCharts();
+  if (charts.rate) charts.rate.destroy(); if (charts.pay) charts.pay.destroy(); if (charts.balance) charts.balance.destroy();
 
   const xScales = { ticks: { maxTicksLimit: 12, font: { size: 10 } } };
-
-  // ① 変動金利グラフ（ごちゃつく文字プラグインを完全削除し、ツールチップのみで常にクリアに確認可能）
+  
   charts.rate = new Chart(document.getElementById('rateChart'), {
-    type: 'line',
-    data: { labels: d.labels, datasets: [{
-      label: '適用金利', data: d.rateData,
-      fill: true, backgroundColor: 'rgba(232,64,64,0.12)',
-      borderColor: '#e84040', borderWidth: 2, pointRadius: 2, hoverRadius: 5, tension: 0
-    }]},
-    options: {
-      responsive: true,
-      plugins: { 
-        legend: { display: false },
-        tooltip: { enabled: true, callbacks: { label: ctx => `適用金利: ${ctx.raw.toFixed(2)}%` } }
-      },
-      scales: { y: { min: 0, max: 4, ticks: { callback: v => v.toFixed(2)+'%' } }, x: xScales }
-    }
+    type: 'line', data: { labels: d.labels, datasets: [{ data: d.rateData, fill: true, backgroundColor: 'rgba(232,64,64,0.12)', borderColor: '#e84040', borderWidth: 2, pointRadius: 0 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 4 }, x: xScales } }
   });
 
-  // ② 返済額グラフ（完全な個別積み上げ仕様）
   charts.pay = new Chart(document.getElementById('payChart'), {
-    type: 'line',
-    data: { labels: d.labels, datasets: [
-      { label: '利息充当額', data: d.payInterestData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 1, fill: true, pointRadius: 0 },
-      { label: '元本充当額', data: d.payPrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 1, fill: true, pointRadius: 0 }
+    type: 'line', data: { labels: d.labels, datasets: [
+      { label: '元本充当額', data: d.payPrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', fill: true, pointRadius: 0 },
+      { label: '利息充当額', data: d.payInterestData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', fill: true, pointRadius: 0 }
     ]},
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'top' } },
-      scales: { 
-        x: xScales, 
-        y: { stacked: true, min: 0, grace: '35%', ticks: { callback: v => (v/10000).toFixed(1)+'万' } } 
-      }
-    }
+    options: { scales: { y: { stacked: true, min: 0 }, x: xScales } }
   });
 
-  // ③ ローン残高推移（完全積み上げに完全修正。グレーの元本の上に、赤の未払い利息が寸分狂わず乗る構造）
+  // 【完全積み上げ仕様：元本残高の上に未払い利息を純粋にスタック】
   charts.balance = new Chart(document.getElementById('balanceChart'), {
-    type: 'line',
-    data: { labels: d.labels, datasets: [
-      { label: '残利息額（未払い利息）', data: d.balanceUnpaidData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 1, fill: true, pointRadius: 0 },
-      { label: '元本残高', data: d.balancePrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 1, fill: true, pointRadius: 0 }
+    type: 'line', data: { labels: d.labels, datasets: [
+      { label: '元本残高', data: d.balancePrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', fill: true, pointRadius: 0 },
+      { label: '残利息額（未払い利息）', data: d.balanceUnpaidData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', fill: true, pointRadius: 0 }
     ]},
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'top' } },
-      scales: { 
-        x: xScales, 
-        y: { stacked: true, min: 0, ticks: { callback: v => (v/10000).toFixed(0)+'万' } } 
-      }
-    }
-  });
-
-  // ④ ローン総支払額
-  charts.cum = new Chart(document.getElementById('cumChart'), {
-    type: 'line',
-    data: { labels: d.labels, datasets: [
-      { label: '総支払額（利息）', data: d.cumInterestData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 1, fill: true, pointRadius: 0 },
-      { label: '総支払額（元本）', data: d.cumPrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 1, fill: true, pointRadius: 0 }
-    ]},
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'top' } },
-      scales: { 
-        x: xScales, 
-        y: { stacked: true, min: 0, ticks: { callback: v => (v/10000).toFixed(0)+'万' } } 
-      }
-    }
+    options: { scales: { y: { stacked: true, min: 0, ticks: { callback: v => (v/10000).toFixed(0)+'万' } }, x: xScales } }
   });
 }
-
-function destroyCharts() {
-  Object.values(charts).forEach(c => { if (c) c.destroy(); });
-  charts = {};
-}
-
-window.onload = function() {
-  onRule5yrChange();
-  renderSteps();
-  calculate();
-};
+window.onload = function() { onRule5yrChange(); renderSteps(); calculate(); };
 </script>
 </body>
 </html>
