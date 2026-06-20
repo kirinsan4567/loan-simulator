@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>住宅ローン返済シミュレーター</title>
+<title>住宅ローン返済シミュレーター（完全版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
@@ -14,6 +14,8 @@
     --sub: #6b6861;
     --accent: #e84040;
     --accent-light: rgba(232,64,64,0.12);
+    --navy: #2563eb;
+    --navy-light: rgba(37,99,235,0.08);
     --orange: #f97316;
     --orange-light: rgba(249,115,22,0.12);
     --gray: #9a9590;
@@ -229,7 +231,7 @@
     font-size: 13px; font-weight: 700;
     margin-bottom: 14px; color: var(--text);
   }
-  canvas { max-height: 210px; }
+  canvas { max-height: 220px; }
 
   @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }
@@ -481,7 +483,6 @@ function getRateAtMonth(startYM, targetMonthIndex) {
   return Math.max(0, initRate + activeBumpSum) / 100 / 12;
 }
 
-// ── 【全面刷新】5年・125%ルールを銀行規約通りに厳密に再現したシミュレーション計算 ──
 let charts = {};
 
 function calculate() {
@@ -500,6 +501,7 @@ function calculate() {
   const paymentData = [];
   const interestData = [];
   const principalData = [];
+  const balanceData = [];
   const unpaidData = [];
 
   let balance = principal;
@@ -510,7 +512,6 @@ function calculate() {
   let totalPayment = 0;
   let unpaidCount = 0;
 
-  // 初期(1ヶ月目)の返済額を算出
   const r0 = getRateAtMonth(startYM, 0);
   if (repayType === 'equal_payment') {
     currentPayment = r0 === 0 ? (balance / totalMonths) : (balance * r0) / (1 - Math.pow(1 + r0, -totalMonths));
@@ -527,13 +528,11 @@ function calculate() {
 
     const remainingMonths = totalMonths - m;
 
-    // ── 【最重要】5年ルールによる返済額の強制再計算（60ヶ月に1度、借入基準で実施） ──
+    // ── 正しい比較・上限処理（2033年は据え置きとなるロジック） ──
     if (repayType === 'equal_payment' && use5yr && m > 0 && m % 60 === 0) {
-      // 銀行規約：現在の残高（未払い利息含む）に対し、残りの期間と「その時点の最新金流」で新返済額を算出
       const effectiveBalance = balance + unpaidInterest;
       let nextPayment = monthlyRate === 0 ? (effectiveBalance / remainingMonths) : (effectiveBalance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -remainingMonths));
       
-      // 125%ルールが有効なら、前回の返済額の1.25倍を絶対に超えさせない
       if (use125) {
         const upperLimit = currentPayment * 1.25;
         if (nextPayment > upperLimit) {
@@ -543,26 +542,22 @@ function calculate() {
       currentPayment = nextPayment;
     }
 
-    // 毎月の利息パート
     let interestPart = balance * monthlyRate;
     let principalPart = 0;
     let payment = 0;
 
     if (repayType === 'equal_payment') {
       if (!use5yr) {
-        // 5年ルールなし：毎月金利変動に合わせて返済額を再計算
         currentPayment = monthlyRate === 0 ? (balance / remainingMonths) : (balance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -remainingMonths));
       }
       payment = currentPayment;
 
-      // 利息が返済額を超えた場合（未払い利息の発生）
       if (payment <= interestPart) {
         unpaidInterest += (interestPart - payment);
-        interestPart = payment; // 今月払えるのは返済額が上限
+        interestPart = payment; 
         principalPart = 0;
         unpaidCount++;
       } else {
-        // 通常返済：まず利息を払い、残りを元本返済へ。過去の未払い利息があれば先に補填
         const surplus = payment - interestPart;
         if (unpaidInterest > 0) {
           const clearUnpaid = Math.min(surplus, unpaidInterest);
@@ -573,12 +568,10 @@ function calculate() {
         }
       }
     } else {
-      // 元金均等返済
       principalPart = principal / totalMonths;
       payment = principalPart + interestPart;
     }
 
-    // 残高を超える返済の調整
     if (balance <= principalPart) {
       principalPart = balance;
       payment = principalPart + interestPart;
@@ -590,6 +583,7 @@ function calculate() {
     interestData.push(Math.round(interestPart));
     principalData.push(Math.round(principalPart));
     paymentData.push(Math.round(payment));
+    balanceData.push(Math.round(balance));
     unpaidData.push(Math.round(unpaidInterest));
 
     totalInterest += interestPart;
@@ -601,7 +595,7 @@ function calculate() {
   }
 
   renderResults({
-    labels, rateData, interestData, principalData, paymentData, unpaidData,
+    labels, rateData, interestData, principalData, paymentData, balanceData, unpaidData,
     totalInterest, totalPayment, totalUnpaid: unpaidInterest, unpaidCount,
     principal, term, use5yr, use125, finalBalance: balance
   });
@@ -635,22 +629,66 @@ function renderResults(d) {
     </div>
 
     <div class="chart-box">
-      <h3>適用金利の実際の推移</h3>
-      <canvas id="rateChart"></canvas>
-    </div>
-    <div class="chart-box">
-      <h3>毎月の返済額内訳</h3>
+      <h3>① 毎月の返済額推移（元本と利息の内訳）</h3>
       <canvas id="payChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <h3>② ローン残高および未払い利息の推移</h3>
+      <canvas id="balanceChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <h3>（参考）適用金利の実際の推移</h3>
+      <canvas id="rateChart"></canvas>
     </div>
   `;
 
   destroyCharts();
 
+  // ① 返済額推移（積み上げ棒グラフ）
+  charts.pay = new Chart(document.getElementById('payChart'), {
+    type: 'bar',
+    data: { labels: d.labels, datasets: [
+      { label: '元本返済分', data: d.principalData, backgroundColor: 'rgba(154, 149, 144, 0.5)' },
+      { label: '利息支払い分', data: d.interestData,  backgroundColor: 'rgba(232, 64, 64, 0.8)' }
+    ]},
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        x: { stacked: true, ticks: { maxTicksLimit: 12, font: { size: 10 } } },
+        y: { stacked: true, ticks: { callback: v => (v/10000).toFixed(1)+'万円' } }
+      }
+    }
+  });
+
+  // ② ローン残高・未払い利息推移（折れ線グラフ）
+  charts.balance = new Chart(document.getElementById('balanceChart'), {
+    type: 'line',
+    data: {
+      labels: d.labels,
+      datasets: [
+        { label: 'ローン残高', data: d.balanceData, borderColor: '#2563eb', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, yAxisID: 'y' },
+        { label: '未払い利息残高', data: d.unpaidData, borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.1)', fill: true, borderWidth: 1.5, pointRadius: 0, yAxisID: 'yUnpaid' }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { ticks: { maxTicksLimit: 12, font: { size: 10 } } },
+        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'ローン残高' }, ticks: { callback: v => (v/10000).toFixed(0)+'万円' } },
+        yUnpaid: { type: 'linear', display: true, position: 'right', title: { display: true, text: '未払い利息' }, grid: { drawOnChartArea: false }, ticks: { callback: v => (v/10000).toFixed(1)+'万円' } }
+      }
+    }
+  });
+
+  // ③ 金利推移
   charts.rate = new Chart(document.getElementById('rateChart'), {
     type: 'line',
     data: { labels: d.labels, datasets: [{
       label: '適用金利（%）', data: d.rateData,
-      fill: true, backgroundColor: 'rgba(232,64,64,0.08)',
+      fill: true, backgroundColor: 'rgba(232,64,64,0.05)',
       borderColor: '#e84040', borderWidth: 1.5, pointRadius: 0, tension: 0
     }]},
     options: {
@@ -659,22 +697,6 @@ function renderResults(d) {
       scales: {
         y: { ticks: { callback: v => v.toFixed(2)+'%' } },
         x: { ticks: { maxTicksLimit: 12, font: { size: 10 } } }
-      }
-    }
-  });
-
-  charts.pay = new Chart(document.getElementById('payChart'), {
-    type: 'bar',
-    data: { labels: d.labels, datasets: [
-      { label: '元本', data: d.principalData, backgroundColor: 'rgba(120,120,120,0.4)' },
-      { label: '利息', data: d.interestData,  backgroundColor: 'rgba(232,64,64,0.7)' }
-    ]},
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'top' } },
-      scales: {
-        x: { stacked: true, ticks: { maxTicksLimit: 12, font: { size: 10 } } },
-        y: { stacked: true, ticks: { callback: v => (v/10000).toFixed(0)+'万' } }
       }
     }
   });
