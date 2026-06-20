@@ -593,7 +593,7 @@ function calculate() {
     
     // 積み上げグラフ用にピュアな数値をそれぞれ格納
     balancePrincipalData.push(Math.round(balance));
-    balanceUnpaidData.push(Math.round(unpaidInterest + balance));
+    balanceUnpaidData.push(Math.round(unpaidInterest));
 
     cumPrincipalData.push(Math.round(cumPrincipal));
     cumInterestData.push(Math.round(cumInterest));
@@ -668,41 +668,41 @@ function renderResults(d) {
 
   // ③ ローン残高推移（理想のグラフを実現するロジック）
   charts.balance = new Chart(document.getElementById('balanceChart'), {
-  type: 'line',
-  data: { 
-    labels: d.labels, 
-    datasets: [
-      { 
-        label: '元本残高', 
-        data: d.balancePrincipalData, 
-        backgroundColor: '#c8c5be', 
-        borderColor: '#404040', 
-        fill: true, // 0から元本まで塗りつぶし
-        pointRadius: 0 
-      },
-      { 
-        label: '残利息額（未払い利息）', 
-        data: d.balanceUnpaidData, 
-        backgroundColor: 'rgba(255, 180, 180, 0.75)', 
-        borderColor: '#e84040', 
-        fill: { target: '-1', above: 'rgba(255, 180, 180, 0.75)' }, // 【ここが重要】元本の上に赤を乗せる
-        pointRadius: 0 
+    type: 'line',
+    data: {
+      labels: d.labels,
+      datasets: [
+        {
+          label: '元本残高',
+          data: d.balancePrincipalData,
+          backgroundColor: '#c8c5be',
+          borderColor: '#404040',
+          fill: true, // 0から元本までを塗りつぶす
+          pointRadius: 0
+        },
+        {
+          label: '残利息額（未払い利息）',
+          data: d.balanceUnpaidData, // ここは未払い利息単体でOK
+          backgroundColor: 'rgba(255, 180, 180, 0.75)',
+          borderColor: '#e84040',
+          fill: { target: '-1', above: 'rgba(255, 180, 180, 0.75)' }, // 【重要】元本データの上に赤を乗せる
+          pointRadius: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          stacked: true, // 【重要】これでデータが積み上がる
+          min: 0,
+          ticks: { callback: v => (v/10000).toFixed(0)+'万' }
+        },
+        x: xScales
       }
-    ]
-  },
-  options: {
-    responsive: true,
-    scales: { 
-      y: { 
-        stacked: true, // 元本と利息をスタックする
-        min: 0, 
-        ticks: { callback: v => (v/10000).toFixed(0)+'万' } 
-      }, 
-      x: xScales 
     }
-  }
-});
-
+  });
+  
   // ④ 総支払額推移
   charts.cum = new Chart(document.getElementById('cumChart'), {
     type: 'line',
