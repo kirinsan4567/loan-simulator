@@ -194,7 +194,6 @@
   .btn-calc.top-btn { margin-top: 10px; margin-bottom: 5px; }
   .btn-calc.bottom-btn { margin-top: 18px; }
 
-  /* ── 結果エリア ── */
   .results {
     padding: 24px;
     display: flex;
@@ -202,7 +201,6 @@
     gap: 20px;
     overflow-y: auto;
   }
-
   .summary-cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -249,7 +247,6 @@
 <div class="layout">
   <aside class="panel">
     <div class="section-title">ローン基本情報</div>
-
     <div class="field">
       <label>借入金額（万円）</label>
       <input type="number" id="principal" value="5000" min="0" max="1000000" step="100" onchange="calculate()">
@@ -281,7 +278,6 @@
     <button class="btn-calc top-btn" onclick="calculate()">シミュレーション実行</button>
 
     <div class="section-title">返済ルール設定</div>
-
     <div class="rule-note">
       <b>5年ルール：</b>金利が変わっても返済額は5年間固定<br>
       <b>125%ルール：</b>見直し後の返済額は前回の125%が上限
@@ -327,7 +323,7 @@
     </div>
 
     <div class="section-title">日銀政策決定会合・利上げシナリオ</div>
-    <p style="font-size:11px;color:var(--sub);margin-bottom:8px;">会合年月と政策金利の変更幅を入力します。適用金利は自動計算されます。</p>
+    <p style="font-size:11px;color:var(--sub);margin-bottom:8px;">会合年月と政策金利の変更幅を入力します。</p>
 
     <div class="rate-steps" id="rateSteps"></div>
     <button class="btn-add" onclick="addRateStep()">＋ 金利変更イベントを追加</button>
@@ -340,16 +336,18 @@
 </div>
 
 <script>
-// ── 2026年6月時点を基準とした正しい実績・予測プリセット ──
+// 基準日を2026年6月固定とする
+const BASE_YM = "2026-06";
+
 let eventSteps = [
-  { ym: "2024-03", bump: 0.25 }, // 確定
-  { ym: "2024-07", bump: 0.25 }, // 確定
-  { ym: "2025-01", bump: 0.25 }, // 確定
-  { ym: "2025-12", bump: 0.25 }, // 確定
-  { ym: "2026-12", bump: 0.25 }, // 予測（これ以降）
-  { ym: "2027-06", bump: 0.25 }, // 予測
-  { ym: "2027-12", bump: 0.25 }, // 予測
-  { ym: "2028-12", bump: 0.25 }  // 予測
+  { ym: "2024-03", bump: 0.25 }, 
+  { ym: "2024-07", bump: 0.25 }, 
+  { ym: "2025-01", bump: 0.25 }, 
+  { ym: "2025-12", bump: 0.25 }, 
+  { ym: "2026-12", bump: 0.25 }, 
+  { ym: "2027-06", bump: 0.25 }, 
+  { ym: "2027-12", bump: 0.25 }, 
+  { ym: "2028-12", bump: 0.25 }  
 ];
 
 function onBaseDataChange() {
@@ -365,15 +363,13 @@ function renderSteps() {
   const initRate = parseFloat(document.getElementById('initRate').value) || 0;
   let runningRate = initRate;
 
-  // 年月順に並び替え
   eventSteps.sort((a,b) => a.ym.localeCompare(b.ym));
 
   eventSteps.forEach((s, i) => {
     runningRate += s.bump; 
-    
-    // 2026年6月より前かどうかで確定か予測かを自動フラグ立て
-    const isPast = s.ym <= "2026-06";
+    const isPast = s.ym <= BASE_YM;
     const statusText = isPast ? "確定" : "予測";
+    const diff = getDiffMonths(document.getElementById('startDate').value, s.ym);
     
     const row = document.createElement('div');
     row.className = 'rate-row';
@@ -394,7 +390,7 @@ function renderSteps() {
       </div>
       <button class="btn-del" onclick="removeStep(${i})">×</button>
       <div style="grid-column: span 4; font-size:10px; color:var(--gray); margin-top:2px; text-align:right;">
-        【${statusText}】借入から ${getDiffMonths(document.getElementById('startDate').value, s.ym)} ヶ月目
+        【${statusText}】借入から ${diff} ヶ月目
       </div>
     `;
     cont.appendChild(row);
@@ -426,31 +422,21 @@ function removeStep(i) {
   calculate();
 }
 
-// ── トグル連動 ──
 function toggle5yr() {
   const cb = document.getElementById('rule5yr');
-  if (cb) {
-    cb.checked = !cb.checked;
-    onRule5yrChange();
-    calculate();
-  }
+  if (cb) { cb.checked = !cb.checked; onRule5yrChange(); calculate(); }
 }
 function toggle125() {
   const cb5 = document.getElementById('rule5yr');
   if (cb5 && !cb5.checked) return;
   const cb = document.getElementById('rule125');
-  if (cb) {
-    cb.checked = !cb.checked;
-    onRule125Change();
-    calculate();
-  }
+  if (cb) { cb.checked = !cb.checked; onRule125Change(); calculate(); }
 }
 function onRule5yrChange() {
   const cb5 = document.getElementById('rule5yr');
   if (!cb5) return;
   const on = cb5.checked;
   document.getElementById('row5yr').classList.toggle('active', on);
-  
   const cb125 = document.getElementById('rule125');
   if (cb125) {
     cb125.disabled = !on;
@@ -464,7 +450,8 @@ function onRule125Change() {
   document.getElementById('row125').classList.toggle('active', cb125.checked && !cb125.disabled);
 }
 
-// ── 金利の判定ロジック ──
+// ── 【改善】無限ループを完全に排除した金利ルックアップ ──
+// ループ処理をせず、シミュレーション対象月（m）時点で有効な金利の合計を「数値」で直球計算
 function getRateAtMonth(startYM, targetMonthIndex) {
   const initRate = parseFloat(document.getElementById('initRate').value) || 0;
   const delay = parseInt(document.getElementById('applyDelay').value) || 0;
@@ -473,22 +460,27 @@ function getRateAtMonth(startYM, targetMonthIndex) {
   if (!startYM) return initRate / 100 / 12;
 
   const [sy, sm] = startYM.split('-').map(Number);
-  const currentRepayDate = new Date(sy, sm - 1 + targetMonthIndex, 1);
-  const currentM = currentRepayDate.getMonth() + 1;
+  
+  // 返済月時点のリアルな「月」（1〜12）
+  const currentMonthNum = ((sm - 1 + targetMonthIndex) % 12) + 1;
 
   let activeBumpSum = 0;
 
   for (let i = 0; i < eventSteps.length; i++) {
     const s = eventSteps[i];
-    const [ey, em] = s.ym.split('-').map(Number);
-    const executionDate = new Date(ey, em - 1 + delay, 1);
+    // 借入月から見た、イベント発生の月インデックス
+    const eventMonthIndex = getDiffMonths(startYM, s.ym);
+    // 実際に反映される月インデックス
+    const executionMonthIndex = eventMonthIndex + delay;
 
-    if (currentRepayDate >= executionDate) {
+    // 返済月が反映月以降の場合
+    if (targetMonthIndex >= executionMonthIndex) {
       if (reviewMode === 'all') {
         activeBumpSum += s.bump;
       } else {
         const allowedMonths = reviewMode.split(',').map(Number);
-        if (allowedMonths.includes(currentM) || currentRepayDate > executionDate) {
+        // 現在の月が金利見直し月であるか、または既に見直し月を通り過ぎて定着しているか
+        if (allowedMonths.includes(currentMonthNum) || targetMonthIndex > executionMonthIndex) {
           activeBumpSum += s.bump;
         }
       }
@@ -533,6 +525,7 @@ function calculate() {
     prevPayment = currentPayment;
   }
 
+  // 1回の固定回数ループ（絶対に無限ループ化しない）
   for (let m = 0; m < totalMonths; m++) {
     const monthlyRate = getRateAtMonth(startYM, m);
     const annualRate = monthlyRate * 12 * 100;
