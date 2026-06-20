@@ -603,15 +603,20 @@ function onRule125Change() {
 }
 
 function getRateAtMonth(startYM, targetMonthIndex) {
-  const initRate = parseFloat(document.getElementById('initRate').value) || 0;
-  const delay = parseInt(document.getElementById('applyDelay').value) || 0;
+  const initRate =
+    parseFloat(document.getElementById('initRate').value) || 0;
+
+  const delay =
+    parseInt(document.getElementById('applyDelay').value) || 0;
+
+  const reviewSet =
+    getReviewMonthsSet();
 
   let activeBumpSum = 0;
 
-  // eventStepsは「借入開始からの相対月数」で持っているのでそのまま使える
   for (let i = 0; i < eventSteps.length; i++) {
     const s = eventSteps[i];
-  
+
     const reviewMonthIndex =
       getNextReviewMonthIndex(
         startYM,
@@ -630,25 +635,34 @@ function getRateAtMonth(startYM, targetMonthIndex) {
     }
   }
 
+  return Math.max(
+    0,
+    initRate + activeBumpSum
+  ) / 100 / 12;
+}
+
   return Math.max(0, initRate + activeBumpSum) / 100 / 12;
 }
 
 // ★追加：getRateAtMonth()が返すのは「その時点で反映可能な生の金利」（毎月変動しうる）。
 //         実際の住宅ローンは見直し月(reviewSet)が来るまで契約金利を据え置くので、
 //         見直し月だけ生の金利をサンプリングして固定する系列をここで作る。
-function buildAppliedRateSeries(startYM, totalMonths, reviewSet) {
-  const [sy, sm] = startYM.split('-').map(Number);
+function buildAppliedRateSeries(
+  startYM,
+  totalMonths,
+  reviewSet
+) {
   const series = [];
-  let appliedRate = null;
+
   for (let m = 0; m <= totalMonths; m++) {
-    const d = new Date(sy, sm - 1 + m, 1);
-    const calMonth = d.getMonth() + 1;
-    const rawRate = getRateAtMonth(startYM, m);
-    if (appliedRate === null || reviewSet.has(calMonth)) {
-      appliedRate = rawRate; // 見直し月（または初月）だけ更新、それ以外は前回値を維持
-    }
-    series.push(appliedRate);
+    series.push(
+      getRateAtMonth(
+        startYM,
+        m
+      )
+    );
   }
+
   return series;
 }
 
