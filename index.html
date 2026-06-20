@@ -518,11 +518,14 @@ function calculate() {
   let cumPrincipal = 0;
   let cumInterest = 0;
 
-  const r0 = getRateAtMonth(startYM, 0);
+  const initRate = parseFloat(document.getElementById('initRate').value) || 0;
+  const r0 = initRate / 100 / 12; 
+
   if (repayType === 'equal_payment') {
     currentPayment = r0 === 0 ? (balance / totalMonths) : (balance * r0) / (1 - Math.pow(1 + r0, -totalMonths));
     lastFixedPayment = currentPayment;
   }
+  
 
   for (let m = 0; m < totalMonths; m++) {
     const monthlyRate = getRateAtMonth(startYM, m);
