@@ -336,7 +336,6 @@
 </div>
 
 <script>
-// 基準日を2026年6月固定とする
 const BASE_YM = "2026-06";
 
 let eventSteps = [
@@ -450,8 +449,6 @@ function onRule125Change() {
   document.getElementById('row125').classList.toggle('active', cb125.checked && !cb125.disabled);
 }
 
-// ── 【改善】無限ループを完全に排除した金利ルックアップ ──
-// ループ処理をせず、シミュレーション対象月（m）時点で有効な金利の合計を「数値」で直球計算
 function getRateAtMonth(startYM, targetMonthIndex) {
   const initRate = parseFloat(document.getElementById('initRate').value) || 0;
   const delay = parseInt(document.getElementById('applyDelay').value) || 0;
@@ -460,26 +457,20 @@ function getRateAtMonth(startYM, targetMonthIndex) {
   if (!startYM) return initRate / 100 / 12;
 
   const [sy, sm] = startYM.split('-').map(Number);
-  
-  // 返済月時点のリアルな「月」（1〜12）
   const currentMonthNum = ((sm - 1 + targetMonthIndex) % 12) + 1;
 
   let activeBumpSum = 0;
 
   for (let i = 0; i < eventSteps.length; i++) {
     const s = eventSteps[i];
-    // 借入月から見た、イベント発生の月インデックス
     const eventMonthIndex = getDiffMonths(startYM, s.ym);
-    // 実際に反映される月インデックス
     const executionMonthIndex = eventMonthIndex + delay;
 
-    // 返済月が反映月以降の場合
     if (targetMonthIndex >= executionMonthIndex) {
       if (reviewMode === 'all') {
         activeBumpSum += s.bump;
       } else {
         const allowedMonths = reviewMode.split(',').map(Number);
-        // 現在の月が金利見直し月であるか、または既に見直し月を通り過ぎて定着しているか
         if (allowedMonths.includes(currentMonthNum) || targetMonthIndex > executionMonthIndex) {
           activeBumpSum += s.bump;
         }
@@ -490,7 +481,7 @@ function getRateAtMonth(startYM, targetMonthIndex) {
   return Math.max(0, initRate + activeBumpSum) / 100 / 12;
 }
 
-// ── 計算メイン ──
+// ── 【全面刷新】5年・125%ルールを銀行規約通りに厳密に再現したシミュレーション計算 ──
 let charts = {};
 
 function calculate() {
@@ -513,73 +504,88 @@ function calculate() {
 
   let balance = principal;
   let unpaidInterest = 0;
+  
   let currentPayment = 0;
-  let prevPayment = 0;
   let totalInterest = 0;
   let totalPayment = 0;
   let unpaidCount = 0;
 
+  // 初期(1ヶ月目)の返済額を算出
   const r0 = getRateAtMonth(startYM, 0);
   if (repayType === 'equal_payment') {
-    currentPayment = r0 === 0 ? (balance / totalMonths) : balance * r0 / (1 - Math.pow(1+r0, -totalMonths));
-    prevPayment = currentPayment;
+    currentPayment = r0 === 0 ? (balance / totalMonths) : (balance * r0) / (1 - Math.pow(1 + r0, -totalMonths));
   }
 
-  // 1回の固定回数ループ（絶対に無限ループ化しない）
   for (let m = 0; m < totalMonths; m++) {
     const monthlyRate = getRateAtMonth(startYM, m);
     const annualRate = monthlyRate * 12 * 100;
 
-    const [y,mm] = startYM.split('-').map(Number);
+    const [y, mm] = startYM.split('-').map(Number);
     const d = new Date(y, mm - 1 + m, 1);
-    labels.push(`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}`);
-
+    labels.push(`${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`);
     rateData.push(+annualRate.toFixed(4));
-    const remaining = totalMonths - m;
 
+    const remainingMonths = totalMonths - m;
+
+    // ── 【最重要】5年ルールによる返済額の強制再計算（60ヶ月に1度、借入基準で実施） ──
+    if (repayType === 'equal_payment' && use5yr && m > 0 && m % 60 === 0) {
+      // 銀行規約：現在の残高（未払い利息含む）に対し、残りの期間と「その時点の最新金流」で新返済額を算出
+      const effectiveBalance = balance + unpaidInterest;
+      let nextPayment = monthlyRate === 0 ? (effectiveBalance / remainingMonths) : (effectiveBalance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -remainingMonths));
+      
+      // 125%ルールが有効なら、前回の返済額の1.25倍を絶対に超えさせない
+      if (use125) {
+        const upperLimit = currentPayment * 1.25;
+        if (nextPayment > upperLimit) {
+          nextPayment = upperLimit;
+        }
+      }
+      currentPayment = nextPayment;
+    }
+
+    // 毎月の利息パート
     let interestPart = balance * monthlyRate;
     let principalPart = 0;
     let payment = 0;
 
     if (repayType === 'equal_payment') {
-      if (use5yr) {
-        if (m > 0 && m % 60 === 0) {
-          const effectiveBalance = balance + unpaidInterest;
-          let newPayment = monthlyRate === 0 ? effectiveBalance / remaining : effectiveBalance * monthlyRate / (1 - Math.pow(1+monthlyRate, -remaining));
-          if (use125 && prevPayment > 0) {
-            newPayment = Math.min(newPayment, prevPayment * 1.25);
-          }
-          prevPayment = currentPayment;
-          currentPayment = newPayment;
-        }
-        payment = currentPayment;
-        
-        if (payment <= interestPart) {
-          unpaidInterest += (interestPart - payment);
-          principalPart = 0;
-          unpaidCount++;
-        } else {
-          const surplus = payment - interestPart;
-          if (unpaidInterest > 0) {
-            const clearUnpaid = Math.min(surplus, unpaidInterest);
-            unpaidInterest -= clearUnpaid;
-            principalPart = surplus - clearUnpaid;
-          } else {
-            principalPart = surplus;
-          }
-        }
+      if (!use5yr) {
+        // 5年ルールなし：毎月金利変動に合わせて返済額を再計算
+        currentPayment = monthlyRate === 0 ? (balance / remainingMonths) : (balance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -remainingMonths));
+      }
+      payment = currentPayment;
+
+      // 利息が返済額を超えた場合（未払い利息の発生）
+      if (payment <= interestPart) {
+        unpaidInterest += (interestPart - payment);
+        interestPart = payment; // 今月払えるのは返済額が上限
+        principalPart = 0;
+        unpaidCount++;
       } else {
-        payment = monthlyRate === 0 ? balance / remaining : balance * monthlyRate / (1 - Math.pow(1+monthlyRate, -remaining));
-        principalPart = payment - interestPart;
+        // 通常返済：まず利息を払い、残りを元本返済へ。過去の未払い利息があれば先に補填
+        const surplus = payment - interestPart;
+        if (unpaidInterest > 0) {
+          const clearUnpaid = Math.min(surplus, unpaidInterest);
+          unpaidInterest -= clearUnpaid;
+          principalPart = surplus - clearUnpaid;
+        } else {
+          principalPart = surplus;
+        }
       }
     } else {
+      // 元金均等返済
       principalPart = principal / totalMonths;
       payment = principalPart + interestPart;
     }
 
-    principalPart = Math.max(0, Math.min(principalPart, balance));
-    interestPart = Math.max(0, interestPart);
-    payment = principalPart + interestPart;
+    // 残高を超える返済の調整
+    if (balance <= principalPart) {
+      principalPart = balance;
+      payment = principalPart + interestPart;
+      balance = 0;
+    } else {
+      balance -= principalPart;
+    }
 
     interestData.push(Math.round(interestPart));
     principalData.push(Math.round(principalPart));
@@ -588,10 +594,8 @@ function calculate() {
 
     totalInterest += interestPart;
     totalPayment += payment;
-    balance -= principalPart;
 
     if (balance <= 0 && unpaidInterest <= 0) {
-      balance = 0;
       break;
     }
   }
