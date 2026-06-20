@@ -145,7 +145,7 @@
   }
   .rule-note b { color: var(--orange); }
 
-  /* 金率ステップ */
+  /* 金利ステップ */
   .rate-steps { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
   .rate-row {
     display: grid;
@@ -172,93 +172,4 @@
   }
   .btn-del:hover { background: #fee2e2; color: var(--accent); }
   .btn-add {
-    margin-top: 6px; width: 100%; padding: 7px;
-    border: 1px dashed var(--border); border-radius: 8px;
-    background: none; font-size: 13px; color: var(--sub);
-    cursor: pointer; transition: all 0.15s;
-  }
-  .btn-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-
-  .btn-calc {
-    width: 100%; margin-top: 18px; padding: 12px;
-    background: var(--accent); color: #fff;
-    border: none; border-radius: 10px;
-    font-size: 15px; font-weight: 700;
-    cursor: pointer; letter-spacing: 0.03em;
-    transition: opacity 0.15s;
-  }
-  .btn-calc:hover { opacity: 0.88; }
-
-  /* ── 結果エリア ── */
-  .results {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    overflow-y: auto;
-  }
-
-  .summary-cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-  }
-  .card.warn { border-color: #fde68a; background: #fffbf0; }
-  .card .label { font-size: 10px; color: var(--sub); margin-bottom: 3px; }
-  .card .value { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-  .card .value.red { color: var(--accent); }
-  .card .value.orange { color: var(--orange); }
-  .card .sub-val { font-size: 11px; color: var(--sub); margin-top: 2px; }
-
-  .chart-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-  }
-  .chart-box h3 {
-    font-size: 13px; font-weight: 700;
-    margin-bottom: 14px; color: var(--text);
-  }
-  canvas { max-height: 210px; }
-
-  .empty {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    height: 300px; color: var(--gray); gap: 10px; font-size: 14px;
-  }
-  .empty .icon { font-size: 40px; }
-
-  @media (max-width: 900px) {
-    .layout { grid-template-columns: 1fr; }
-    .panel { border-right: none; border-bottom: 1px solid var(--border); }
-    .summary-cards { grid-template-columns: repeat(2, 1fr); }
-  }
-</style>
-</head>
-<body>
-<header>
-  <h1>住宅ローン返済シミュレーター</h1>
-  <span>変動金利 / 5年ルール / 125%ルール対応</span>
-</header>
-
-<div class="layout">
-  <aside class="panel">
-    <div class="section-title">ローン基本情報</div>
-
-    <div class="field">
-      <label>借入金額（万円）</label>
-      <input type="number" id="principal" value="10000" min="0" max="1000000" step="100">
-    </div>
-    <div class="field">
-      <label>借入開始年月（契約）</label>
-      <input type="month" id="startDate" value="2023-10">
-    </div>
-    <div class="field">
-      <label>返済期間（年）</label>
+    margin-top: 6px; width:
