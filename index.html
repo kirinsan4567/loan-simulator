@@ -323,7 +323,7 @@
 </div>
 
 <script>
-// ── 金利の初期設定データ（最初の行の「開始月」も完全に変更可能） ──
+// ── 金利の初期設定データ（1行目の開始月も手動変更可能） ──
 let defaultSteps = [
   { fromMonth: 0, rate: 0.3 },
   { fromMonth: 12, rate: 0.5 },
@@ -339,7 +339,7 @@ function renderSteps() {
     const row = document.createElement('div');
     row.className = 'rate-row';
     
-    // 最初の行（i === 0）の開始月も編集可能。disabledを除去しています。
+    // 最初の行（i === 0）の開始月も完全に編集可能。
     row.innerHTML = `
       <div>
         <div style="font-size:10px;color:var(--sub);margin-bottom:2px;">開始月</div>
@@ -374,7 +374,7 @@ function removeStep(i) {
   renderSteps();
 }
 
-// ── トグルの動作（安全な要素存在チェックを追加） ──
+// ── トグルの動作 ──
 function toggle5yr() {
   const cb = document.getElementById('rule5yr');
   if (cb) {
@@ -430,6 +430,7 @@ function getRateAt(month) {
 }
 
 function formatManYen(n) { return (n/10000).toFixed(0)+'万円'; }
+
 function monthLabel(startYM, month) {
   if (!startYM) return `${month}ヶ月目`;
   const [y,m] = startYM.split('-').map(Number);
