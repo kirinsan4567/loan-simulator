@@ -675,17 +675,17 @@ function renderResults(d) {
         {
           label: '元本残高',
           data: d.balancePrincipalData,
-          backgroundColor: '#c8c5be',
+          backgroundColor: '#c8c5be', // グレー
           borderColor: '#404040',
-          fill: true, // ここをtrueにすると0〜元本までが塗りつぶされます
+          fill: true,
           pointRadius: 0
         },
         {
           label: '残利息額（未払い利息）',
           data: d.balanceUnpaidData, // ここは unpaidInterest 単体
-          backgroundColor: 'rgba(255, 180, 180, 0.75)',
+          backgroundColor: 'rgba(255, 180, 180, 0.75)', // 赤
           borderColor: '#e84040',
-          fill: true, // stacked: true なので、これだけで「元本の上に」積み上がります
+          fill: true, // stacked: true なので、これだけでグレーの上に乗ります
           pointRadius: 0
         }
       ]
@@ -694,7 +694,7 @@ function renderResults(d) {
       responsive: true,
       scales: {
         y: {
-          stacked: true, // これで「データセット1 + データセット2」の高さになります
+          stacked: true, // 【重要】これがあれば、データセット1の上に2が積み上がります
           min: 0,
           ticks: { callback: v => (v/10000).toFixed(0)+'万' }
         },
@@ -702,6 +702,9 @@ function renderResults(d) {
       }
     }
   });
+
+
+  
   
   // ④ 総支払額推移
   charts.cum = new Chart(document.getElementById('cumChart'), {
