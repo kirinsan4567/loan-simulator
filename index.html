@@ -682,20 +682,18 @@ function renderResults(d) {
         {
           label: '元本残高',
           data: d.balancePrincipalData,
-          backgroundColor: '#c8c5be',
+          backgroundColor: '#c8c5be', // グレー
           borderColor: '#404040',
-          fill: true, // 下まで塗りつぶし
-          pointRadius: 0,
-          order: 2 // 順番を後ろにする（下に描画）
+          fill: true, // 下まで塗りつぶす
+          pointRadius: 0
         },
         {
-          label: '未払い利息',
-          data: d.balanceUnpaidData.map((val, i) => d.balancePrincipalData[i] + val),
-          backgroundColor: 'rgba(255, 180, 180, 0.75)',
+          label: '残利息額',
+          data: d.balanceUnpaidData, // 未払い利息そのもの
+          backgroundColor: 'rgba(255, 180, 180, 0.75)', // 赤
           borderColor: '#e84040',
-          fill: { target: 1 }, // target: 1 で「元本残高」のラインまでを塗りつぶす
-          pointRadius: 0,
-          order: 1 // 順番を前にする（上に描画）
+          fill: true, // stacked: true なので、グレーの上に自動で乗る
+          pointRadius: 0
         }
       ]
     },
@@ -703,7 +701,7 @@ function renderResults(d) {
       responsive: true,
       scales: {
         y: {
-          stacked: false, 
+          stacked: true, // ★重要：これで「利息」が「元本」の高さからスタートします
           min: 0,
           ticks: { callback: v => (v/10000).toFixed(0)+'万' }
         },
