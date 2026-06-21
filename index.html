@@ -717,7 +717,7 @@ function buildAppliedRateSeries(startYM, totalMonths, reviewSet) {
 let charts = {};
 
 function calculate() {
-  const principal = parseFloat(document.getElementById('principal').value.replace(/,/g,'')) * 10000;
+  const principal = parseFloat(document.getElementById('principal').value) * 10000;
   const term = parseInt(document.getElementById('term').value);
   const repayType = document.getElementById('repayType').value;
   const startYM = document.getElementById('startDate').value;
