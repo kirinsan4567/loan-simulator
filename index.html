@@ -717,7 +717,15 @@ function buildAppliedRateSeries(startYM, totalMonths, reviewSet) {
 let charts = {};
 
 function calculate() {
-  const principal = parseFloat(document.getElementById('principal').value);
+  // 1. 入力欄の値を取得（カンマがあれば消す）
+  const inputVal = document.getElementById('principal').value.replace(/,/g, '');
+  
+  // 2. 「万円」単位を「円」単位に変換（10,000倍する）
+  // 10000（入力値） * 10000（単位：万） = 100,000,000円
+  const principal = parseFloat(inputVal) * 10000;
+  
+  // デバッグ：ここをコンソールで確認してください
+  console.log("計算用元本(円):", principal);
   const term = parseInt(document.getElementById('term').value);
   const repayType = document.getElementById('repayType').value;
   const startYM = document.getElementById('startDate').value;
