@@ -605,16 +605,16 @@ function offsetToYm(startYM, offsetMonths) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
-// ★変更：日銀政策金利シナリオも「今日(BASE_YM)」からの相対月数で動的に生成する。
-//         以前は絶対年月(2024-08等)で固定されており、数年後に見ると全イベントが
-//         過去の「実績」になってしまい、シミュレーターの売りである「将来予測」の
-//         デモにならなくなってしまっていた。今日を基準に、過去4件＋将来3件が
-//         常に混在するようにしている。
-const defaultEventOffsetsFromToday = [-22, -17, -10, -4, 6, 18, 30];
-const defaultEvents = defaultEventOffsetsFromToday.map(off => ({
-  ym: offsetToYm(BASE_YM, off),
-  bump: 0.25
-}));
+// 【修正】相対計算ロジックを廃止し、絶対年月で固定する
+const defaultEvents = [
+  { ym: "2024-08", bump: 0.25 },
+  { ym: "2025-01", bump: 0.25 },
+  { ym: "2025-12", bump: 0.25 },
+  { ym: "2026-06", bump: 0.25 },
+  { ym: "2026-12", bump: 0.25 },
+  { ym: "2027-12", bump: 0.25 },
+  { ym: "2028-12", bump: 0.25 }
+];
 
 let eventSteps = defaultEvents.map(e => ({ ...e }));
 
