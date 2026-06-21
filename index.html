@@ -968,8 +968,7 @@ function renderResults(d) {
     data: { labels: d.labels, datasets: [
       { label: '元本充当額', data: d.payPrincipalData, backgroundColor: '#c8c5be', borderColor: '#404040', borderWidth: 2, fill: true, pointRadius: 0 },
       { label: '利息充当額', data: d.payInterestData, backgroundColor: 'rgba(255, 180, 180, 0.75)', borderColor: '#e84040', borderWidth: 2, fill: true,
-        pointRadius: interestChangeRadius, pointHoverRadius: interestChangeHoverRadius,
-        pointBackgroundColor: '#e84040', pointBorderColor: '#fff', pointBorderWidth: 1.5 }
+        pointRadius: 0, }
     ]},
     options: {
       interaction: { mode: 'index', intersect: false },
