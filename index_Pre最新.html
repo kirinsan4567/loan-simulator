@@ -433,27 +433,27 @@
       <b>125%ルール：</b>見直し後の返済額は前回の125%が上限
     </div>
 
-    <div class="toggle-row" id="row5yr" onclick="document.getElementById('rule5yr').click();" style="cursor: pointer;">
-      <div>
-        <div class="toggle-label">5年ルール</div>
-        <div class="toggle-desc">返済額を5年ごとに見直し</div>
-      </div>
-      <div class="toggle-switch" onclick="event.stopPropagation()">
-        <input type="checkbox" id="rule5yr" onchange="onRule5yrChange(); calculate();" checked>
-        <span class="slider"></span>
-      </div>
-    </div>
+ <div class="toggle-row" id="row5yr" onclick="handleCustomToggle('rule5yr', onRule5yrChange);" style="cursor: pointer;">
+  <div>
+    <div class="toggle-label">5年ルール</div>
+    <div class="toggle-desc">返済額を5年ごとに見直し</div>
+  </div>
+  <div class="toggle-switch">
+    <input type="checkbox" id="rule5yr" checked onclick="event.stopPropagation();">
+    <span class="slider"></span>
+  </div>
+</div>
 
-    <div class="toggle-row" id="row125" onclick="document.getElementById('rule125').click();" style="cursor: pointer;">
-      <div>
-        <div class="toggle-label">125%ルール</div>
-        <div class="toggle-desc">返済額増加を前回の125%に制限</div>
-      </div>
-      <div class="toggle-switch" onclick="event.stopPropagation()">
-        <input type="checkbox" id="rule125" onchange="onRule125Change(); calculate();" checked>
-        <span class="slider"></span>
-      </div>
-    </div>
+<div class="toggle-row" id="row125" onclick="handleCustomToggle('rule125', onRule125Change);" style="cursor: pointer;">
+  <div>
+    <div class="toggle-label">125%ルール</div>
+    <div class="toggle-desc">返済額増加を前回の125%に制限</div>
+  </div>
+  <div class="toggle-switch">
+    <input type="checkbox" id="rule125" checked onclick="event.stopPropagation();">
+    <span class="slider"></span>
+  </div>
+</div>
 
     <div class="section-title">金利見直し・適用タイミング</div>
     <div class="field">
