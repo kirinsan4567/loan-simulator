@@ -467,6 +467,36 @@ function getNextReviewMonthIndex(startYM, fromMonthIndex, reviewSet) {
 function formatMan(yen) { return Math.round(yen / 10000).toLocaleString('ja-JP'); }
 function formatYen(yen) { return Math.round(yen).toLocaleString('ja-JP'); }
 
+
+// Today線を描画するプラグイン
+const todayLinePlugin = {
+  id: 'todayLine',
+  afterDraw: (chart) => {
+    const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+    const todayIndex = chart.options.todayIndex; // グラフごとのTODAYの位置
+    if (todayIndex === undefined) return;
+
+    const xPos = x.getPixelForValue(todayIndex);
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#333';
+    ctx.setLineDash([4, 4]); // 点線にする
+    ctx.moveTo(xPos, top);
+    ctx.lineTo(xPos, bottom);
+    ctx.stroke();
+    // ラベルの描画
+    ctx.fillStyle = '#333';
+    ctx.textAlign = 'center';
+    ctx.fillText('TODAY', xPos, top - 5);
+    ctx.restore();
+  }
+};
+
+
+
+
+  
 /* ---------- 借入金額（カンマ区切り入力） ---------- */
 function formatPrincipalInput() {
   const el = document.getElementById('principal');
@@ -994,7 +1024,15 @@ function renderResults(d) {
       pointBorderColor: '#fff',
       pointBorderWidth: 1.5
     }] },
-    options: { plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 4, ticks: { callback: v => v.toFixed(2)+'%' } }, x: xScales } }
+    options: { 
+      plugins: {
+         todayLine: true, // これを追加！
+         // ...既存のtooltipなどの設定
+         legend: { display: false }
+      }, 
+      todayIndex: 30, // TODAYがデータセットの何番目か（計算ロジックから渡す必要があります）
+  // ...既存のscales設定など
+      scales: { y: { min: 0, max: 4, ticks: { callback: v => v.toFixed(2)+'%' } }, x: xScales } }
   });
 
   // ② 返済額推移：変動金利推移と同様に、利息充当額は変化した月だけドット表示。
