@@ -284,7 +284,7 @@
     <div class="section-title">ローン基本情報</div>
     <div class="field">
       <label>借入金額（万円）</label>
-      <input type="number" inputmode="numeric" id="principal" value="10,000" class="input-field" onchange="calculate()"
+      <input type="number" inputmode="numeric" id="principal" value="10000" class="input-field" onchange="calculate()"
              onfocus="this.value=this.value.replace(/,/g,'')"
              onblur="formatPrincipalInput()">
     </div>
@@ -935,6 +935,92 @@ function calculate() {
   });
 }
 
+/* ---------- TODAYライン（カスタムプラグイン） ---------- */
+const todayLinePlugin = {
+  id: 'todayLine',
+  afterDraw(chart) {
+    const idx = chart.options.todayIndex;
+    if (idx === undefined || idx === null) return;
+    const xScale = chart.scales.x;
+    const yScale = chart.scales.y;
+    if (!xScale || !yScale) return;
+    const x = xScale.getPixelForValue(idx);
+    if (!isFinite(x)) return;
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.moveTo(x, yScale.top);
+    ctx.lineTo(x, yScale.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = 'bold 10px "Helvetica Neue", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('TODAY', x, yScale.top - 6);
+    ctx.restore();
+  }
+};
+Chart.register(todayLinePlugin);
+
+function renderResults(d) {
+  const unpaidIsZero = d.totalUnpaid < 1;
+  const finalIsZero = d.finalBalance < 1;
+  const todayIdxForChart = (d.todayIndex >= 0 && d.todayIndex < d.labels.length) ? d.todayIndex : null;
+
+  document.getElementById('results').innerHTML = `
+    <div class="summary-cards">
+      <div class="card"><div class="label">総返済額</div><div class="value red">${formatMan(d.totalPayment)}万円</div></div>
+      <div class="card"><div class="label">利息総額</div><div class="value">${formatMan(d.totalInterest)}万円</div></div>
+      <div class="card ${finalIsZero ? '' : 'warn'}"><div class="label">最終残高</div><div class="value ${finalIsZero ? '' : 'orange'}">${formatMan(d.finalBalance)}万円</div></div>
+      <div class="card ${unpaidIsZero ? '' : 'warn'}"><div class="label">未払い利息残</div><div class="value ${unpaidIsZero ? '' : 'orange'}">${formatMan(d.totalUnpaid)}万円</div></div>
+    </div>
+
+    <div class="summary-cards" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card">
+        <div class="label">毎月の返済額（変動幅）</div>
+        <div class="value">${formatMan(d.minPayment)}〜${formatMan(d.maxPayment)}万円</div>
+      </div>
+      <div class="card">
+        <div class="label">現在の返済額（${d.currentPaymentYm || BASE_YM.replace('-', '/')}時点）</div>
+        <div class="value">${d.currentPaymentVal != null ? formatYen(d.currentPaymentVal) + '円' : '—'}</div>
+      </div>
+      <div class="card">
+        <div class="label">次の返済額</div>
+        <div class="value">${d.nextPaymentVal != null ? formatYen(d.nextPaymentVal) + '円' : '変更予定なし'}</div>
+        <div class="sub-val">${d.nextPaymentYm ? d.nextPaymentYm + '〜適用' : ''}</div>
+      </div>
+    </div>
+
+    <div class="chart-box">
+      <h3>変動金利推移</h3>
+      <canvas id="rateChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>毎月の返済額推移</h3>
+      <canvas id="payChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>ローン残高推移</h3>
+      <canvas id="balanceChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>ローン総支払額</h3>
+      <canvas id="cumChart"></canvas>
+    </div>
+  `;
+
+  if (charts.rate) charts.rate.destroy();
+  if (charts.pay) charts.pay.destroy();
+  if (charts.balance) charts.balance.destroy();
+  if (charts.cum) charts.cum.destroy();
+
+  const xScales = { ticks: { maxTicksLimit: 12, font: { size: 10 } } };
+  const manTicks = { callback: v => (v / 10000).toLocaleString('ja-JP', { maximumFractionDigits: 0 }) + '万' };
+
+  
   
 function fmt(n) { return Math.round(n).toLocaleString('ja-JP'); }
 function fmtMan(n) { return Math.round(n/10000).toLocaleString('ja-JP') + '万円'; }
