@@ -810,14 +810,20 @@ function removeStep(i) {
 
 function toggle5yr() {
   const cb = document.getElementById('rule5yr');
-  if (cb) { cb.checked = !cb.checked; onRule5yrChange(); calculate(); }
+  cb.checked = !cb.checked;
+  // ここで確実にイベントを発火させる
+  if (typeof onRule5yrChange === 'function') onRule5yrChange();
+  if (typeof calculate === 'function') calculate();
 }
+
 function toggle125() {
-  const cb5 = document.getElementById('rule5yr');
-  if (cb5 && !cb5.checked) return;
   const cb = document.getElementById('rule125');
-  if (cb) { cb.checked = !cb.checked; onRule125Change(); calculate(); }
+  cb.checked = !cb.checked;
+  // ここで確実にイベントを発火させる
+  if (typeof onRule125Change === 'function') onRule125Change();
+  if (typeof calculate === 'function') calculate();
 }
+  
 function onRule5yrChange() {
   const cb5 = document.getElementById('rule5yr');
   if (!cb5) return;
