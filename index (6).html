@@ -30,13 +30,24 @@
 <style>
 .site-header {
   display: flex;
-  align-items: center;  /* ←縦中央揃え */
-  gap: 10px;            /* ←アイコンと文字の間隔 */
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
 }
+
+/* ★ここが重要：サイズアップ */
 .header-icon {
-  width: 180px;
-  height: 180px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
+  display: block;
+}
+
+/* ★h1の余白リセット（超重要） */
+.site-header h1 {
+  margin: 0;
+  line-height: 1.2;
+  font-size: 18px;
 }
     
   :root {
