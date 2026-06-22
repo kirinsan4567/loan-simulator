@@ -28,11 +28,17 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
- .header-icon {
-  width: 32px;
-  height: 32px;
+.site-header {
+  display: flex;
+  align-items: center;  /* ←縦中央揃え */
+  gap: 10px;            /* ←アイコンと文字の間隔 */
+}
+.header-icon {
+  width: 48px;
+  height: 48px;
   border-radius: 8px;
- }
+}
+  
   
   :root {
     --bg: #f8f7f4;
