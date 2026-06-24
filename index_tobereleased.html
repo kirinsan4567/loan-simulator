@@ -742,9 +742,7 @@
 </footer>
 
 <script>
-// ★変更：以前は BASE_YM が "2026-06" に固定されていたため、公開後に時間が経つと
-//         「実績/予測」の判定やTODAYラインの位置がずれていくバグがあった。
-//         実際の今日の日付から動的に算出する。
+// BASE_YM は "2026-06" に固定せず、実際の今日の日付から動的に算出する。
 function getCurrentYM() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -767,7 +765,8 @@ const defaultEvents = [
   { ym: "2026-06-17", bump: 0.25 },
   { ym: "2026-12-18", bump: 0.25 },
   { ym: "2027-12-17", bump: 0.25 },
-  { ym: "2028-12-15", bump: 0.25 }
+  { ym: "2028-12-15", bump: 0.25 },
+  { ym: "2029-06-15", bump: 0.25 }
 ];
 
 let eventSteps = defaultEvents.map(e => ({ ...e }));
