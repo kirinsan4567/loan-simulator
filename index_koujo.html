@@ -311,7 +311,8 @@
   }
   .card.warn { border-color: #fde68a; background: #fffbf0; }
   /* ラベルは固定の高さを確保し、各パネルの数字の縦位置を揃える */
-  .card .label { font-size: 10px; color: var(--sub); margin-bottom: 4px; line-height: 1.3; min-height: 1.3em; }
+  .card .label { font-size: 12px; color: var(--text); font-weight: 600; margin-bottom: 5px; line-height: 1.3; min-height: 1.3em; }
+  .card .label .label-sub { font-size: 10px; color: var(--sub); font-weight: normal; }
   .card .value { font-size: 17px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2; }
   .card .value.red { color: var(--accent); }
   .card .value.orange { color: var(--orange); }
@@ -321,10 +322,17 @@
   .card .note { font-size: 11px; color: var(--accent); margin-top: 4px; line-height: 1.35; }
   .card .note .delta { font-size: 10px; }
   .card .note-sub { font-size: 10px; color: var(--sub); margin-top: 1px; line-height: 1.35; }
-  /* 各年の控除額 内訳 */
-  .ded-toggle { font-size: 11px; color: var(--accent); margin-top: 4px; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 3px; }
-  .ded-toggle:hover { text-decoration: underline; }
-  .ded-breakdown { margin-top: 5px; font-size: 11px; color: var(--text); line-height: 1.6; max-height: 168px; overflow-y: auto; border-top: 1px dashed var(--border); padding-top: 5px; }
+  /* 各年の控除額：設定画面のプルダウン風ボックス */
+  .ded-toggle {
+    margin-top: 7px; width: 100%; box-sizing: border-box;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--bg); color: var(--text); font-size: 11px; font-weight: 600;
+    cursor: pointer; user-select: none;
+  }
+  .ded-toggle:hover { border-color: var(--accent); }
+  .ded-toggle .caret { font-size: 9px; color: var(--sub); }
+  .ded-breakdown { margin-top: 6px; font-size: 11px; color: var(--text); line-height: 1.6; max-height: 168px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; background: var(--surface); }
   .ded-breakdown .row { display: flex; justify-content: space-between; gap: 8px; }
   .ded-breakdown .row .yr { color: var(--sub); }
 
@@ -457,7 +465,7 @@
     #dashboardCards .summary-cards { display: contents; }
     #dashboardCards .dash-intro { grid-column: 1 / -1; }
     .card { padding: 8px 8px; }
-    .card .label { font-size: 9.5px; margin-bottom: 3px; }
+    .card .label { font-size: 11px; margin-bottom: 4px; }
     .card .value { font-size: 14px; }
     .card .value .unit { font-size: 9.5px; }
     .card .sub-val,
@@ -468,7 +476,10 @@
     header { padding: 10px 14px; gap: 6px; }
     header h1 { font-size: 17px; }
     header > span { font-size: 11px; width: 100%; }
+    /* パターン選択帯：スマホで端が切れないよう確実に折り返す */
     .slot-area { width: 100%; margin-left: 0; flex-wrap: wrap; }
+    #slotBtns { flex-wrap: wrap; }
+    .slot-btn { width: 30px; height: 30px; }
   }
 </style>
 </head>
@@ -2807,9 +2818,8 @@ function renderResults(d) {
   if (dcEl) dcEl.innerHTML = `
     <div class="summary-cards">
       <div class="card">
-        <div class="label">総返済額</div>
+        <div class="label">総返済額 <span class="label-sub">（借入：${Math.round(d.principal/10000).toLocaleString('ja-JP')}万円）</span></div>
         <div class="value red">${fmtMan(d.totalPayment)}</div>
-        <div class="sub-val">借入 ${Math.round(d.principal/10000).toLocaleString('ja-JP')}万円</div>
         ${diffPayment != null ? `<div class="note">※繰上げ後：${fmtMan(prepayTotalPayment)} <span class="delta">(${diffPayment<0?'−':'＋'}${fmtMan(Math.abs(diffPayment))})</span></div>` : ''}
       </div>
       <div class="card">
@@ -2818,13 +2828,13 @@ function renderResults(d) {
         ${diffInterest != null ? `<div class="note">※繰上げ後：${fmtMan(prepayTotalInterest)} <span class="delta">(${diffInterest<0?'−':'＋'}${fmtMan(Math.abs(diffInterest))})</span></div>` : ''}
       </div>
       <div class="card">
-        <div class="label">控除累計額${useDeduction ? '' : ' <span style="font-size:9px;color:var(--sub);">（OFF）</span>'}</div>
+        <div class="label">控除累計額${useDeduction ? '' : ' <span class="label-sub">（OFF）</span>'}</div>
         <div class="value" style="${useDeduction ? 'color:#2563eb;' : 'color:var(--border);'}">${deductionResult ? fmtMan(deductionResult.totalDeduction) : '—'}</div>
-        ${dedRows ? `<div class="ded-toggle" onclick="toggleDeductionBreakdown(event)">各年の控除額 <span class="caret">${dashDeductionOpen?'▲':'▼'}</span></div><div class="ded-breakdown" style="display:${dashDeductionOpen?'block':'none'};">${dedRows}</div>` : ''}
         ${(deductionDiff !== null && deductionDiff < -100) ? `<div class="note"><span style="color:var(--orange);">⚠️</span> 繰上げ後：${fmtMan(prepayDeductionResult.totalDeduction)} <span class="delta">(▼${fmtMan(Math.abs(deductionDiff))})</span><div class="note-sub">早期返済で控除が減少</div></div>` : ''}
+        ${dedRows ? `<div class="ded-toggle" onclick="toggleDeductionBreakdown(event)">各年の控除額 <span class="caret">${dashDeductionOpen?'▲':'▼'}</span></div><div class="ded-breakdown" style="display:${dashDeductionOpen?'block':'none'};">${dedRows}</div>` : ''}
       </div>
       <div class="card">
-        <div class="label">実質負担額${useDeduction ? '' : ' <span style="font-size:9px;color:var(--sub);">（OFF）</span>'}</div>
+        <div class="label">実質負担額${useDeduction ? '' : ' <span class="label-sub">（OFF）</span>'}</div>
         <div class="value" style="${useDeduction ? 'color:#2563eb;' : 'color:var(--border);'}">${deductionResult ? fmtMan(d.totalPayment - deductionResult.totalDeduction) : '—'}</div>
         ${deductionResult ? `<div class="sub-val">総返済額 − 控除累計</div>` : ''}
         ${(deductionResult && prepayDeductionResult && prepayTotalPayment != null) ? (() => {
@@ -2847,7 +2857,7 @@ function renderResults(d) {
       <div class="card">
         <div class="label">次の返済額変更</div>
         <div class="value">${d.nextChangePayment ? fmt(d.nextChangePayment)+'<span class="unit">円/月</span>' : '-'}</div>
-        <div class="sub-val">${d.nextChangeLabel ? d.nextChangeLabel+'〜（適用金利変更による）' : ''}</div>
+        <div class="sub-val">${d.nextChangeLabel ? d.nextChangeLabel+'〜' : ''}</div>
         ${payChangesHtml}
       </div>
       <div class="card">
