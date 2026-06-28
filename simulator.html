@@ -508,6 +508,9 @@
   .home-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;background:var(--surface);white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s}
   .home-btn:hover{background:var(--bg);border-color:var(--text)}
   @media (max-width:600px){.home-btn{font-size:12px;padding:5px 9px}}
+
+  .prepay-note{font-size:11.5px;color:#c0392b;line-height:1.6;margin:5px 0 8px}
+  .prepay-note a{color:#c0392b;text-decoration:underline;font-weight:600}
 </style>
 </head>
 <body>
@@ -754,13 +757,13 @@
     </div>
 
     <div class="section-title" id="sec-deduction" onclick="toggleSectionCollapse('sec-deduction')">住宅ローン控除 <button class="collapse-btn" id="scbtn-sec-deduction" onclick="event.stopPropagation();toggleSectionCollapse('sec-deduction')">－</button></div>
-    <div id="sec-deduction-content">
+    <div id="sec-deduction-content"><div class="prepay-note" id="prepayNoteDeduction" style="display:none">※繰り上げ返済は急いでやるべきではなく、利息の大小のみで比較するものでもありません。詳しくは<a href="scenarios.html#prepay">『繰り上げ返済の考え方』</a>をご参照ください</div>
     <div class="toggle-row" id="rowDeduction" onclick="toggleDeductionCompare()">
       <div>
         <div class="toggle-label">住宅ローン控除の比較表示</div>
         <div class="toggle-desc">控除後の実質返済額・残高ラインをグラフに表示</div>
       </div>
-      <div class="toggle-switch" onclick="event.stopPropagation()">
+      <div class="toggle-switch" onclick="event.stopPropagation(); toggleDeductionCompare()">
         <input type="checkbox" id="useDeduction" onchange="onDeductionChange(); calculate()">
         <span class="slider"></span>
       </div>
@@ -813,7 +816,7 @@
         <div class="toggle-label">5年ルール</div>
         <div class="toggle-desc">返済額を5年ごとに見直し</div>
       </div>
-      <div class="toggle-switch" onclick="event.stopPropagation()">
+      <div class="toggle-switch" onclick="event.stopPropagation(); toggle5yr()">
         <input type="checkbox" id="rule5yr" onchange="onRule5yrChange(); calculate();" checked>
         <span class="slider"></span>
       </div>
@@ -824,7 +827,7 @@
         <div class="toggle-label">125%ルール</div>
         <div class="toggle-desc">返済額増加を前回の125%に制限</div>
       </div>
-      <div class="toggle-switch" onclick="event.stopPropagation()">
+      <div class="toggle-switch" onclick="event.stopPropagation(); toggle125()">
         <input type="checkbox" id="rule125" onchange="onRule125Change(); calculate();" checked>
         <span class="slider"></span>
       </div>
@@ -859,7 +862,7 @@
         <div class="toggle-label">繰り上げ返済の比較表示</div>
         <div class="toggle-desc">入力した繰り上げ返済を青線でグラフに表示</div>
       </div>
-      <div class="toggle-switch" onclick="event.stopPropagation()">
+      <div class="toggle-switch" onclick="event.stopPropagation(); togglePrepayCompare()">
         <input type="checkbox" id="usePrepay" onchange="onPrepayChange(); calculate()">
         <span class="slider"></span>
       </div>
@@ -924,6 +927,7 @@
     <div class="chart-box" id="box-payChart">
       <h3 id="payChartTitle" onclick="toggleChartCollapse('payChart')">毎月の返済額推移 <span style="display:flex;gap:4px;align-items:center;"><button class="collapse-btn" id="sbtn-payChart" onclick="event.stopPropagation();toggleChartStretch('payChart')" title="縦に拡大">↕</button><button class="collapse-btn" id="cbtn-payChart" onclick="event.stopPropagation();toggleChartCollapse('payChart')">－</button></span></h3>
       <div id="sub-payChart" class="chart-sub"></div>
+      <div class="prepay-note prepay-gate" id="prepayNotePay" style="display:none">※繰り上げ返済は急いでやるべきではなく、利息の大小のみで比較するものでもありません。詳しくは<a href="scenarios.html#prepay">『繰り上げ返済の考え方』</a>をご参照ください</div>
       <div id="wrap-payChart" style="position:relative;height:280px;"><canvas id="payChart" style="height:100%;"></canvas></div>
     </div>
     <div class="chart-box" id="box-balanceChart">
@@ -934,6 +938,7 @@
     <div class="chart-box" id="box-cumChart">
       <h3 id="cumChartTitle" onclick="toggleChartCollapse('cumChart')">ローン総支払額 <span style="display:flex;gap:4px;align-items:center;"><button class="collapse-btn" id="sbtn-cumChart" onclick="event.stopPropagation();toggleChartStretch('cumChart')" title="縦に拡大">↕</button><button class="collapse-btn" id="cbtn-cumChart" onclick="event.stopPropagation();toggleChartCollapse('cumChart')">－</button></span></h3>
       <div id="sub-cumChart" class="chart-sub"></div>
+      <div class="prepay-note prepay-gate" id="prepayNoteCum" style="display:none">※繰り上げ返済は急いでやるべきではなく、利息の大小のみで比較するものでもありません。詳しくは<a href="scenarios.html#prepay">『繰り上げ返済の考え方』</a>をご参照ください</div>
       <div id="wrap-cumChart" style="position:relative;height:280px;"><canvas id="cumChart" style="height:100%;"></canvas></div>
     </div>
     </main>
@@ -1893,10 +1898,24 @@ function calcDeduction(balancePrincipalData, labels, startYM, principal) {
   return { annualDeductions, monthlyDeduction, totalDeduction, deductionLine, lastEndIdx };
 }
 
+function updatePrepayNotes() {
+  const c = document.getElementById('usePrepay');
+  const on = !!(c && c.checked);
+  let collapse = {};
+  try { collapse = JSON.parse(localStorage.getItem('chart_collapse') || '{}'); } catch(e) {}
+  const d = document.getElementById('prepayNoteDeduction');
+  if (d) d.style.display = on ? '' : 'none';
+  const pn = document.getElementById('prepayNotePay');
+  if (pn) pn.style.display = (on && !collapse['payChart']) ? '' : 'none';
+  const cn = document.getElementById('prepayNoteCum');
+  if (cn) cn.style.display = (on && !collapse['cumChart']) ? '' : 'none';
+}
+
 function onPrepayChange() {
   const cb = document.getElementById('usePrepay');
   if (cb) {
     document.getElementById('rowPrepay').classList.toggle('active', cb.checked);
+    updatePrepayNotes();
     // 全パターン共通でON/OFFを保存
     localStorage.setItem('prepay_display_on', cb.checked ? '1' : '0');
   }
@@ -2598,6 +2617,7 @@ function applyChartCollapse(id, collapsed) {
   const h3 = document.getElementById('box-' + id)?.querySelector('h3');
   if (h3) h3.style.marginBottom = collapsed ? '0' : '';
   updateChartCollapseBtn(id, collapsed);
+  if (typeof updatePrepayNotes === "function") updatePrepayNotes();
 }
 
 function toggleChartStretch(id) {
