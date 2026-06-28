@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>住宅ローン返済シミュレーター｜KIRIN</title>
+<meta name="description" content="変動金利の見直し・繰り上げ返済・住宅ローン控除まで、条件を入れて最長50年の住宅ローン返済額を試算できる無料ツールです。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#191B22;
+    --ink-soft:#3a3e49;
+    --mist:#5f6473;
+    --panel:rgba(255,255,255,.42);
+    --panel-strong:rgba(255,255,255,.74);
+    --card:rgba(255,255,255,.74);
+    --card-strong:rgba(255,255,255,.92);
+    --hair:rgba(25,27,34,.13);
+    --hair-soft:rgba(25,27,34,.08);
+    --amber:#E8821E;
+    --amber-deep:#c4660f;
+    --teal:#149a8c;
+    --magenta:#c12d80;
+    --bg-fallback:#cfd4da;
+    --jp:"Zen Kaku Gothic New",system-ui,sans-serif;
+    --en:"Space Grotesk","Zen Kaku Gothic New",sans-serif;
+    --maxw:1040px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:var(--jp);color:var(--ink);line-height:1.75;
+    background:var(--bg-fallback);min-height:100vh;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* fixed giraffe background (iOS-safe pseudo-element) */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-2;
+    background-color:#cfd4da;
+    background-image:url('KIRIN_SIM_MUSEUM.jpg');
+    background-size:cover;
+    background-position:center 20%;
+    background-repeat:no-repeat;
+  }
+  /* very light veil only; the content panel carries readability */
+  body::after{
+    content:"";position:fixed;inset:0;z-index:-1;
+    background:linear-gradient(180deg,
+      rgba(244,245,247,.04) 0%,
+      rgba(244,245,247,.14) 55%,
+      rgba(244,245,247,.30) 100%);
+  }
+
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(140%) blur(10px);
+    -webkit-backdrop-filter:saturate(140%) blur(10px);
+    background:rgba(255,255,255,.6);
+    border-bottom:1px solid var(--hair-soft);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    flex-wrap:wrap;padding:13px 22px;max-width:1120px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .name{display:flex;flex-direction:column;line-height:1.15}
+  .brand .name .ey{font-family:var(--en);font-weight:600;font-size:.66rem;
+    letter-spacing:.28em;color:var(--amber-deep);text-transform:uppercase}
+  .brand .name .ti{font-weight:700;font-size:.95rem;letter-spacing:.01em}
+  nav.links{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  nav.links a{font-size:.86rem;font-weight:500;color:var(--ink-soft);
+    padding:7px 12px;border-radius:8px;transition:background .18s,color .18s}
+  nav.links a:hover{background:rgba(25,27,34,.06);color:var(--ink)}
+  nav.links a[aria-current]{color:var(--ink);font-weight:700}
+  nav.links a[aria-current]::after{content:"";display:block;height:2px;border-radius:2px;
+    margin-top:2px;background:var(--amber)}
+
+  /* ---------- Content panel (the translucent box over the giraffe) ---------- */
+  main{padding:clamp(26px,5vh,54px) 0 clamp(40px,7vh,70px)}
+  .panel{
+    background:var(--panel);
+    border:1px solid rgba(255,255,255,.55);
+    border-radius:22px;
+    padding:clamp(26px,4.5vw,52px);
+    backdrop-filter:saturate(150%) blur(14px);
+    -webkit-backdrop-filter:saturate(150%) blur(14px);
+    box-shadow:0 32px 72px -34px rgba(20,22,30,.55);
+  }
+
+  /* ---------- Hero (inside panel) ---------- */
+  .eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .eyebrow span{font-family:var(--en);font-weight:600;font-size:.72rem;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
+  h1{font-weight:900;letter-spacing:.005em;line-height:1.3;
+    font-size:clamp(1.75rem,5vw,3rem)}
+  h1 .hl{color:var(--amber-deep)}
+  .lead{margin-top:18px;font-size:clamp(1rem,1.8vw,1.14rem);max-width:36em;color:var(--ink-soft)}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:13px;margin-top:30px}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:1rem;
+    padding:14px 26px;border-radius:12px;transition:transform .16s,box-shadow .16s,background .16s}
+  .btn .arr{font-family:var(--en);transition:transform .16s}
+  .btn-primary{background:var(--amber);color:#241502;
+    box-shadow:0 10px 26px -10px rgba(196,102,15,.7)}
+  .btn-primary:hover{background:#f08c25;transform:translateY(-2px)}
+  .btn-primary:hover .arr{transform:translateX(4px)}
+  .btn-ghost{background:rgba(255,255,255,.78);color:var(--ink);border:1px solid var(--hair)}
+  .btn-ghost:hover{background:#fff;transform:translateY(-2px)}
+
+  /* ---------- Divider + cards (inside panel) ---------- */
+  .section-head{display:flex;align-items:center;gap:14px;margin:clamp(34px,6vw,52px) 0 20px}
+  .section-head .lbl{font-family:var(--en);font-weight:600;font-size:.72rem;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--mist);white-space:nowrap}
+  .section-head .rule{flex:1;height:1px;background:var(--hair)}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{position:relative;display:flex;flex-direction:column;
+    background:var(--card);border:1px solid var(--hair);border-radius:15px;
+    padding:24px 22px 20px;overflow:hidden;
+    transition:transform .2s,box-shadow .2s,border-color .2s;
+    box-shadow:0 12px 30px -24px rgba(20,22,30,.6)}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:var(--accent,var(--amber))}
+  .card:hover{transform:translateY(-5px);border-color:rgba(25,27,34,.2);
+    box-shadow:0 22px 44px -24px rgba(20,22,30,.55)}
+  .card .role{font-family:var(--en);font-weight:600;font-size:.68rem;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--accent,var(--amber-deep));margin-bottom:11px}
+  .card h3{font-weight:700;font-size:1.18rem;line-height:1.4;margin-bottom:9px}
+  .card p{font-size:.91rem;color:var(--ink-soft);line-height:1.7;flex:1}
+  .card .go{display:inline-flex;align-items:center;gap:7px;margin-top:17px;
+    font-weight:700;font-size:.91rem;color:var(--ink)}
+  .card .go .arr{font-family:var(--en);color:var(--accent,var(--amber-deep));transition:transform .16s}
+  .card:hover .go .arr{transform:translateX(4px)}
+  .card.primary{background:var(--card-strong)}
+  .card.primary .go{align-self:flex-start;background:var(--amber);color:#241502;
+    padding:11px 18px;border-radius:10px;margin-top:19px;
+    box-shadow:0 9px 22px -10px rgba(196,102,15,.65)}
+  .card.primary .go .arr{color:#241502}
+
+  /* ---------- Footer (simulator.html と統一) ---------- */
+  footer.site-footer{
+    background:rgba(255,255,255,.72);
+    border-top:1px solid #e2e0db;
+    padding:16px 24px 22px;text-align:center;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  }
+  .footer-disclaimer{font-size:10px;color:#6b6861;line-height:1.7;max-width:680px;margin:0 auto 14px}
+  .footer-credit{display:flex;align-items:center;justify-content:center;gap:9px;
+    font-size:12px;color:#6b6861;flex-wrap:wrap}
+  .footer-icon{width:24px;height:24px;border-radius:50%;object-fit:cover;
+    border:1px solid #e2e0db;flex-shrink:0}
+  .footer-x-link{display:inline-flex;align-items:center;gap:6px;color:#1a1a1a;
+    text-decoration:none;font-weight:700;font-size:12px;padding:5px 12px;
+    border:1px solid #e2e0db;border-radius:20px;transition:background .15s,border-color .15s}
+  .footer-x-link:hover{background:#f8f7f4;border-color:#1a1a1a}
+  .x-logo{flex-shrink:0}
+
+  .dia{width:15px;height:15px;display:inline-block;vertical-align:middle}
+
+  /* ---------- Motion ---------- */
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .anim{opacity:0;animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
+  .d1{animation-delay:.05s}.d2{animation-delay:.18s}.d3{animation-delay:.30s}
+
+  /* ---------- Mobile: stronger panel, stack ---------- */
+  @media (max-width:760px){.cards{grid-template-columns:1fr;gap:13px}}
+  @media (max-width:640px){
+    :root{--panel:var(--panel-strong);--card:var(--card-strong)}
+    main{padding-top:18px}
+    .nav{justify-content:center;gap:10px;padding:11px 16px}
+    nav.links{justify-content:center}
+    nav.links a{padding:6px 9px;font-size:.82rem}
+    .wrap{padding:0 14px}
+    .panel{border-radius:18px;padding:24px 20px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .anim{animation:none;opacity:1}
+    .btn,.card,.card .go .arr,.btn .arr{transition:none}
+  }
+  :focus-visible{outline:2.5px solid var(--amber-deep);outline-offset:3px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html" aria-label="ホーム">
+      <svg class="dia" style="width:26px;height:26px" viewBox="0 0 32 32" aria-hidden="true">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#E8821E"/><stop offset=".5" stop-color="#c12d80"/><stop offset="1" stop-color="#149a8c"/>
+        </linearGradient></defs>
+        <path d="M16 1 31 16 16 31 1 16Z" fill="url(#g)"/>
+        <path d="M16 1 31 16 16 16Z" fill="#fff" opacity=".22"/>
+        <path d="M16 31 1 16 16 16Z" fill="#000" opacity=".12"/>
+      </svg>
+      <span class="name">
+        <span class="ey">KIRIN</span>
+        <span class="ti">住宅ローン返済シミュレーター</span>
+      </span>
+    </a>
+    <nav class="links" aria-label="メインナビ">
+      <a href="index.html" aria-current="page">ホーム</a>
+      <a href="simulator.html">シミュレーター</a>
+      <a href="guide.html">使い方</a>
+      <a href="scenarios.html">シナリオ</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="panel anim d1">
+
+      <p class="eyebrow">
+        <svg class="dia" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M16 2 30 16 16 30 2 16Z" fill="#E8821E"/>
+          <path d="M16 2 30 16 16 16Z" fill="#fff" opacity=".3"/>
+        </svg>
+        <span>変動金利・住宅ローン返済シミュレーター</span>
+      </p>
+      <h1>「金利が上がったら？」を、<br><span class="hl">自分の数字</span>で確かめる。</h1>
+      <p class="lead">変動金利の見直し、繰り上げ返済、住宅ローン控除まで。条件を入れるだけで、最長50年の住宅ローン返済額をグラフで試算できる無料ツールです。</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="simulator.html">試算をはじめる <span class="arr">→</span></a>
+        <a class="btn btn-ghost" href="guide.html">使い方を見る</a>
+      </div>
+
+      <div class="section-head">
+        <span class="lbl">Menu</span>
+        <span class="rule"></span>
+      </div>
+      <div class="cards">
+        <a class="card primary" href="simulator.html" style="--accent:var(--amber-deep)">
+          <span class="role">Tool</span>
+          <h3>シミュレーターを使う</h3>
+          <p>借入額・金利・期間を入れて、毎月の返済と総額をグラフで確認。金利上昇シナリオや繰り上げ返済も試せます。</p>
+          <span class="go">試算をはじめる <span class="arr">→</span></span>
+        </a>
+        <a class="card" href="guide.html" style="--accent:var(--teal)">
+          <span class="role">Guide</span>
+          <h3>使い方ガイド</h3>
+          <p>入力項目の意味と、画面の見方をひと通り解説。はじめての方は、まずここから。</p>
+          <span class="go">使い方を見る <span class="arr">→</span></span>
+        </a>
+        <a class="card" href="scenarios.html" style="--accent:var(--magenta)">
+          <span class="role">Scenarios</span>
+          <h3>試したいシナリオ＆繰り上げの考え方</h3>
+          <p>「上がったら」「繰り上げると」など試しておきたいケースと、繰り上げ・運用の考え方を整理。</p>
+          <span class="go">シナリオを読む <span class="arr">→</span></span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-disclaimer">
+    本ツールは試算を目的としたものであり、実際の金利・返済額は金融機関の審査・契約条件等により異なります。将来の金利シナリオはあくまで一例であり、将来の金利動向を保証するものではありません。借入に関するご判断は、金融機関等にご確認の上、ご自身の責任で行ってください。
+  </div>
+  <div class="footer-credit">
+    <img src="icon.jpg" alt="KIRIN" class="footer-icon">
+    <span>© 2026 KIRIN</span>
+    <a class="footer-x-link" href="https://x.com/kirinsan4567" target="_blank" rel="noopener noreferrer">
+      <svg class="x-logo" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      <span>@kirinsan4567</span>
+    </a>
+  </div>
+</footer>
+
+</body>
+</html>

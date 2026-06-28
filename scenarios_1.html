@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>住宅ローンで試したいシナリオ｜KIRIN</title>
+<meta name="apple-mobile-web-app-title" content="使い方ガイド">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f2430;
+    --ink-soft:#5b6273;
+    --line:#e7e3da;
+    --teal:#1fb6c9;
+    --green:#6fb93b;
+    --violet:#6e4be0;
+    --magenta:#c23b8e;
+    --amber:#f39237;
+    --red:#e84040;
+    --panel: rgba(255,255,255,0.72);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    color:var(--ink);
+    line-height:1.8;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+  }
+  /* 背景：低ポリゴンのキリン（美術館）を退色させて敷く */
+  body::before{
+    content:"";
+    position:fixed; inset:0; z-index:-2;
+    background:#cfd4da url('KIRIN_SIM_MUSEUM.jpg') center/cover no-repeat;
+  }
+  /* 退色ベール1枚（キリンを約40〜45%の濃さに） */
+  body::after{
+    content:""; position:fixed; inset:0; z-index:-1;
+    background:rgba(255,255,255,0.32);
+  }
+
+  .wrap{max-width:1040px;width:90%;margin:0 auto;padding:34px 0 60px;}
+  .panel{
+    background:var(--panel);
+    -webkit-backdrop-filter:saturate(1.1) blur(10px);
+    backdrop-filter:saturate(1.1) blur(10px);
+    border:1px solid rgba(255,255,255,0.7);
+    border-radius:var(--radius);
+    box-shadow:0 24px 60px rgba(31,36,48,0.16), 0 2px 0 rgba(255,255,255,0.6) inset;
+    padding:38px 40px;
+    margin-bottom:22px;
+  }
+  @media(max-width:640px){ .wrap{width:94%;} .panel{padding:24px 18px;} }
+
+  /* ---- 共通：ファセット・チップ（キリンの三角面のモチーフ） ---- */
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.18em;font-weight:700;color:var(--ink-soft);text-transform:uppercase;margin-bottom:14px;}
+  .facet{width:0;height:0;border-style:solid;border-width:0 7px 12px 7px;border-color:transparent transparent var(--teal) transparent;display:inline-block;}
+  .eyebrow .ja{letter-spacing:.05em;}
+
+  h1.title{font-size:clamp(26px,5vw,40px);font-weight:900;line-height:1.3;letter-spacing:.01em;}
+  h1.title .sub{display:block;font-size:clamp(13px,2.4vw,16px);font-weight:500;color:var(--ink-soft);margin-top:8px;letter-spacing:.02em;}
+  h2{font-size:clamp(19px,3.4vw,24px);font-weight:900;line-height:1.4;display:flex;align-items:center;gap:12px;}
+  h2 .bar{width:6px;height:24px;border-radius:3px;background:var(--teal);flex-shrink:0;}
+  h3{font-size:16px;font-weight:700;margin-bottom:4px;}
+  p{margin:0 0 12px;}
+  p.lead{font-size:clamp(15px,2.3vw,17px);}
+  a{color:var(--violet);}
+  .muted{color:var(--ink-soft);}
+  .small{font-size:13px;line-height:1.7;}
+
+  .credit{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:13px;color:var(--ink-soft);}
+  .credit b{color:var(--ink);}
+
+  /* 設計ビジョン callout */
+  .vision{
+    margin-top:22px;border-left:4px solid var(--violet);
+    background:linear-gradient(90deg, rgba(110,75,224,0.07), rgba(110,75,224,0));
+    border-radius:0 12px 12px 0;padding:16px 18px;
+  }
+  .vision .eyebrow{margin-bottom:6px;}
+
+  /* こんな方に */
+  .for-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px;}
+  @media(max-width:640px){ .for-grid{grid-template-columns:1fr;} }
+  .for-card{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line);border-radius:13px;padding:15px 16px;background:rgba(255,255,255,0.42);}
+  .for-card .tri{width:0;height:0;border-style:solid;border-width:0 9px 16px 9px;flex-shrink:0;margin-top:4px;}
+  .for-card .body{font-size:14px;line-height:1.65;}
+  .for-card .body b{display:block;font-size:15px;margin-bottom:2px;}
+
+  /* 画面マップ */
+  .map-wrap{margin-top:6px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.6);}
+  .map-wrap svg{display:block;width:100%;height:auto;}
+  .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 22px;margin-top:18px;}
+  @media(max-width:640px){ .legend{grid-template-columns:1fr;} }
+  .legend .row{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.6;}
+  .num{flex-shrink:0;width:22px;height:22px;border-radius:6px;color:#fff;font-family:"Roboto Mono",monospace;font-weight:700;font-size:12px;display:inline-flex;align-items:center;justify-content:center;margin-top:2px;}
+
+  /* ステップ */
+  .steps{counter-reset:step;display:flex;flex-direction:column;gap:14px;margin-top:6px;}
+  .step{display:flex;gap:16px;align-items:flex-start;}
+  .step .sn{counter-increment:step;flex-shrink:0;width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:"Roboto Mono",monospace;font-weight:700;font-size:17px;color:#fff;box-shadow:0 6px 14px rgba(31,36,48,0.14);}
+  .step .sn::before{content:counter(step,decimal-leading-zero);}
+  .step .st{flex:1;padding-top:2px;}
+  .step .st b{font-size:15.5px;}
+  .step .st .d{font-size:13.5px;color:var(--ink-soft);line-height:1.7;}
+
+  /* 機能カード */
+  .feat{display:flex;flex-direction:column;gap:0;margin-top:6px;}
+  .feat .item{border-top:1px solid var(--line);padding:16px 0;}
+  .feat .item:first-child{border-top:none;}
+  .feat .item .h{display:flex;align-items:center;gap:10px;}
+  .feat .item .chip{font-size:11px;font-weight:700;color:#fff;padding:3px 9px;border-radius:999px;letter-spacing:.03em;white-space:nowrap;}
+  .feat .item .d{font-size:14px;color:var(--ink);line-height:1.75;margin-top:7px;}
+  .feat .item .d .k{font-weight:700;}
+  .tip{margin-top:8px;font-size:12.5px;color:var(--ink-soft);background:rgba(31,182,201,0.08);border-radius:8px;padding:7px 11px;display:flex;gap:7px;}
+  .tip::before{content:"▶";color:var(--teal);font-size:10px;line-height:1.6;}
+
+  /* ダッシュボード見方の小図 */
+  .anat{margin-top:6px;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:rgba(255,255,255,0.6);}
+  .anat svg{display:block;width:100%;height:auto;}
+
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13.5px;}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-weight:700;color:var(--ink-soft);font-size:12px;white-space:nowrap;}
+  td b{font-weight:700;}
+
+  .note-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+  .note-list li{display:flex;gap:10px;font-size:13.5px;line-height:1.7;}
+  .note-list li::before{content:"";flex-shrink:0;width:0;height:0;border-style:solid;border-width:0 6px 11px 6px;border-color:transparent transparent var(--amber) transparent;margin-top:6px;}
+
+  .backbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  .btn-back{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:11px 20px;border-radius:11px;}
+  .btn-back:hover{background:#000;}
+  footer{color:var(--ink-soft);font-size:12.5px;text-align:center;padding:6px 0 0;}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .toc a{font-size:12.5px;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:rgba(255,255,255,0.6);padding:6px 12px;border-radius:999px;}
+  .toc a:hover{border-color:var(--violet);color:var(--violet);}
+
+  /* シナリオ集 */
+  .scn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px;}
+  @media(max-width:640px){ .scn-grid{grid-template-columns:1fr;} }
+  .scn{border:1px solid var(--line);border-radius:13px;padding:15px 16px;background:rgba(255,255,255,0.42);}
+  .scn .h{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+  .scn .h .dot{flex-shrink:0;width:0;height:0;border-style:solid;border-width:0 8px 14px 8px;border-color:transparent transparent var(--teal) transparent;}
+  .scn .h b{font-size:15px;line-height:1.4;}
+  .scn .row{display:flex;gap:8px;font-size:13.5px;line-height:1.65;margin-top:5px;}
+  .scn .row .lab{flex-shrink:0;font-size:10.5px;font-weight:700;color:#fff;background:var(--ink-soft);border-radius:5px;padding:2px 7px;height:fit-content;margin-top:3px;letter-spacing:.02em;}
+  .scn .row.see .lab{background:var(--teal);}
+
+.site-header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(140%) blur(10px);-webkit-backdrop-filter:saturate(140%) blur(10px);background:rgba(255,255,255,.62);border-bottom:1px solid rgba(25,27,34,.08)}
+.site-header .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:12px 22px;max-width:1120px;margin:0 auto}
+.site-header .brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}
+.site-header .brand .name{display:flex;flex-direction:column;line-height:1.15}
+.site-header .brand .ey{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:11px;letter-spacing:.28em;color:#c4660f;text-transform:uppercase}
+.site-header .brand .ti{font-weight:700;font-size:15px;color:var(--ink)}
+.site-header .links{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.site-header .links a{font-size:14px;font-weight:500;color:var(--ink-soft);padding:7px 12px;border-radius:8px;text-decoration:none;transition:background .18s}
+.site-header .links a:hover{background:rgba(25,27,34,.06);color:var(--ink)}
+.site-header .links a[aria-current]{color:var(--ink);font-weight:700}
+.site-header .links a[aria-current]::after{content:"";display:block;height:2px;border-radius:2px;margin-top:2px;background:var(--amber)}
+.site-header .dia{display:inline-block;vertical-align:middle}
+@media(max-width:640px){.site-header .nav{justify-content:center;gap:10px;padding:11px 16px}.site-header .links{justify-content:center}.site-header .links a{padding:6px 9px;font-size:13px}}
+.site-footer{background:rgba(255,255,255,.72);border-top:1px solid #e2e0db;padding:16px 24px 22px;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:0 0 var(--radius) var(--radius)}
+.footer-disclaimer{font-size:10px;color:#6b6861;line-height:1.7;max-width:680px;margin:0 auto 14px}
+.footer-credit{display:flex;align-items:center;justify-content:center;gap:9px;font-size:12px;color:#6b6861;flex-wrap:wrap}
+.footer-icon{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid #e2e0db;flex-shrink:0}
+.footer-x-link{display:inline-flex;align-items:center;gap:6px;color:#1a1a1a;text-decoration:none;font-weight:700;font-size:12px;padding:5px 12px;border:1px solid #e2e0db;border-radius:20px}
+.footer-x-link:hover{background:#f8f7f4;border-color:#1a1a1a}.x-logo{flex-shrink:0}
+/* ===== figures (unified: one accent + grey) ===== */
+.scn-fig{margin:0 0 4px;border-radius:10px;background:rgba(255,255,255,.5);border:1px solid var(--line);overflow:hidden}
+.scn-fig svg{width:100%;height:auto;display:block}
+.scn-fig .ln{fill:none;stroke-width:2.1;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
+.scn-fig .ln.base{stroke:#bcb7ad}.scn-fig .ln.a1{stroke:#f0a59c}.scn-fig .ln.a2{stroke:var(--red)}
+.scn-fig .ln.dim{stroke:#bcb7ad}.scn-fig .ln.solid{stroke:#7d7870}.scn-fig .ln.dash{stroke-dasharray:3.5 3}
+.scn-fig .ax{stroke:#2c2c2c;stroke-width:1;vector-effect:non-scaling-stroke}.scn-fig .axh{fill:#2c2c2c}
+.scn-fig line.cap{stroke:var(--red);stroke-width:1.3;vector-effect:non-scaling-stroke}
+.scn-fig line.tick{stroke:#bcb7ad;stroke-width:1.1;vector-effect:non-scaling-stroke}.scn-fig line.tick.dash{stroke-dasharray:3 3}
+.scn-fig .bar{stroke:none}.scn-fig .bar.g{fill:#cfcabf}.scn-fig .bar.acc{fill:var(--teal)}.scn-fig .bar.acc2{fill:var(--amber)}.scn-fig .bar.hot{fill:var(--red)}
+.scn-fig .ghost{fill:none;stroke:#bcb7ad;stroke-width:1;stroke-dasharray:3 2;vector-effect:non-scaling-stroke}
+.scn-fig polygon.gap{fill:rgba(232,64,64,.14)}
+.scn-fig text{font-family:"Zen Kaku Gothic New",sans-serif;fill:#2c2c2c}
+.scn-fig text.ax-x,.scn-fig text.ax-y{font-size:6.3px;fill:#2c2c2c}
+.scn-fig text.ttl{font-size:8px;font-weight:700;fill:#1f2430}
+.scn-fig text.rl{font-size:6.6px;fill:#2c2c2c}
+.scn-fig text.il{font-size:6px;fill:#333}
+.scn-fig text.il.onw{fill:#ffffff}
+.scn-fig text.il.onw2{fill:#3a3a3a}
+.scn-fig text.il.a1c{fill:#d65c50}
+.scn-fig text.il.a2c,.scn-fig text.il.hotc,.scn-fig text.il.capc,.scn-fig text.il.gapc{fill:#c0392b}
+.scn-fig text.il.dimc{fill:#5c584f}
+.scn-fig text.il.solidc{fill:#4a463f}
+.scn-fig text.il.acc2c{fill:#bf7016}
+.scn-fig text.ax-name{font-size:6.3px;fill:#2c2c2c}
+.scn-fig text.il.acc1c{fill:#138a99}
+.scn-fig text.il.capc{fill:#c0392b}
+.figcap{font-size:11.5px;color:var(--ink-soft);margin:3px 0 10px;line-height:1.55}
+.leg{display:inline-flex;align-items:center;gap:4px;margin:0 10px 2px 0;font-size:11px;color:var(--ink-soft);white-space:nowrap}
+.leg i{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0}
+.scn-fig2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2px}.scn.wide{grid-column:1/-1}
+.note-s{font-size:11.5px;color:var(--ink-soft);background:rgba(25,27,34,.04);border-radius:8px;padding:7px 10px;margin-top:9px;line-height:1.6}
+/* steps */
+.step-title{display:flex;align-items:center;gap:12px;margin:0 0 5px}
+.step-title .badge{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;color:#fff;background:var(--violet);border-radius:8px;padding:5px 11px;flex-shrink:0}
+.step-title h2{margin:0}.step-sub{font-size:13.5px;color:var(--ink-soft);margin:0 0 12px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:16px 0 2px}
+.flow .node{flex:1;min-width:150px;background:rgba(255,255,255,.5);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.flow .node .n{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;color:var(--violet)}
+.flow .node b{display:block;font-size:14.5px;margin:3px 0 2px}.flow .node span{font-size:12px;color:var(--ink-soft)}
+.flow .arw{align-self:center;color:#b9b4aa;font-weight:700}
+@media(max-width:640px){.flow .arw{display:none}.flow .node{flex-basis:100%}}
+/* prepay */
+.give-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.give{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:rgba(255,255,255,.5)}
+.give .gi{flex-shrink:0;width:32px;height:32px}.give h4{font-size:14.5px;font-weight:700;margin:0 0 3px}.give p{font-size:12.6px;color:var(--ink-soft);margin:0;line-height:1.6}
+.blk{border-left:3px solid var(--violet);padding:1px 0 1px 15px;margin:16px 0}
+.blk h3{margin:0 0 5px}.blk p{font-size:13.4px;color:var(--ink-soft);margin:0 0 6px;line-height:1.78}.blk ul{margin:6px 0;padding-left:1.1em;font-size:13px;color:var(--ink-soft);line-height:1.7}
+.cmp{width:100%;border-collapse:collapse;margin:12px 0;font-size:12.8px}
+.cmp th,.cmp td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+.cmp thead th{background:rgba(110,75,224,.10);font-weight:700}.cmp tbody th{font-weight:700;white-space:nowrap;background:rgba(255,255,255,.4)}
+.ev{font-weight:700;margin-right:5px}.ev.good{color:var(--teal)}.ev.ok{color:var(--ink-soft)}.ev.mid{color:var(--amber)}.ev.bad{color:var(--red)}
+.cau{font-size:12.8px;color:var(--ink-soft);background:rgba(31,182,201,.08);border-radius:9px;padding:10px 13px;line-height:1.7;margin:8px 0}
+.consider{margin:10px 0 0;padding:0;list-style:none}
+.consider li{position:relative;padding-left:18px;margin-bottom:9px;font-size:13.2px;color:var(--ink-soft);line-height:1.72}
+.consider li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--violet)}
+.consider li b{color:var(--ink)}
+.col-ul{margin:8px 0 0;padding-left:1.15em;line-height:1.8}.col-ul li{margin-bottom:5px;color:var(--ink-soft);font-size:13.4px}
+.src{font-size:11.5px;color:var(--ink-soft);margin-top:14px;line-height:1.7;border-top:1px solid var(--line);padding-top:10px}
+html{scroll-behavior:smooth}
+section[id^="step"]{scroll-margin-top:72px}
+a.node{text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s,border-color .15s}
+a.node:hover{transform:translateY(-2px);border-color:var(--violet);box-shadow:0 8px 20px -12px rgba(110,75,224,.5)}
+@media(max-width:640px){.give-grid{grid-template-columns:1fr}.cmp{font-size:12px}.cmp th,.cmp td{padding:6px 7px}.scn-fig2{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="nav">
+  <a class="brand" href="index.html" aria-label="ホーム"><svg class="dia" width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="navDiaGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f39237"/><stop offset=".5" stop-color="#c23b8e"/><stop offset="1" stop-color="#1fb6c9"/></linearGradient></defs><path d="M16 1 31 16 16 31 1 16Z" fill="url(#navDiaGrad)"/><path d="M16 1 31 16 16 16Z" fill="#fff" opacity=".22"/><path d="M16 31 1 16 16 16Z" fill="#000" opacity=".12"/></svg><span class="name"><span class="ey">KIRIN</span><span class="ti">住宅ローン返済シミュレーター</span></span></a>
+  <nav class="links" aria-label="メインナビ"><a href="index.html">ホーム</a><a href="simulator.html">シミュレーター</a><a href="guide.html">使い方</a><a href="scenarios.html" aria-current="page">シナリオ</a></nav>
+</div></header>
+<div class="wrap">
+<section class="panel" id="top">
+  <div class="eyebrow"><span class="facet" style="border-bottom-color:var(--violet);"></span><span class="ja">SCENARIOS ／ 何を試すべきか</span></div>
+  <h2><span class="bar" style="background:var(--violet);"></span>住宅ローンで試しておきたいシナリオ</h2>
+  <p class="lead" style="font-size:15px;">変動金利は「いまの返済額」より「この先どうなるか」で決まります。<b>知る → そなえる → 見直す</b>の3ステップで試すと整理しやすくなります。気になる条件は<b>パターンA〜J</b>に保存し、<b>軸統一</b>でスケールをそろえて見比べてください。</p>
+  <div class="flow">
+    <a class="node" href="#step1"><span class="n">STEP 1</span><b>知る</b><span>どこまで上がりうるか、振れ幅と限界を把握</span></a><span class="arw">→</span>
+    <a class="node" href="#step2"><span class="n">STEP 2</span><b>そなえる</b><span>繰り上げ・固定化など打ち手を比べる</span></a><span class="arw">→</span>
+    <a class="node" href="#step3"><span class="n">STEP 3</span><b>見直す</b><span>借入額・期間・控除など条件を調整</span></a>
+  </div>
+</section><section class="panel" id="step1"><div class="step-title"><span class="badge">STEP 1</span><h2><span class="bar" style="background:var(--red);"></span>「上がったら」を知る</h2></div><p class="step-sub">金利が上がった世界線で、返済がどこまで膨らみうるか＝リスクの大きさを把握します。</p><div class="scn-grid"><div class="scn"><div class="scn-fig"><svg viewBox="0 0 176 88" preserveAspectRatio="xMidYMid meet"><line class="ax" x1="30" y1="66" x2="166" y2="66"/><line class="ax" x1="30" y1="12" x2="30" y2="66"/><path class="axh" d="M166 66 162 64 162 68Z"/><path class="axh" d="M30 12 28 16 32 16Z"/><text class="ax-name" x="11" y="39" transform="rotate(-90 11 39)" text-anchor="middle">月返済額</text><text class="ax-name" x="166" y="80" text-anchor="end">年</text><polyline class="ln base" points="32,58 164,55"/><polyline class="ln a1" points="32,58 164,38"/><polyline class="ln a2" points="32,58 164,18"/><text class="il dimc" x="160" y="53" text-anchor="end">据置</text><text class="il a1c" x="160" y="35" text-anchor="end">+1%</text><text class="il a2c" x="160" y="16" text-anchor="end">+2〜3%</text></svg></div><div class="figcap"><span class="leg"><i style="background:#cfcabf"></i>据置</span><span class="leg"><i style="background:#f0a59c"></i>+1%</span><span class="leg"><i style="background:#e84040"></i>+2〜3%</span>3つの金利シナリオで、毎月返済額がどう推移するか</div><div class="h"><span class="dot" style="border-bottom-color:var(--teal);"></span><b>① 金利は「3本立て」で見る</b></div><div class="row"><span class="lab">試す</span><div>据置(A)／+1%(B)／+2〜3%(C)の金利シナリオを保存して並べる。</div></div><div class="row see"><span class="lab">見る</span><div>毎月返済額の推移と最大返済額。どこまで上がりうるか<b>振れ幅</b>をつかむ。</div></div></div><div class="scn"><div class="scn-fig"><svg viewBox="0 0 176 88" preserveAspectRatio="xMidYMid meet"><line class="ax" x1="30" y1="66" x2="166" y2="66"/><line class="ax" x1="30" y1="12" x2="30" y2="66"/><path class="axh" d="M166 66 162 64 162 68Z"/><path class="axh" d="M30 12 28 16 32 16Z"/><text class="ax-name" x="11" y="39" transform="rotate(-90 11 39)" text-anchor="middle">月返済額</text><line class="cap" x1="30" y1="26" x2="166" y2="26"/><text class="il capc" x="33" y="23">払える上限</text><rect class="bar g" x="44" y="52" width="16" height="14"/><rect class="bar g" x="70" y="46" width="16" height="20"/><rect class="bar g" x="96" y="38" width="16" height="28"/><rect class="bar hot" x="122" y="16" width="16" height="50"/><text class="il hotc" x="130" y="13" text-anchor="middle">超過</text><text class="ax-x" x="52" y="78" text-anchor="middle">当初</text><text class="ax-x" x="78" y="78" text-anchor="middle">+1</text><text class="ax-x" x="104" y="78" text-anchor="middle">+2</text><text class="ax-x" x="130" y="78" text-anchor="middle">+3%</text></svg></div><div class="figcap">金利別の毎月返済額が、赤い<b>「払える上限」</b>を超えないか</div><div class="h"><span class="dot" style="border-bottom-color:var(--green);"></span><b>② 金利ストレステスト(+1/+2/+3%)</b></div><div class="row"><span class="lab">試す</span><div>当初金利から一気に+1%・+2%・+3%へ上げて比較する。</div></div><div class="row see"><span class="lab">見る</span><div>最大の毎月返済額が上限を超えないか。耐えられる<b>限界金利</b>を探す。</div></div></div><div class="scn"><div class="scn-fig"><svg viewBox="0 0 176 88" preserveAspectRatio="xMidYMid meet"><line class="ax" x1="30" y1="66" x2="166" y2="66"/><line class="ax" x1="30" y1="12" x2="30" y2="66"/><path class="axh" d="M166 66 162 64 162 68Z"/><path class="axh" d="M30 12 28 16 32 16Z"/><text class="ax-name" x="11" y="39" transform="rotate(-90 11 39)" text-anchor="middle">月返済額</text><text class="ax-name" x="166" y="80" text-anchor="end">年</text><polygon class="gap" points="32,58 72,58 72,50 112,50 112,42 164,42 164,18 32,58"/><polyline class="ln dim dash" points="32,58 164,18"/><polyline class="ln solid" points="32,58 72,58 72,50 112,50 112,42 164,42"/><text class="il solidc" x="74" y="49" >×1.25まで</text><text class="il solidc" x="114" y="41">×1.25まで</text><text class="il dimc" x="162" y="15" text-anchor="end">本来必要な額</text><text class="il gapc" x="120" y="33" text-anchor="middle">未払い利息</text><text class="il onw2" x="40" y="63">5年据置</text><text class="ax-x" x="32" y="78" text-anchor="middle">0</text><text class="ax-x" x="72" y="78" text-anchor="middle">5</text><text class="ax-x" x="112" y="78" text-anchor="middle">10</text></svg></div><div class="figcap">5年は据置・上げ幅は1.25倍まで。増えない分（赤）が<b>未払い利息</b>として残る</div><div class="h"><span class="dot" style="border-bottom-color:var(--magenta);"></span><b>③ 5年・125%ルール あり／なし</b></div><div class="row"><span class="lab">試す</span><div>急上昇シナリオのまま、ルールをON/OFFで比較する。</div></div><div class="row see"><span class="lab">見る</span><div>残高推移と最終残高。据え置きの裏で<b>未払い利息</b>が残らないか確認。</div></div><div class="note-s">※5年・125%ルールは<b>採用しない金融機関</b>もあります（その場合、金利上昇はそのまま毎月返済額に反映）。また、繰り上げ返済（特に<b>返済額軽減型</b>）をした際に、据え置きや1.25倍上限の起点が<b>再計算・リセット</b>される扱いも金融機関により異なります。詳しくは借入先にご確認ください。</div></div></div></section><section class="panel" id="step2"><div class="step-title"><span class="badge">STEP 2</span><h2><span class="bar" style="background:var(--violet);"></span>そなえ方を比べる</h2></div><p class="step-sub">上昇への打ち手（繰り上げ・固定化）を並べ、効果と「安心料」を見比べます。</p><div class="scn-grid"><div class="scn wide"><div class="scn-fig2"><div><div class="scn-fig"><svg viewBox="0 0 176 88" preserveAspectRatio="xMidYMid meet"><text class="ttl" x="88" y="14" text-anchor="middle">期間短縮型</text><rect class="bar acc" x="26" y="34" width="78" height="20"/><rect class="ghost" x="104" y="34" width="46" height="20"/><line class="tick" x1="104" y1="30" x2="104" y2="60"/><text class="il onw" x="65" y="46" text-anchor="middle">同じ月額</text><text class="il dimc" x="127" y="46" text-anchor="middle">短縮</text><text class="ax-name" x="88" y="76" text-anchor="middle">返済期間（短くなる）</text></svg></div><div class="figcap"><span class="leg"><i style="background:#1fb6c9"></i>同じ月額</span>月額そのまま・期間が縮む</div></div><div><div class="scn-fig"><svg viewBox="0 0 176 88" preserveAspectRatio="xMidYMid meet"><text class="ttl" x="88" y="14" text-anchor="middle">返済額軽減型</text><rect class="ghost" x="26" y="24" width="124" height="30"/><rect class="bar acc" x="26" y="40" width="124" height="14"/><text class="il dimc" x="88" y="32" text-anchor="middle">元の月額</text><text class="il onw" x="88" y="50" text-anchor="middle">下がった月額</text><text class="ax-name" x="88" y="76" text-anchor="middle">返済期間（同じ）</text></svg></div><div class="figcap"><span class="leg"><i style="background:#1fb6c9"></i>下がった月額</span>期間そのまま・月額が下がる</div></div></div><div class="h"><span class="dot" style="border-bottom-color:var(--violet);"></span><b>④ 繰り上げ：期間短縮 と 返済額軽減</b></div><div class="row"><span class="lab">試す</span><div>同額を「期間短縮」と「返済額軽減」で入れて比べる。</div></div><div class="row see"><span class="lab">見る</span><div>短縮は<b>利息削減が大きい</b>／軽減は<b>毎月の余裕</b>が増える。</div></div></div><div class="scn"><div class="h"><span class="dot" style="border-bottom-color:var(--amber);"></span><b>⑤ 変動 vs 固定</b></div><div class="row"><span class="lab">試す</span><div>上昇込みの変動プランと固定プランを別パターンに保存して並べる。</div></div><div class="row see"><span class="lab">見る</span><div>総返済額。固定の<b>「安心料」</b>がいくらかが見える。</div></div></div></div></section><section class="panel" id="step3"><div class="step-title"><span class="badge">STEP 3</span><h2><span class="bar" style="background:var(--teal);"></span>条件そのものを見直す</h2></div><p class="step-sub">借入額・期間・ボーナス・控除など、前提を1つずつ動かして影響を切り分けます。</p><div class="scn-grid"><div class="scn wide"><div class="scn-fig2"><div><div class="scn-fig"><svg viewBox="0 0 176 88" preserveAspectRatio="xMidYMid meet"><text class="ttl" x="88" y="14" text-anchor="middle">頭金を入れる</text><text class="rl" x="6" y="34">なし</text><rect class="bar acc" x="34" y="25" width="78" height="13"/><rect class="bar g" x="112" y="25" width="38" height="13"/><text class="rl" x="6" y="58">あり</text><rect class="bar acc" x="34" y="49" width="56" height="13"/><rect class="bar g" x="90" y="49" width="22" height="13"/><text class="il onw" x="73" y="34" text-anchor="middle">元金</text><text class="il onw2" x="131" y="34" text-anchor="middle">利息</text></svg></div><div class="figcap"><span class="leg"><i style="background:#1fb6c9"></i>元金</span><span class="leg"><i style="background:#cfcabf"></i>利息</span>頭金で借入を減らすと、利息も減る</div></div><div><div class="scn-fig"><svg viewBox="0 0 176 88" preserveAspectRatio="xMidYMid meet"><text class="ttl" x="88" y="14" text-anchor="middle">50年など長期化</text><text class="rl" x="6" y="34">35年</text><rect class="bar acc" x="34" y="25" width="62" height="13"/><rect class="bar g" x="96" y="25" width="26" height="13"/><text class="rl" x="6" y="58">50年</text><rect class="bar acc" x="34" y="49" width="62" height="13"/><rect class="bar g" x="96" y="49" width="50" height="13"/><text class="il onw" x="65" y="34" text-anchor="middle">元金</text><text class="il onw2" x="109" y="34" text-anchor="middle">利息</text><text class="il onw2" x="121" y="58" text-anchor="middle">利息</text></svg></div><div class="figcap"><span class="leg"><i style="background:#1fb6c9"></i>元金</span><span class="leg"><i style="background:#cfcabf"></i>利息</span>期間を延ばすと毎月額は下がるが、利息は増える</div></div></div><div class="h"><span class="dot" style="border-bottom-color:var(--teal);"></span><b>⑥ 借入額・期間を見直す</b></div><div class="row"><span class="lab">試す</span><div>頭金で借入を減らす／期間を50年など長期にする。借入が年収の何倍か（目安7倍前後）も意識。</div></div><div class="row see"><span class="lab">見る</span><div>毎月額と利息総額の<b>トレードオフ</b>。長期化は月軽く・総利息は重い。</div></div></div><div class="scn"><div class="scn-fig"><svg viewBox="0 0 176 88" preserveAspectRatio="xMidYMid meet"><line class="ax" x1="30" y1="66" x2="166" y2="66"/><line class="ax" x1="30" y1="12" x2="30" y2="66"/><path class="axh" d="M166 66 162 64 162 68Z"/><path class="axh" d="M30 12 28 16 32 16Z"/><text class="ax-name" x="11" y="39" transform="rotate(-90 11 39)" text-anchor="middle">返済額</text><text class="ax-name" x="166" y="80" text-anchor="end">月</text><rect class="bar acc" x="40" y="52" width="8" height="14"/><rect class="bar acc" x="52" y="52" width="8" height="14"/><rect class="bar acc" x="64" y="52" width="8" height="14"/><rect class="bar acc" x="76" y="52" width="8" height="14"/><rect class="bar acc2" x="76" y="30" width="8" height="22"/><rect class="bar acc" x="88" y="52" width="8" height="14"/><rect class="bar acc" x="100" y="52" width="8" height="14"/><rect class="bar acc" x="112" y="52" width="8" height="14"/><rect class="bar acc" x="124" y="52" width="8" height="14"/><rect class="bar acc" x="136" y="52" width="8" height="14"/><rect class="bar acc2" x="136" y="30" width="8" height="22"/><rect class="bar acc" x="148" y="52" width="8" height="14"/><text class="il acc1c" x="44" y="48">毎月</text><text class="il acc2c" x="140" y="26" text-anchor="middle">ボーナス月</text></svg></div><div class="figcap"><span class="leg"><i style="background:#1fb6c9"></i>毎月</span><span class="leg"><i style="background:#f39237"></i>ボーナス月の上乗せ</span>毎月分に、ボーナス月だけ上乗せされる</div><div class="h"><span class="dot" style="border-bottom-color:var(--green);"></span><b>⑦ ボーナス払い あり／なし</b></div><div class="row"><span class="lab">試す</span><div>同じ借入で、ボーナス併用と毎月のみを比較する。</div></div><div class="row see"><span class="lab">見る</span><div>毎月額・総返済額。月は楽だが<b>ボーナス依存リスク</b>も意識。</div></div></div><div class="scn"><div class="scn-fig"><svg viewBox="0 0 176 88" preserveAspectRatio="xMidYMid meet"><line class="ax" x1="30" y1="66" x2="166" y2="66"/><line class="ax" x1="30" y1="12" x2="30" y2="66"/><path class="axh" d="M166 66 162 64 162 68Z"/><path class="axh" d="M30 12 28 16 32 16Z"/><text class="ax-name" x="11" y="39" transform="rotate(-90 11 39)" text-anchor="middle">実質負担</text><text class="ax-name" x="166" y="80" text-anchor="end">年</text><rect class="bar acc" x="40" y="48" width="6" height="18"/><rect class="bar acc" x="49" y="48" width="6" height="18"/><rect class="bar acc" x="58" y="48" width="6" height="18"/><rect class="bar acc" x="67" y="48" width="6" height="18"/><rect class="bar acc" x="76" y="48" width="6" height="18"/><rect class="bar acc" x="85" y="48" width="6" height="18"/><rect class="bar acc" x="94" y="48" width="6" height="18"/><rect class="bar hot" x="103" y="30" width="6" height="36"/><rect class="bar hot" x="112" y="30" width="6" height="36"/><rect class="bar hot" x="121" y="30" width="6" height="36"/><rect class="bar hot" x="130" y="30" width="6" height="36"/><rect class="bar hot" x="139" y="30" width="6" height="36"/><rect class="bar hot" x="148" y="30" width="6" height="36"/><rect class="bar hot" x="157" y="30" width="6" height="36"/><line class="tick dash" x1="101" y1="14" x2="101" y2="66"/><text class="il onw2" x="42" y="46">控除中</text><text class="il hotc" x="160" y="28" text-anchor="end">終了後↑</text></svg></div><div class="figcap"><span class="leg"><i style="background:#1fb6c9"></i>控除期間中</span><span class="leg"><i style="background:#e84040"></i>控除終了後</span>実質負担＝返済−控除。控除終了後に<b>負担が上がる</b></div><div class="h"><span class="dot" style="border-bottom-color:var(--violet);"></span><b>⑧ 控除の効果と「終わったあと」</b></div><div class="row"><span class="lab">試す</span><div>控除あり/なし、控除期間(13年/10年)を入れて比較する。</div></div><div class="row see"><span class="lab">見る</span><div>控除という毎年の戻りが無くなり実質負担が上がる。<b>終了後の負担増</b>を前提に見ておく。</div></div></div></div></section><section class="panel" id="prepay">
+  <div class="eyebrow"><span class="facet" style="border-bottom-color:var(--green);"></span><span class="ja">COLUMN ／ 繰り上げか、運用か</span></div>
+  <h2><span class="bar" style="background:var(--green);"></span>繰り上げ返済は「原則、急がない」</h2>
+  <p class="lead" style="font-size:15px;">住宅ローンは、個人が借りられるお金の中で<b>最も低金利・最も長期・団信つき</b>という、きわめて有利な借金です。余裕資金で繰り上げ返済をするのは、その<b>有利な借金</b>を自分から手放し、同時に<b>流動性（いつでも使えるお金）</b>と<b>団信の保障</b>まで縮める行為になります。だから、まとまったお金ができても繰り上げを急がず、生活防衛資金を確保したうえで残りは運用に回す——という考え方が近年支持されています。以下は助言ではなく考え方の整理で、運用にはリスクがあり、誰にでも当てはまる正解はありません。</p>
+
+  <h3 style="margin-top:18px;">繰り上げ返済で「手放す」もの</h3>
+  <div class="give-grid">
+    <div class="give"><svg class="gi" viewBox="0 0 32 32" fill="none" stroke="#f39237" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="24" height="14" rx="2"/><circle cx="16" cy="16" r="2.6"/><path d="M8 13v6M24 13v6"/></svg><div><h4>低金利・長期の借金</h4><p>これほど低い金利・長い期間で借りられる機会はほかにありません。完済を急ぐほど、その有利さを早く失います。</p></div></div>
+    <div class="give"><svg class="gi" viewBox="0 0 32 32" fill="none" stroke="#1fb6c9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4s-9 10-9 16a9 9 0 0 0 18 0c0-6-9-16-9-16Z"/></svg><div><h4>流動性（Cash is king）</h4><p>繰り上げた現金は家の含み資産に変わり、急な出費に使えません。いざ足りなくても低利で借り直すのは困難です。</p></div></div>
+    <div class="give"><svg class="gi" viewBox="0 0 32 32" fill="none" stroke="#c23b8e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4l10 4v7c0 7-5 11-10 13-5-2-10-6-10-13V8l10-4Z"/><path d="M16 20s-4-2.3-4-5a2.2 2.2 0 0 1 4-1 2.2 2.2 0 0 1 4 1c0 2.7-4 5-4 5Z"/></svg><div><h4>団信の保障</h4><p>団信は残高に対する生命保険。残高を減らすと、万一のとき帳消しになる保険の価値も小さくなります。</p></div></div>
+    <div class="give"><svg class="gi" viewBox="0 0 32 32" fill="none" stroke="#6fb93b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h14v22l-3-2-2 2-2-2-2 2-2-2-3 2V5Z"/><path d="M12 12h8M12 17h6"/></svg><div><h4>住宅ローン控除</h4><p>控除期間中は年末残高の0.7%が減税に。繰り上げで残高が減ると、受けられる控除も減ります。</p></div></div>
+  </div>
+
+  <div class="blk"><h3>1. 流動性とライフリスク（手元資金を残す）</h3>
+    <p>繰り上げで手元の現金が減ると、急な出費に備えられなくなります。とくに次のような出費は、いつ来るか読めません。</p>
+    <ul><li>子どもの教育費（進学・受験）</li><li>住まいの修繕・リフォーム</li><li>病気・けが・医療費</li><li>失業・転職・収入減・独立</li><li>親の介護、災害・被災</li></ul>
+    <p>家に変えた資金は引き出せず、足りなければカードローン等の<b>高金利</b>に頼ることに。「現金は王様（Cash is king）」が基本です。さらに団信は残高に対する保険なので、残高を減らすほど、万一のとき帳消しになる保障も小さくなります（共働き・ペアローンは影響が大きい）。</p>
+  </div>
+
+  <div class="blk" style="border-left-color:var(--teal);"><h3>2. お金の置き場所（運用とコスト）</h3>
+    <p>同じ資金を運用に回した場合の期待リターンを失います（<b>機会損失</b>）。低金利の局面では、長期・分散・積立の運用の期待リターンがローン金利を上回りやすく、複利は早く始めるほど効くので、繰り上げで運用開始を遅らせること自体がコストです。低金利では繰り上げで減る利息も小さく、銀行によっては<b>繰り上げ手数料</b>もかかります。</p>
+    <p>インフレ局面では、固定的な借金は実質的に<b>目減り</b>します。また変動金利でも（採用行なら）5年・125%ルールで当面の月額急増は抑えられるため、あわてず<b>「本当に上がってから繰り上げる」選択肢</b>を残せます。低利のローンを持ち続ければ、将来の<b>借り換え余地</b>も保てます。なお控除期間中の繰り上げは控除も減らすため、少なくとも<b>控除期間が終わるまで待つ</b>整理がよくされます。</p>
+  </div>
+
+  <h3 style="margin-top:22px;">運用 vs 繰り上げ（ざっくり比較）</h3>
+  <table class="cmp"><thead><tr><th>観点</th><th>繰り上げ返済</th><th>運用</th></tr></thead><tbody>
+    <tr><th>リターン</th><td><span class="ev mid">△</span>上限あり</td><td><span class="ev good">◎</span>期待は高い（不確実）</td></tr>
+    <tr><th>流動性</th><td><span class="ev bad">×</span>失う（引き出せない）</td><td><span class="ev good">◎</span>保てる（取り崩せる）</td></tr>
+    <tr><th>確実性</th><td><span class="ev good">◎</span>確実</td><td><span class="ev mid">△</span>不確実</td></tr>
+    <tr><th>税</th><td><span class="ev mid">△</span>控除が一部減る</td><td><span class="ev ok">○</span>優遇制度あり</td></tr>
+    <tr><th>団信</th><td><span class="ev bad">×</span>保障が減る</td><td><span class="ev good">◎</span>影響なし</td></tr>
+  </tbody></table>
+
+  <h3 style="margin-top:22px;">それでも繰り上げが妥当になりやすい場面</h3>
+  <p>原則は「急がない」ですが、次の場合は繰り上げの合理性が増します。</p>
+  <ul class="col-ul">
+    <li>ローン金利が高い、または明確な上昇局面にある。</li>
+    <li>運用をしない・できない、値動きの不確実性を負いたくない。</li>
+    <li>すでに十分な手元資金と運用資産があり、心理的に身軽になりたい。</li>
+    <li>控除期間が終わっている。</li>
+    <li>退職までに完済したい等、ライフプラン上の理由がある。</li>
+  </ul>
+  <div class="cau">繰り上げるなら<b>生活防衛資金は必ず残す</b>。タイプは「期間短縮」が利息削減は大きく、「返済額軽減」は毎月の余裕（流動性）を増やす方向です。</div>
+
+  <h3 style="margin-top:22px;">あわせて考えること</h3>
+  <ul class="consider">
+    <li><b>年収倍率（目安は7倍前後まで）</b>：借入額が年収の何倍か。背伸びした借入ほど、金利上昇や収入減に弱くなります。頭金で借入を抑えれば倍率は下がりますが、頭金は<b>最初に流動性を手放す判断</b>でもあり、Cash is king とはトレードオフです。</li>
+    <li><b>収入の変化に耐えられるか</b>：失業・転職・収入減・産休育休でも返済を続けられる余裕（返済比率）を見ておく。</li>
+    <li><b>金利上昇への耐性</b>：変動は上がりうる前提で、上限近くまで上がっても払えるかを確認する。</li>
+    <li><b>離婚・共有持分</b>：ペアローンや共有名義は、関係解消時に整理が複雑になります。</li>
+    <li><b>資産価格の下落</b>：物件価値は下がることもあり、残債が価値を上回る（オーバーローン）可能性。</li>
+    <li><b>災害・保険</b>：火災・地震保険、被災時の二重ローンなど、住まいのリスクも合わせて備える。</li>
+    <li><b>制度改正</b>：控除や税制は将来変わりうるため、前提が動くことを織り込む。</li>
+  </ul>
+  <p style="margin-top:14px;">結局は、<b>運用か繰り上げか</b>・<b>流動性をどれだけ持つか</b>・<b>リスク許容度</b>・<b>団信や控除の価値</b>・<b>ライフプラン</b>の総合で決まります。本ツールで自分の金利を入れ、繰り上げで利息がどれだけ減るかを確かめ、同じ資金を残した場合と並べて考えてみてください。</p>
+</section><div class="backbar" style="margin-top:24px;"><a class="btn-back" href="index.html">← ホームに戻る</a> <span class="small muted">使い方は <a href="guide.html">使い方ガイド</a> ／ ご感想は <a href="https://x.com/kirinsan4567" target="_blank" rel="noopener">@kirinsan4567</a> まで</span></div><footer class="site-footer"><div class="footer-disclaimer">本ツールは試算を目的としたものであり、実際の金利・返済額は金融機関の審査・契約条件等により異なります。将来の金利シナリオはあくまで一例であり、将来の金利動向を保証するものではありません。借入に関するご判断は、金融機関等にご確認の上、ご自身の責任で行ってください。</div><div class="footer-credit"><img src="icon.jpg" alt="KIRIN" class="footer-icon"><span>© 2026 KIRIN</span><a class="footer-x-link" href="https://x.com/kirinsan4567" target="_blank" rel="noopener noreferrer"><svg class="x-logo" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg><span>@kirinsan4567</span></a></div></footer>
+</div>
+
+</body>
+</html>

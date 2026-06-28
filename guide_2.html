@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>住宅ローン返済シミュレーター｜使い方ガイド</title>
+<meta name="apple-mobile-web-app-title" content="使い方ガイド">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f2430;
+    --ink-soft:#5b6273;
+    --line:#e7e3da;
+    --teal:#1fb6c9;
+    --green:#6fb93b;
+    --violet:#6e4be0;
+    --magenta:#c23b8e;
+    --amber:#f39237;
+    --red:#e84040;
+    --panel: rgba(255,255,255,0.72);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    color:var(--ink);
+    line-height:1.8;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+  }
+  /* 背景：低ポリゴンのキリン（美術館）を退色させて敷く */
+  body::before{
+    content:"";
+    position:fixed; inset:0; z-index:-2;
+    background:#cfd4da url('KIRIN_SIM_MUSEUM.jpg') center/cover no-repeat;
+  }
+  /* 退色ベール1枚（キリンを約40〜45%の濃さに） */
+  body::after{
+    content:""; position:fixed; inset:0; z-index:-1;
+    background:rgba(255,255,255,0.32);
+  }
+
+  .wrap{max-width:1040px;width:90%;margin:0 auto;padding:34px 0 60px;}
+  .panel{
+    background:var(--panel);
+    -webkit-backdrop-filter:saturate(1.1) blur(10px);
+    backdrop-filter:saturate(1.1) blur(10px);
+    border:1px solid rgba(255,255,255,0.7);
+    border-radius:var(--radius);
+    box-shadow:0 24px 60px rgba(31,36,48,0.16), 0 2px 0 rgba(255,255,255,0.6) inset;
+    padding:38px 40px;
+    margin-bottom:22px;
+  }
+  @media(max-width:640px){ .wrap{width:94%;} .panel{padding:24px 18px;} }
+
+  /* ---- 共通：ファセット・チップ（キリンの三角面のモチーフ） ---- */
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.18em;font-weight:700;color:var(--ink-soft);text-transform:uppercase;margin-bottom:14px;}
+  .facet{width:0;height:0;border-style:solid;border-width:0 7px 12px 7px;border-color:transparent transparent var(--teal) transparent;display:inline-block;}
+  .eyebrow .ja{letter-spacing:.05em;}
+
+  h1.title{font-size:clamp(26px,5vw,40px);font-weight:900;line-height:1.3;letter-spacing:.01em;}
+  h1.title .sub{display:block;font-size:clamp(13px,2.4vw,16px);font-weight:500;color:var(--ink-soft);margin-top:8px;letter-spacing:.02em;}
+  h2{font-size:clamp(19px,3.4vw,24px);font-weight:900;line-height:1.4;display:flex;align-items:center;gap:12px;}
+  h2 .bar{width:6px;height:24px;border-radius:3px;background:var(--teal);flex-shrink:0;}
+  h3{font-size:16px;font-weight:700;margin-bottom:4px;}
+  p{margin:0 0 12px;}
+  p.lead{font-size:clamp(15px,2.3vw,17px);}
+  a{color:var(--violet);}
+  .muted{color:var(--ink-soft);}
+  .small{font-size:13px;line-height:1.7;}
+
+  .credit{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:13px;color:var(--ink-soft);}
+  .credit b{color:var(--ink);}
+
+  /* 設計ビジョン callout */
+  .vision{
+    margin-top:22px;border-left:4px solid var(--violet);
+    background:linear-gradient(90deg, rgba(110,75,224,0.07), rgba(110,75,224,0));
+    border-radius:0 12px 12px 0;padding:16px 18px;
+  }
+  .vision .eyebrow{margin-bottom:6px;}
+
+  /* こんな方に */
+  .for-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px;}
+  @media(max-width:640px){ .for-grid{grid-template-columns:1fr;} }
+  .for-card{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line);border-radius:13px;padding:15px 16px;background:rgba(255,255,255,0.42);}
+  .for-card .tri{width:0;height:0;border-style:solid;border-width:0 9px 16px 9px;flex-shrink:0;margin-top:4px;}
+  .for-card .body{font-size:14px;line-height:1.65;}
+  .for-card .body b{display:block;font-size:15px;margin-bottom:2px;}
+
+  /* 画面マップ */
+  .map-wrap{margin-top:6px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.6);}
+  .map-wrap svg{display:block;width:100%;height:auto;}
+  .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 22px;margin-top:18px;}
+  @media(max-width:640px){ .legend{grid-template-columns:1fr;} }
+  .legend .row{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.6;}
+  .num{flex-shrink:0;width:22px;height:22px;border-radius:6px;color:#fff;font-family:"Roboto Mono",monospace;font-weight:700;font-size:12px;display:inline-flex;align-items:center;justify-content:center;margin-top:2px;}
+
+  /* ステップ */
+  .steps{counter-reset:step;display:flex;flex-direction:column;gap:14px;margin-top:6px;}
+  .step{display:flex;gap:16px;align-items:flex-start;}
+  .step .sn{counter-increment:step;flex-shrink:0;width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:"Roboto Mono",monospace;font-weight:700;font-size:17px;color:#fff;box-shadow:0 6px 14px rgba(31,36,48,0.14);}
+  .step .sn::before{content:counter(step,decimal-leading-zero);}
+  .step .st{flex:1;padding-top:2px;}
+  .step .st b{font-size:15.5px;}
+  .step .st .d{font-size:13.5px;color:var(--ink-soft);line-height:1.7;}
+
+  /* 機能カード */
+  .feat{display:flex;flex-direction:column;gap:0;margin-top:6px;}
+  .feat .item{border-top:1px solid var(--line);padding:16px 0;}
+  .feat .item:first-child{border-top:none;}
+  .feat .item .h{display:flex;align-items:center;gap:10px;}
+  .feat .item .chip{font-size:11px;font-weight:700;color:#fff;padding:3px 9px;border-radius:999px;letter-spacing:.03em;white-space:nowrap;}
+  .feat .item .d{font-size:14px;color:var(--ink);line-height:1.75;margin-top:7px;}
+  .feat .item .d .k{font-weight:700;}
+  .tip{margin-top:8px;font-size:12.5px;color:var(--ink-soft);background:rgba(31,182,201,0.08);border-radius:8px;padding:7px 11px;display:flex;gap:7px;}
+  .tip::before{content:"▶";color:var(--teal);font-size:10px;line-height:1.6;}
+
+  /* ダッシュボード見方の小図 */
+  .anat{margin-top:6px;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:rgba(255,255,255,0.6);}
+  .anat svg{display:block;width:100%;height:auto;}
+
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13.5px;}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-weight:700;color:var(--ink-soft);font-size:12px;white-space:nowrap;}
+  td b{font-weight:700;}
+
+  .note-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+  .note-list li{position:relative;padding-left:20px;font-size:13.5px;line-height:1.7;}
+  .note-list li::before{content:"";position:absolute;left:0;top:.6em;width:0;height:0;border-style:solid;border-width:0 6px 11px 6px;border-color:transparent transparent var(--amber) transparent;}
+
+  .backbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  .btn-back{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:11px 20px;border-radius:11px;}
+  .btn-back:hover{background:#000;}
+  footer{color:var(--ink-soft);font-size:12.5px;text-align:center;padding:6px 0 0;}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .toc a{font-size:12.5px;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:rgba(255,255,255,0.6);padding:6px 12px;border-radius:999px;}
+  .toc a:hover{border-color:var(--violet);color:var(--violet);}
+
+  /* シナリオ集 */
+  .scn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px;}
+  @media(max-width:640px){ .scn-grid{grid-template-columns:1fr;} }
+  .scn{border:1px solid var(--line);border-radius:13px;padding:15px 16px;background:rgba(255,255,255,0.42);}
+  .scn .h{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+  .scn .h .dot{flex-shrink:0;width:0;height:0;border-style:solid;border-width:0 8px 14px 8px;border-color:transparent transparent var(--teal) transparent;}
+  .scn .h b{font-size:15px;line-height:1.4;}
+  .scn .row{display:flex;gap:8px;font-size:13.5px;line-height:1.65;margin-top:5px;}
+  .scn .row .lab{flex-shrink:0;font-size:10.5px;font-weight:700;color:#fff;background:var(--ink-soft);border-radius:5px;padding:2px 7px;height:fit-content;margin-top:3px;letter-spacing:.02em;}
+  .scn .row.see .lab{background:var(--teal);}
+
+/* ===== shared site chrome (header/footer) ===== */
+.site-header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(140%) blur(10px);-webkit-backdrop-filter:saturate(140%) blur(10px);background:rgba(255,255,255,.62);border-bottom:1px solid rgba(25,27,34,.08)}
+.site-header .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:12px 22px;max-width:1120px;margin:0 auto}
+.site-header .brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}
+.site-header .brand .name{display:flex;flex-direction:column;line-height:1.15}
+.site-header .brand .ey{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:11px;letter-spacing:.28em;color:#c4660f;text-transform:uppercase}
+.site-header .brand .ti{font-weight:700;font-size:15px;letter-spacing:.01em;color:var(--ink)}
+.site-header .links{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.site-header .links a{font-size:14px;font-weight:500;color:var(--ink-soft);padding:7px 12px;border-radius:8px;transition:background .18s,color .18s;text-decoration:none}
+.site-header .links a:hover{background:rgba(25,27,34,.06);color:var(--ink)}
+.site-header .links a[aria-current]{color:var(--ink);font-weight:700}
+.site-header .links a[aria-current]::after{content:"";display:block;height:2px;border-radius:2px;margin-top:2px;background:var(--amber)}
+.site-header .dia{display:inline-block;vertical-align:middle}
+@media (max-width:640px){
+  .site-header .nav{justify-content:center;gap:10px;padding:11px 16px}
+  .site-header .links{justify-content:center}
+  .site-header .links a{padding:6px 9px;font-size:13px}
+}
+.site-footer{background:rgba(255,255,255,.72);border-top:1px solid #e2e0db;padding:16px 24px 22px;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:0 0 var(--radius) var(--radius)}
+.footer-disclaimer{font-size:10px;color:#6b6861;line-height:1.7;max-width:680px;margin:0 auto 14px}
+.footer-credit{display:flex;align-items:center;justify-content:center;gap:9px;font-size:12px;color:#6b6861;flex-wrap:wrap}
+.footer-icon{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid #e2e0db;flex-shrink:0}
+.footer-x-link{display:inline-flex;align-items:center;gap:6px;color:#1a1a1a;text-decoration:none;font-weight:700;font-size:12px;padding:5px 12px;border:1px solid #e2e0db;border-radius:20px;transition:background .15s,border-color .15s}
+.footer-x-link:hover{background:#f8f7f4;border-color:#1a1a1a}
+.x-logo{flex-shrink:0}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav">
+    <a class="brand" href="index.html" aria-label="ホーム">
+      <svg class="dia" width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+        <defs><linearGradient id="navDiaGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f39237"/><stop offset=".5" stop-color="#c23b8e"/><stop offset="1" stop-color="#1fb6c9"/>
+        </linearGradient></defs>
+        <path d="M16 1 31 16 16 31 1 16Z" fill="url(#navDiaGrad)"/>
+        <path d="M16 1 31 16 16 16Z" fill="#fff" opacity=".22"/>
+        <path d="M16 31 1 16 16 16Z" fill="#000" opacity=".12"/>
+      </svg>
+      <span class="name"><span class="ey">KIRIN</span><span class="ti">住宅ローン返済シミュレーター</span></span>
+    </a>
+    <nav class="links" aria-label="メインナビ">
+      <a href="index.html">ホーム</a>
+      <a href="simulator.html">シミュレーター</a>
+      <a href="guide.html" aria-current="page">使い方</a>
+      <a href="scenarios.html">シナリオ</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="panel" id="top">
+    <div class="eyebrow"><span class="facet"></span><span class="ja">USER GUIDE ／ 使い方ガイド</span></div>
+    <h1 class="title">住宅ローン返済シミュレーター
+      <span class="sub">変動金利の「これから」を、自分の数字で見るために。</span>
+    </h1>
+    <p class="lead" style="margin-top:18px;">
+      変動金利の住宅ローンは、いま支払えるかどうかより「この先、金利が上がったらどうなるか」がいちばん不安なところです。
+      このシミュレーターは、将来の金利シナリオ・5年ルール・125%ルール・繰り上げ返済・住宅ローン控除・ボーナス払いまで、
+      実際の制度に沿ってあなたの条件で試せるように作りました。数字を変えるたびに、グラフとダッシュボードがその場で動きます。
+    </p>
+    <div class="vision">
+      <div class="eyebrow"><span class="facet" style="border-bottom-color:var(--violet);"></span><span class="ja">DESIGN VISION ／ つくった理由</span></div>
+      <p style="margin:0;">
+        銀行のシミュレーターは「いくら借りられるか」は教えてくれますが、「金利が上がった世界線」までは見せてくれません。
+        このツールは、楽観も悲観もせず、複数の未来を並べて自分で確かめるための道具です。
+        だから保存できる比較パターン（ex.・A〜J）があり、無料で公開しています。
+      </p>
+    </div>
+    <div class="credit">制作：<b>KIRIN</b>（<a href="https://x.com/kirinsan4567" target="_blank" rel="noopener">@kirinsan4567</a>）</div>
+
+    <nav class="toc">
+      <a href="#for">こんな方に</a>
+      <a href="#map">画面の全体図</a>
+      <a href="#steps">5ステップ</a>
+      <a href="#input">入力の各項目</a>
+      <a href="#result">結果の読み方</a>
+      <a href="scenarios.html">シナリオ集 ↗</a>
+      <a href="#notes">注意とFAQ</a>
+    </nav>
+  </section>
+
+  <!-- こんな方に -->
+  <section class="panel" id="for">
+    <h2><span class="bar" style="background:var(--green);"></span>こんな方のためのシミュレーターです</h2>
+    <div class="for-grid">
+      <div class="for-card"><span class="tri" style="border-bottom-color:var(--teal);"></span><div class="body"><b>変動金利の将来が不安な方</b>政策金利が上がる前提で、返済額がどこまで増えるかを先に見ておきたい。</div></div>
+      <div class="for-card"><span class="tri" style="border-bottom-color:var(--green);"></span><div class="body"><b>5年・125%ルールの実際を知りたい方</b>「返済額は5年据え置き」「上がっても1.25倍まで」が、自分の場合どう効くのかを確かめたい。</div></div>
+      <div class="for-card"><span class="tri" style="border-bottom-color:var(--violet);"></span><div class="body"><b>繰り上げ返済を試したい方</b>いつ・いくら返すと、利息や期間がどれだけ減るのかを数字で比べたい。</div></div>
+      <div class="for-card"><span class="tri" style="border-bottom-color:var(--magenta);"></span><div class="body"><b>複数プランを並べて選びたい方</b>借入額・金利・期間ちがいのプランを保存して、横並びで比較したい。</div></div>
+      <div class="for-card"><span class="tri" style="border-bottom-color:var(--amber);"></span><div class="body"><b>住宅ローン控除まで含めたい方</b>控除を引いた「実質負担額」で、本当のコストを把握したい。</div></div>
+      <div class="for-card"><span class="tri" style="border-bottom-color:var(--red);"></span><div class="body"><b>ボーナス払いを検討中の方</b>ボーナス併用にしたときの毎月額・総返済額の変化を見たい。</div></div>
+    </div>
+  </section>
+
+  <!-- 画面マップ -->
+  <section class="panel" id="map">
+    <div class="eyebrow"><span class="facet" style="border-bottom-color:var(--magenta);"></span><span class="ja">SCREEN MAP ／ 画面の全体図</span></div>
+    <h2><span class="bar" style="background:var(--magenta);"></span>画面は「左で入力・右で結果」の2エリア</h2>
+    <p class="small muted">スマホでは縦に並び、<b>結果が上・入力が下</b>になります。番号は下の説明に対応しています。</p>
+    <div class="map-wrap">
+      <!-- SVG: 左=入力 / 右=結果 のギャラリーマップ -->
+      <svg viewBox="0 0 1000 560" role="img" aria-label="画面の全体図">
+        <defs>
+          <style>
+            .lbl{font-family:"Zen Kaku Gothic New",sans-serif;fill:#1f2430;}
+            .blk{fill:#ffffff;stroke:#e2ddd2;stroke-width:1.5;rx:10;}
+          </style>
+        </defs>
+        <rect x="0" y="0" width="1000" height="560" fill="#faf9f6"/>
+        <!-- 左パネル -->
+        <rect x="28" y="60" width="430" height="476" rx="14" fill="#ffffff" stroke="#ddd7ca" stroke-width="2"/>
+        <text x="48" y="92" class="lbl" font-size="18" font-weight="900">入力エリア（左）</text>
+        <text x="48" y="114" class="lbl" font-size="12" fill="#7a8090">条件を入れる場所</text>
+        <!-- 左の中身 -->
+        <g font-family="Zen Kaku Gothic New" font-size="14" fill="#2a3040">
+          <rect x="48" y="130" width="390" height="58" rx="9" fill="#f4f7f8" stroke="#d9e6e9"/>
+          <circle cx="70" cy="159" r="13" fill="#1fb6c9"/><text x="70" y="164" font-size="13" fill="#fff" text-anchor="middle" font-family="Roboto Mono" font-weight="700">1</text>
+          <text x="92" y="155">ローン基本情報</text><text x="92" y="174" font-size="11.5" fill="#7a8090">借入額・ボーナス・期間・方式・金利</text>
+
+          <rect x="48" y="196" width="390" height="44" rx="9" fill="#f5f8f3" stroke="#dde9d4"/>
+          <circle cx="70" cy="218" r="13" fill="#6fb93b"/><text x="70" y="223" font-size="13" fill="#fff" text-anchor="middle" font-family="Roboto Mono" font-weight="700">2</text>
+          <text x="92" y="223">返済ルール（5年・125%）／金利見直し</text>
+
+          <rect x="48" y="248" width="390" height="44" rx="9" fill="#f3f0fb" stroke="#e0d8f4"/>
+          <circle cx="70" cy="270" r="13" fill="#6e4be0"/><text x="70" y="275" font-size="13" fill="#fff" text-anchor="middle" font-family="Roboto Mono" font-weight="700">3</text>
+          <text x="92" y="275">繰り上げ返済</text>
+
+          <rect x="48" y="300" width="390" height="44" rx="9" fill="#fbeef6" stroke="#f0d6e6"/>
+          <circle cx="70" cy="322" r="13" fill="#c23b8e"/><text x="70" y="327" font-size="13" fill="#fff" text-anchor="middle" font-family="Roboto Mono" font-weight="700">4</text>
+          <text x="92" y="327">金利シナリオ（政策金利・適用金利）</text>
+
+          <rect x="48" y="352" width="390" height="44" rx="9" fill="#fdf2e8" stroke="#f6dcc2"/>
+          <circle cx="70" cy="374" r="13" fill="#f39237"/><text x="70" y="379" font-size="13" fill="#fff" text-anchor="middle" font-family="Roboto Mono" font-weight="700">5</text>
+          <text x="92" y="379">住宅ローン控除</text>
+        </g>
+
+        <!-- 右パネル -->
+        <rect x="486" y="60" width="486" height="476" rx="14" fill="#ffffff" stroke="#ddd7ca" stroke-width="2"/>
+        <text x="508" y="92" class="lbl" font-size="18" font-weight="900">結果エリア（右）</text>
+        <text x="508" y="114" class="lbl" font-size="12" fill="#7a8090">入れた条件の答えが出る場所</text>
+        <g font-family="Zen Kaku Gothic New" font-size="14" fill="#2a3040">
+          <rect x="508" y="130" width="442" height="40" rx="9" fill="#f7f6f3" stroke="#e2ddd2"/>
+          <circle cx="530" cy="150" r="13" fill="#e84040"/><text x="530" y="155" font-size="13" fill="#fff" text-anchor="middle" font-family="Roboto Mono" font-weight="700">6</text>
+          <text x="552" y="155">パターン帯（ex.・A〜J）／保存・比較・軸統一</text>
+
+          <rect x="508" y="178" width="442" height="120" rx="9" fill="#f7f6f3" stroke="#e2ddd2"/>
+          <circle cx="530" cy="198" r="13" fill="#1f2430"/><text x="530" y="203" font-size="13" fill="#fff" text-anchor="middle" font-family="Roboto Mono" font-weight="700">7</text>
+          <text x="552" y="203">ダッシュボード（8パネル）</text>
+          <g>
+            <rect x="552" y="216" width="92" height="34" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="560" y="237" font-size="11">総返済額</text>
+            <rect x="652" y="216" width="92" height="34" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="660" y="237" font-size="11">利息総額</text>
+            <rect x="752" y="216" width="92" height="34" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="760" y="237" font-size="11">控除累計</text>
+            <rect x="852" y="216" width="86" height="34" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="860" y="237" font-size="11">実質負担</text>
+            <rect x="552" y="256" width="92" height="32" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="560" y="276" font-size="11">現在返済</text>
+            <rect x="652" y="256" width="92" height="32" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="660" y="276" font-size="11">次の変更</text>
+            <rect x="752" y="256" width="92" height="32" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="760" y="276" font-size="11">最大返済</text>
+            <rect x="852" y="256" width="86" height="32" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="860" y="276" font-size="11">最終残高</text>
+          </g>
+
+          <rect x="508" y="306" width="442" height="222" rx="9" fill="#f7f6f3" stroke="#e2ddd2"/>
+          <circle cx="530" cy="326" r="13" fill="#1fb6c9"/><text x="530" y="331" font-size="13" fill="#fff" text-anchor="middle" font-family="Roboto Mono" font-weight="700">8</text>
+          <text x="552" y="331">グラフ（4種）</text>
+          <g>
+            <rect x="552" y="344" width="186" height="80" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="562" y="362" font-size="11">変動金利推移</text>
+            <polyline points="562,410 600,400 640,388 690,360 728,344" fill="none" stroke="#1fb6c9" stroke-width="2.5"/>
+            <rect x="748" y="344" width="190" height="80" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="758" y="362" font-size="11">毎月の返済額</text>
+            <g fill="#e84040" opacity="0.8"><rect x="762" y="392" width="10" height="24"/><rect x="784" y="386" width="10" height="30"/><rect x="806" y="382" width="10" height="34"/><rect x="828" y="378" width="10" height="38"/></g>
+            <rect x="552" y="432" width="186" height="84" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="562" y="450" font-size="11">ローン残高推移</text>
+            <polyline points="562,472 590,466 610,463 652,479 692,495 728,506" fill="none" stroke="#6e4be0" stroke-width="2.5"/>
+            <rect x="748" y="432" width="190" height="84" rx="6" fill="#fff" stroke="#e2ddd2"/><text x="758" y="450" font-size="11">ローン総支払額</text>
+            <polygon points="758,506 938,506 938,470 858,478 758,498" fill="#6fb93b" opacity="0.35"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <div class="row"><span class="num" style="background:var(--teal);">1</span><div><b>ローン基本情報</b>｜借入金額・ボーナス払い・返済期間・返済方式・開始年月・当初金利・金利タイプ。まずはここ。</div></div>
+      <div class="row"><span class="num" style="background:var(--green);">2</span><div><b>返済ルール／金利見直し</b>｜5年ルール・125%ルールの ON/OFF、金利を見直す月と、新金利が効き始めるまでの遅延月数。</div></div>
+      <div class="row"><span class="num" style="background:var(--violet);">3</span><div><b>繰り上げ返済</b>｜実施する年月・金額・タイプ（期間短縮／支払額軽減）を追加。青線で比較表示。</div></div>
+      <div class="row"><span class="num" style="background:var(--magenta);">4</span><div><b>金利シナリオ</b>｜将来の政策金利・適用金利の変更イベントを並べて、上昇局面を再現。</div></div>
+      <div class="row"><span class="num" style="background:var(--amber);">5</span><div><b>住宅ローン控除</b>｜控除率・控除期間・対象残高上限。実質負担額に反映されます。</div></div>
+      <div class="row"><span class="num" style="background:var(--red);">6</span><div><b>パターン帯</b>｜ex.（サンプル）と A〜J。保存・コピー・並べ替え・軸統一でプランを比較。</div></div>
+      <div class="row"><span class="num" style="background:#1f2430;">7</span><div><b>ダッシュボード</b>｜総返済額や毎月返済額など、要点の8パネル。繰り上げ後との比較も表示。</div></div>
+      <div class="row"><span class="num" style="background:var(--teal);">8</span><div><b>グラフ4種</b>｜金利・毎月返済額・残高・総支払額の推移。タイトルで折りたたみ／縦拡大もできます。</div></div>
+    </div>
+  </section>
+
+  <!-- 5ステップ -->
+  <section class="panel" id="steps">
+    <h2><span class="bar" style="background:var(--violet);"></span>はじめての5ステップ</h2>
+    <div class="steps">
+      <div class="step"><div class="sn" style="background:var(--teal);"></div><div class="st"><b>基本情報を入れる</b><div class="d">借入金額（万円）と返済期間（初期値35年）、返済方式（初期値=元利均等）、開始年月、当初金利を入力。ボーナス払いを使うなら「あり」を選びます。</div></div></div>
+      <div class="step"><div class="sn" style="background:var(--green);"></div><div class="st"><b>ルールと金利見直しを決める</b><div class="d">変動金利なら 5年ルール・125%ルールを必要に応じて ON。金利を見直す月（例：4月・10月）と、新金利が効くまでの遅延月数を設定します。</div></div></div>
+      <div class="step"><div class="sn" style="background:var(--magenta);"></div><div class="st"><b>金利シナリオを描く</b><div class="d">「いつ・どれだけ上がる（下がる）か」を金利シナリオに追加。複数のイベントを並べて、上昇局面を作れます。</div></div></div>
+      <div class="step"><div class="sn" style="background:var(--violet);"></div><div class="st"><b>繰り上げ返済を試す</b><div class="d">比較表示を ON にし、年月・金額・タイプ（期間短縮／支払額軽減）を追加。青線で「繰り上げあり」の結果が重なります。</div></div></div>
+      <div class="step"><div class="sn" style="background:var(--amber);"></div><div class="st"><b>保存して見比べる</b><div class="d">気に入った条件を A〜J に保存。借入額や金利ちがいのプランを並べ、軸統一でスケールをそろえて比較します。</div></div></div>
+    </div>
+  </section>
+
+  <!-- 入力の各項目 -->
+  <section class="panel" id="input">
+    <div class="eyebrow"><span class="facet" style="border-bottom-color:var(--teal);"></span><span class="ja">INPUT ／ 入力エリアの各項目</span></div>
+    <h2><span class="bar"></span>左パネルでできること</h2>
+    <div class="feat">
+      <div class="item"><div class="h"><span class="chip" style="background:var(--teal);">基本情報</span><h3>借入金額・ボーナス払い</h3></div>
+        <div class="d">借入金額は <span class="k">10万円単位</span>（10万円未満は自動で切り捨て）。<span class="k">ボーナス払い</span>は「あり」を選ぶと、入力方法（割合％／金額・万円／1回あたり返済額・万円）を選べ、入れていない側の値を自動表示します。返済月は年2回（例：7月・12月）も年1回も選べます。</div>
+        <div class="tip">「？」マークにふれると、単位や切り捨てのルールが出ます。</div>
+      </div>
+      <div class="item"><div class="h"><span class="chip" style="background:var(--teal);">基本情報</span><h3>返済期間・返済方式・金利</h3></div>
+        <div class="d">返済期間（初期値35年）、返済方式は <span class="k">元利均等</span>（毎月一定）／<span class="k">元金均等</span>（元金一定）。当初契約金利と金利タイプ（変動／固定）を設定します。</div>
+      </div>
+      <div class="item"><div class="h"><span class="chip" style="background:var(--green);">ルール</span><h3>5年ルール・125%ルール</h3></div>
+        <div class="d"><span class="k">5年ルール</span>＝金利が動いても毎月の返済額は5年間据え置き。<span class="k">125%ルール</span>＝見直し時も返済額は前回の1.25倍まで。どちらも変動金利で増額をやわらげる仕組みで、ON/OFF を切り替えて効果を確認できます。</div>
+        <div class="tip">据え置き中に利息が膨らむと「未払い利息」が出ることがあります。グラフと残高で確認できます。</div>
+      </div>
+      <div class="item"><div class="h"><span class="chip" style="background:var(--green);">金利見直し</span><h3>見直し月・適用タイミング</h3></div>
+        <div class="d">金利を見直す基準月（例：4月・10月）を選び、<span class="k">新金利が効き始めるまでの遅延月数</span>を指定します。実際の変動金利は「見直し→数ヶ月後に返済額へ反映」という遅れがあり、それを再現します。</div>
+      </div>
+      <div class="item"><div class="h"><span class="chip" style="background:var(--violet);">繰り上げ返済</span><h3>期間短縮／支払額軽減</h3></div>
+        <div class="d">比較表示を ON にして、年月・金額・タイプを追加します。<span class="k">期間短縮</span>＝返済期間を縮める（利息減が大きい）。<span class="k">支払額軽減</span>＝毎月の返済額を下げる。結果は青線で重ねて表示されます。</div>
+      </div>
+      <div class="item"><div class="h"><span class="chip" style="background:var(--magenta);">シナリオ</span><h3>金利シナリオ（政策金利・適用金利）</h3></div>
+        <div class="d">将来の金利変更イベントを時系列で並べます。政策金利の変更を起点に、適用金利の上昇・下降を描けます。複数パターンを保存して「楽観・標準・悲観」を比較するのがおすすめです。</div>
+      </div>
+      <div class="item"><div class="h"><span class="chip" style="background:var(--amber);">控除</span><h3>住宅ローン控除</h3></div>
+        <div class="d">控除率・控除期間（13年／10年）・対象残高上限を設定すると、各年の控除額が計算され、<span class="k">実質負担額</span>（総返済額−控除累計）に反映されます。各年の内訳も開いて確認できます。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果の読み方 -->
+  <section class="panel" id="result">
+    <div class="eyebrow"><span class="facet" style="border-bottom-color:var(--red);"></span><span class="ja">RESULT ／ 結果エリアの読み方</span></div>
+    <h2><span class="bar" style="background:var(--red);"></span>右パネルの見かた</h2>
+
+    <h3 style="margin-top:8px;">ダッシュボードの8パネル</h3>
+    <table>
+      <tr><th>パネル</th><th>意味</th></tr>
+      <tr><td><b>総返済額</b></td><td>最後まで返した支払いの合計（利息・ボーナス分を含む）。下に借入額を表示。</td></tr>
+      <tr><td><b>利息総額</b></td><td>支払う利息の合計。</td></tr>
+      <tr><td><b>控除累計額</b></td><td>住宅ローン控除の合計。各年の内訳を開けます。</td></tr>
+      <tr><td><b>実質負担額</b></td><td>総返済額から控除累計を引いた、実質のコスト。</td></tr>
+      <tr><td><b>現在の返済額</b></td><td>いまの毎月返済額（ボーナス分を除く月々分）。</td></tr>
+      <tr><td><b>次の返済額変更</b></td><td>金利見直し等で次に返済額が変わる時期と金額。</td></tr>
+      <tr><td><b>最大返済額</b></td><td>期間中いちばん高くなる毎月返済額とその時期。</td></tr>
+      <tr><td><b>最終残高</b></td><td>完済時の残高（通常は0）。</td></tr>
+    </table>
+
+    <h3 style="margin-top:22px;">パネルの「上下2分割」の見かた</h3>
+    <p class="small muted">繰り上げ返済を比較中は、各パネルが横線で上下に分かれます。上＝繰上げなし、下＝繰り上げ返済後です。</p>
+    <div class="anat">
+      <svg viewBox="0 0 760 240" role="img" aria-label="パネルの分割の見方">
+        <rect x="0" y="0" width="760" height="240" fill="#faf9f6"/>
+        <rect x="40" y="28" width="320" height="184" rx="12" fill="#fff" stroke="#ddd7ca" stroke-width="2"/>
+        <text x="62" y="58" font-family="Zen Kaku Gothic New" font-size="14" font-weight="700" fill="#5b6273">総返済額 <tspan font-size="12" fill="#9aa0ad">?</tspan></text>
+        <text x="62" y="96" font-family="Zen Kaku Gothic New" font-size="30" font-weight="900" fill="#e84040">8,500万円</text>
+        <line x1="62" y1="118" x2="338" y2="118" stroke="#e7e3da" stroke-width="1.5"/>
+        <text x="62" y="146" font-family="Zen Kaku Gothic New" font-size="11" font-weight="700" fill="#7a8090">繰り上げ返済後</text>
+        <text x="62" y="178" font-family="Zen Kaku Gothic New" font-size="24" font-weight="900" fill="#e84040">8,200万円 <tspan font-size="14" fill="#1f2430">(</tspan><tspan font-size="14" fill="#e84040">−300万円</tspan><tspan font-size="14" fill="#1f2430">)</tspan></text>
+        <!-- 注釈 -->
+        <g font-family="Zen Kaku Gothic New" font-size="13" fill="#2a3040">
+          <line x1="360" y1="80" x2="430" y2="80" stroke="#1fb6c9" stroke-width="2"/><circle cx="360" cy="80" r="3" fill="#1fb6c9"/>
+          <text x="440" y="76">上＝繰上げなし（基準）</text><text x="440" y="94" font-size="11.5" fill="#7a8090">パネルの色＝その指標の色</text>
+          <line x1="360" y1="162" x2="430" y2="162" stroke="#6e4be0" stroke-width="2"/><circle cx="360" cy="162" r="3" fill="#6e4be0"/>
+          <text x="440" y="158">下＝繰り上げ返済後</text><text x="440" y="176" font-size="11.5" fill="#7a8090">（ ）内のマイナスは赤字で減少額</text>
+        </g>
+      </svg>
+    </div>
+
+    <h3 style="margin-top:22px;">4つのグラフ</h3>
+    <table>
+      <tr><th>グラフ</th><th>読みかた</th></tr>
+      <tr><td><b>変動金利推移</b></td><td>シナリオに沿った適用金利の動き。</td></tr>
+      <tr><td><b>毎月の返済額推移</b></td><td>毎月返済額の元金・利息の内訳（月々分）。タイトル下に繰り上げの効果を表示。</td></tr>
+      <tr><td><b>ローン残高推移</b></td><td>残高＋残利息。繰り上げで短縮した期間も表示。</td></tr>
+      <tr><td><b>ローン総支払額</b></td><td>累計の元金＋利息。繰上げなしとの差を表示。</td></tr>
+    </table>
+    <div class="tip">各グラフはタイトルをタップで折りたたみ、「↕」で縦に拡大できます。効果情報はタイトルの下に出て、折りたたむと隠れます。</div>
+
+    <h3 style="margin-top:22px;">パターン保存（ex.・A〜J）と軸統一</h3>
+    <p class="d" style="font-size:14px;">条件のセットを A〜J に保存して、ボタンで切り替え・比較できます。<b>ex.</b> はいつでも見られるサンプルです。COPY/PASTE で複製、並べ替えで順序変更。<b>軸統一</b>（Y・X）を ON にすると、パターン間でグラフのスケールがそろい、比較しやすくなります（ex. はY軸統一の対象外で、常に自動スケールです）。</p>
+  </section>
+
+  <!-- シナリオ集 -->
+  <section class="panel" id="notes">
+    <h2><span class="bar" style="background:var(--amber);"></span>使うときの注意・FAQ</h2>
+    <ul class="note-list">
+      <li>本ツールは<b>概算のシミュレーション</b>です。実際の返済額・端数処理・適用ルールは金融機関ごとに異なります。契約前に必ず各行の条件をご確認ください。</li>
+      <li>ボーナス払いの「1回あたり返済額」モードは、初期金利を基準に元本を逆算します。変動金利では回ごとに当時の金利で再計算されるため、1回あたり額は初期値を基準に推移します。</li>
+      <li>保存データはお使いの<b>ブラウザ内</b>に保存されます。別の端末・別のサイトでは表示されません。スマホで最新版が出ないときは、タブを開き直す／キャッシュを消去してください。</li>
+      <li>住宅ローン控除の制度内容は改正されることがあります。最新の要件はご自身でもご確認ください。</li>
+    </ul>
+    <div class="backbar" style="margin-top:24px;">
+      <a class="btn-back" href="index.html">← ホームに戻る</a>
+      <span class="small muted">ご感想・ご要望は <a href="https://x.com/kirinsan4567" target="_blank" rel="noopener">@kirinsan4567</a> まで</span>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+  <div class="footer-disclaimer">本ツールは試算を目的としたものであり、実際の金利・返済額は金融機関の審査・契約条件等により異なります。将来の金利シナリオはあくまで一例であり、将来の金利動向を保証するものではありません。借入に関するご判断は、金融機関等にご確認の上、ご自身の責任で行ってください。</div>
+  <div class="footer-credit">
+    <img src="icon.jpg" alt="KIRIN" class="footer-icon">
+    <span>© 2026 KIRIN</span>
+    <a class="footer-x-link" href="https://x.com/kirinsan4567" target="_blank" rel="noopener noreferrer">
+      <svg class="x-logo" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      <span>@kirinsan4567</span>
+    </a>
+  </div>
+</footer>
+</div>
+</body>
+</html>
