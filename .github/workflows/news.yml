@@ -23,9 +23,7 @@ jobs:
         with:
           node-version: '24'
       
-      # ロックファイルエラーを回避し、最新のNode環境でパッケージのみインストール
       - run: npm install rss-parser
-        
       - run: node scripts/fetch-news.js
         
       - uses: actions/upload-pages-artifact@v3
@@ -35,5 +33,10 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # 【重要】以下のenvironmentセクションを追加してください
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/deploy-pages@v4
+      - id: deployment
+        uses: actions/deploy-pages@v4
