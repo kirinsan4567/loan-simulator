@@ -1,0 +1,320 @@
+<!-- insights.html -->
+
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>KIRIN Insights | 住宅ローン分析レポート・ニュース・コラム・厳選X投稿</title>
+
+<meta name="description" content="住宅ローン分析レポート、最新ニュース、コラム、厳選X投稿を掲載。">
+
+<style>
+
+:root{
+  --accent:#E8821E;
+  --border:#e5e7eb;
+  --bg:#fafafa;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:#222;
+  line-height:1.7;
+  background:#fff;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:24px;
+}
+
+.hero{
+  padding:48px 0 32px;
+}
+
+.hero h1{
+  margin:0;
+  font-size:42px;
+}
+
+.hero p{
+  color:#666;
+  margin-top:12px;
+}
+
+.section{
+  margin-top:56px;
+}
+
+.section-title{
+  font-size:28px;
+  margin-bottom:20px;
+  border-bottom:2px solid #eee;
+  padding-bottom:10px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+}
+
+.card{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px;
+  transition:.2s;
+}
+
+.card:hover{
+  transform:translateY(-2px);
+}
+
+.tag{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#f4f4f4;
+  font-size:12px;
+  margin-right:6px;
+}
+
+.news-item{
+  padding:14px 0;
+  border-bottom:1px solid #eee;
+}
+
+.news-date{
+  color:#888;
+  font-size:12px;
+}
+
+.news-category{
+  display:inline-block;
+  margin-top:4px;
+  background:#FFF3E6;
+  color:#E8821E;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:12px;
+}
+
+.news-title{
+  margin-top:8px;
+  font-weight:600;
+}
+
+.pick{
+  background:#FFF8F0;
+  border-left:5px solid var(--accent);
+  padding:20px;
+  border-radius:10px;
+}
+
+.x-card{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:16px;
+}
+
+.btn{
+  display:inline-block;
+  margin-top:10px;
+  padding:10px 16px;
+  border-radius:10px;
+  text-decoration:none;
+  background:var(--accent);
+  color:white;
+  font-weight:600;
+}
+
+.cta{
+  text-align:center;
+  margin:60px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<section class="hero">
+
+<h1>KIRIN Insights</h1>
+
+<p>
+住宅ローン分析レポート・ニュース・コラム・厳選X投稿
+</p>
+
+</section>
+
+<section class="section">
+
+<h2 class="section-title">📊 分析レポート</h2>
+
+<div class="grid">
+
+<div class="card">
+<h3>借入8,000万円で政策金利1.5%</h3>
+<span class="tag">利上げ分析</span>
+<p>毎月返済額・総返済額・残高推移への影響を試算。</p>
+</div>
+
+<div class="card">
+<h3>借入1億円で政策金利2.0%</h3>
+<span class="tag">高額借入</span>
+<p>金利上昇局面における返済負担を分析。</p>
+</div>
+
+<div class="card">
+<h3>500万円繰上返済の効果</h3>
+<span class="tag">繰上返済</span>
+<p>期間短縮・利息削減効果を比較。</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2 class="section-title">📰 最新ニュース</h2>
+
+<div id="news-container">
+読み込み中...
+</div>
+
+</section>
+
+<section class="section">
+
+<h2 class="section-title">⭐ KIRIN Picks</h2>
+
+<div class="pick">
+
+<h3>今週の注目テーマ</h3>
+
+<p>
+政策金利1.0%超えを想定した場合の返済額上昇リスク。
+借入額が大きい方はシミュレーターで確認しておきましょう。
+</p>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2 class="section-title">𝕏 厳選X投稿</h2>
+
+<div class="x-card">
+借入8,000万円・政策金利1.5%シナリオ分析
+</div>
+
+<div class="x-card">
+繰上返済500万円の効果分析
+</div>
+
+<div class="x-card">
+変動金利と固定金利の比較
+</div>
+
+</section>
+
+<section class="section">
+
+<h2 class="section-title">✍️ コラム</h2>
+
+<div class="grid">
+
+<div class="card">
+<h3>5年ルールとは？</h3>
+<p>変動金利型住宅ローンの仕組みを解説。</p>
+</div>
+
+<div class="card">
+<h3>125%ルールとは？</h3>
+<p>返済額急上昇を抑える仕組みを解説。</p>
+</div>
+
+<div class="card">
+<h3>変動金利はどこまで上がる？</h3>
+<p>政策金利との関係を整理。</p>
+</div>
+
+</div>
+
+</section>
+
+<div class="cta">
+<a href="simulator.html" class="btn">
+住宅ローン返済シミュレーターを使う
+</a>
+</div>
+
+</div>
+
+<script>
+
+async function loadNews(){
+
+  try{
+
+    const res = await fetch("news.json");
+    const news = await res.json();
+
+    const container =
+      document.getElementById("news-container");
+
+    container.innerHTML = "";
+
+    news.forEach(item=>{
+
+      container.innerHTML += `
+        <div class="news-item">
+
+          <div class="news-date">
+            ${item.date}
+          </div>
+
+          <div class="news-category">
+            ${item.category}
+          </div>
+
+          <div class="news-title">
+            ${item.title}
+          </div>
+
+        </div>
+      `;
+
+    });
+
+  }catch(e){
+
+    document.getElementById("news-container").innerHTML =
+      "ニュースを取得できませんでした";
+
+  }
+
+}
+
+loadNews();
+
+</script>
+
+</body>
+</html>
