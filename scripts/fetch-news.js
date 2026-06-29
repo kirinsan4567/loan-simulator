@@ -6,7 +6,10 @@ const parser = new Parser();
 // ニュースソースのリスト
 const sources = [
   { name: "Yahooビジネス", url: "https://news.yahoo.co.jp/rss/topics/business.xml" },
-  { name: "不動産流通研究所", url: "https://www.re-port.net/rss/index.xml" }
+  { name: "不動産流通研究所", url: "https://www.re-port.net/rss/index.xml" },
+  { name: "建通新聞", url: "https://www.kentsu.co.jp/webnews/rss.xml" },
+  { name: "新建ハウジング", url: "https://www.s-housing.jp/feed" },
+  { name: "住宅新報", url: "https://www.jutaku-s.com/feed" }
 ];
 
 (async () => {
