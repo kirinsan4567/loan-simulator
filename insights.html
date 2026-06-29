@@ -359,8 +359,8 @@ async function renderNews(){
     const twoWeeksAgoStart = thisWeekStart - 14*dayMs;
     const T = n => new Date(n.date).getTime();
 
-    // デフォルト：昨日・今日（最大40件）
-    const recent = items.filter(n => T(n) >= yesterdayStart).slice(0, NEWS_RECENT_MAX);
+    // デフォルト：新しい順に最大40件（日付では絞らない）
+    const recent = items.slice(0, NEWS_RECENT_MAX);
     const recentIds = new Set(recent.map(n => n.id));
     const archive = items.filter(n => !recentIds.has(n.id));
 
