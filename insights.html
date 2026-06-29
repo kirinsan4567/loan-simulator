@@ -6,192 +6,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>KIRIN Insights | 住宅ローン分析レポート・ニュース・コラム・厳選X投稿</title>
-
-<meta name="description" content="住宅ローン分析レポート、最新ニュース、コラム、厳選X投稿を掲載。">
+<title>KIRIN Insights</title>
 
 <style>
-
-:root{
-  --accent:#E8821E;
-  --border:#e5e7eb;
-  --bg:#fafafa;
-}
-
-*{
-  box-sizing:border-box;
-}
-
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:#222;
-  line-height:1.7;
+  font-family:-apple-system,sans-serif;
   background:#fff;
+  color:#222;
+}
+
+.header{
+  background:#fff;
+  border-bottom:1px solid #eee;
+  padding:20px 40px;
+}
+
+.nav{
+  display:flex;
+  gap:24px;
+  margin-top:10px;
+}
+
+.nav a{
+  text-decoration:none;
+  color:#444;
 }
 
 .container{
-  max-width:1100px;
+  max-width:1400px;
   margin:auto;
-  padding:24px;
+  padding:30px;
 }
 
-.hero{
-  padding:48px 0 32px;
-}
-
-.hero h1{
-  margin:0;
-  font-size:42px;
-}
-
-.hero p{
-  color:#666;
-  margin-top:12px;
+.layout{
+  display:grid;
+  grid-template-columns:3fr 1fr;
+  gap:40px;
 }
 
 .section{
-  margin-top:56px;
+  margin-bottom:50px;
 }
 
-.section-title{
-  font-size:28px;
-  margin-bottom:20px;
+.section h2{
   border-bottom:2px solid #eee;
   padding-bottom:10px;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:20px;
-}
-
-.card{
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:20px;
-  transition:.2s;
-}
-
-.card:hover{
-  transform:translateY(-2px);
-}
-
-.tag{
-  display:inline-block;
-  padding:4px 10px;
-  border-radius:999px;
-  background:#f4f4f4;
-  font-size:12px;
-  margin-right:6px;
-}
-
 .news-item{
-  padding:14px 0;
+  padding:12px 0;
   border-bottom:1px solid #eee;
-}
-
-.news-date{
-  color:#888;
-  font-size:12px;
-}
-
-.news-category{
-  display:inline-block;
-  margin-top:4px;
-  background:#FFF3E6;
-  color:#E8821E;
-  padding:3px 8px;
-  border-radius:999px;
-  font-size:12px;
-}
-
-.news-title{
-  margin-top:8px;
-  font-weight:600;
 }
 
 .pick{
   background:#FFF8F0;
-  border-left:5px solid var(--accent);
+  border-left:5px solid #E8821E;
   padding:20px;
-  border-radius:10px;
+  margin-bottom:15px;
+}
+
+.sidebar{
+  position:sticky;
+  top:20px;
 }
 
 .x-card{
-  border:1px solid var(--border);
+  border:1px solid #eee;
+  border-radius:10px;
+  padding:15px;
+  margin-bottom:15px;
+}
+
+.card{
+  border:1px solid #eee;
   border-radius:12px;
   padding:20px;
-  margin-bottom:16px;
+  margin-bottom:15px;
 }
-
-.btn{
-  display:inline-block;
-  margin-top:10px;
-  padding:10px 16px;
-  border-radius:10px;
-  text-decoration:none;
-  background:var(--accent);
-  color:white;
-  font-weight:600;
-}
-
-.cta{
-  text-align:center;
-  margin:60px 0;
-}
-
 </style>
 
 </head>
 
 <body>
 
-<div class="container">
-
-<section class="hero">
+<div class="header">
 
 <h1>KIRIN Insights</h1>
 
-<p>
-住宅ローン分析レポート・ニュース・コラム・厳選X投稿
-</p>
+<div class="nav">
+<a href="insights.html">ホーム</a>
+<a href="reports.html">分析レポート</a>
+<a href="columns.html">コラム</a>
+</div>
 
-</section>
+</div>
+
+<div class="container">
+
+<div class="layout">
+
+<main>
 
 <section class="section">
-
-<h2 class="section-title">📊 分析レポート</h2>
-
-<div class="grid">
-
-<div class="card">
-<h3>借入8,000万円で政策金利1.5%</h3>
-<span class="tag">利上げ分析</span>
-<p>毎月返済額・総返済額・残高推移への影響を試算。</p>
-</div>
-
-<div class="card">
-<h3>借入1億円で政策金利2.0%</h3>
-<span class="tag">高額借入</span>
-<p>金利上昇局面における返済負担を分析。</p>
-</div>
-
-<div class="card">
-<h3>500万円繰上返済の効果</h3>
-<span class="tag">繰上返済</span>
-<p>期間短縮・利息削減効果を比較。</p>
-</div>
-
-</div>
-
-</section>
-
-<section class="section">
-
-<h2 class="section-title">📰 最新ニュース</h2>
+<h2>📰 最新ニュース</h2>
 
 <div id="news-container">
 読み込み中...
@@ -201,68 +119,66 @@ body{
 
 <section class="section">
 
-<h2 class="section-title">⭐ KIRIN Picks</h2>
+<h2>⭐ KIRIN Picks</h2>
 
 <div class="pick">
+日銀利上げが住宅ローンへ与える影響
+</div>
 
-<h3>今週の注目テーマ</h3>
-
-<p>
-政策金利1.0%超えを想定した場合の返済額上昇リスク。
-借入額が大きい方はシミュレーターで確認しておきましょう。
-</p>
-
+<div class="pick">
+借入8000万円世帯への影響分析
 </div>
 
 </section>
 
 <section class="section">
 
-<h2 class="section-title">𝕏 厳選X投稿</h2>
+<h2>📊 分析レポート</h2>
 
-<div class="x-card">
-借入8,000万円・政策金利1.5%シナリオ分析
+<div class="card">
+借入8000万円で政策金利1.5%
 </div>
 
-<div class="x-card">
-繰上返済500万円の効果分析
-</div>
-
-<div class="x-card">
-変動金利と固定金利の比較
+<div class="card">
+借入1億円で政策金利2.0%
 </div>
 
 </section>
 
 <section class="section">
 
-<h2 class="section-title">✍️ コラム</h2>
-
-<div class="grid">
+<h2>✍️ コラム</h2>
 
 <div class="card">
-<h3>5年ルールとは？</h3>
-<p>変動金利型住宅ローンの仕組みを解説。</p>
+5年ルールとは？
 </div>
 
 <div class="card">
-<h3>125%ルールとは？</h3>
-<p>返済額急上昇を抑える仕組みを解説。</p>
-</div>
-
-<div class="card">
-<h3>変動金利はどこまで上がる？</h3>
-<p>政策金利との関係を整理。</p>
-</div>
-
+125%ルールとは？
 </div>
 
 </section>
 
-<div class="cta">
-<a href="simulator.html" class="btn">
-住宅ローン返済シミュレーターを使う
-</a>
+</main>
+
+<aside class="sidebar">
+
+<h2>𝕏 厳選X投稿</h2>
+
+<div class="x-card">
+埋め込みポスト①
+</div>
+
+<div class="x-card">
+埋め込みポスト②
+</div>
+
+<div class="x-card">
+埋め込みポスト③
+</div>
+
+</aside>
+
 </div>
 
 </div>
@@ -271,44 +187,24 @@ body{
 
 async function loadNews(){
 
-  try{
+const res = await fetch("news.json");
+const news = await res.json();
 
-    const res = await fetch("news.json");
-    const news = await res.json();
+const container =
+document.getElementById("news-container");
 
-    const container =
-      document.getElementById("news-container");
+container.innerHTML="";
 
-    container.innerHTML = "";
+news.forEach(item=>{
 
-    news.forEach(item=>{
+container.innerHTML += `
+<div class="news-item">
+<strong>${item.category}</strong><br>
+${item.title}
+</div>
+`;
 
-      container.innerHTML += `
-        <div class="news-item">
-
-          <div class="news-date">
-            ${item.date}
-          </div>
-
-          <div class="news-category">
-            ${item.category}
-          </div>
-
-          <div class="news-title">
-            ${item.title}
-          </div>
-
-        </div>
-      `;
-
-    });
-
-  }catch(e){
-
-    document.getElementById("news-container").innerHTML =
-      "ニュースを取得できませんでした";
-
-  }
+});
 
 }
 
