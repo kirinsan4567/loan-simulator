@@ -2,9 +2,6 @@
   "name": "news-fetcher",
   "version": "1.0.0",
   "type": "module",
-  "engines": {
-    "node": ">=24.0.0"
-  },
   "dependencies": {
     "rss-parser": "^3.13.0"
   }
