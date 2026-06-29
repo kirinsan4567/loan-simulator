@@ -1,0 +1,165 @@
+// scripts/fetch-news.js
+// KIRIN Insights ニュース収集スクリプト
+// 役割: 複数RSSを巡回 → 整形 → タグ付け → 重複除去 → data/news.json に「追記」保存
+//
+// 設計方針:
+//  - キーワードはグループ化したタグで付与（複数タグOK）。
+//  - 同じ記事は出さない（URL正規化して名寄せ。同記事が複数フィードに出たらタグを統合）。
+//  - 過去分はストック（既存JSONに追記、最新順、上限 MAX_ITEMS 件で打ち切り）。
+//  - フィードが1本死んでも全体は止めない（自動スキップ）。
+//
+// フィードの type:
+//  - "google": Google ニュース検索RSS。リンクは news.google.com のリダイレクトURL
+//              （ブラウザのクリックでは本物の記事に飛ぶ）。媒体名はタイトル末尾から抽出。
+//  - 省略時 : 各媒体の公式RSS（"direct"扱い）。リンクは実URL。媒体名は name を使用。
+
+import fs from "fs";
+import path from "path";
+import Parser from "rss-parser";
+
+const parser = new Parser({ timeout: 15000 });
+
+const OUT_PATH = "data/news.json";
+const MAX_ITEMS = 400; // ストック上限（古いものから捨てる）
+
+// ───────────────────────────────────────────────────────────
+// 1) フィード一覧
+//   ⚠️ 確認は手動でしなくてOK。Actionを1回回して、ログの
+//      「OK <名前> (N件)」/「SKIP <名前>: ...」で生死が分かります。
+//      死んでるものを後から消すだけ。
+// ───────────────────────────────────────────────────────────
+const FEEDS = [
+  // ── Google ニュース site: 検索（媒体を絞る）──────────────
+  { name: "ブルームバーグ", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:bloomberg.co.jp 不動産 金利 マンション 地価 市況&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "日銀",          type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:boj.or.jp 金融政策 金利 住宅ローン&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "ロイター",      type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:reuters.com 日本 不動産 住宅&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "国交省",        type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:mlit.go.jp 不動産 住宅 地価 統計&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "住宅新報",      type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:jutaku-s.com ニュース&hl=ja&gl=JP&ceid=JP:ja") },
+
+  // ── 横断検索（媒体を絞らず広く拾う）──────────────────────
+  { name: "不動産市況", type: "google", url: encodeURI("https://news.google.com/rss/search?q=不動産 マンション 地価 市況&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "金融政策",   type: "google", url: encodeURI("https://news.google.com/rss/search?q=日銀 金融政策 金利 住宅ローン&hl=ja&gl=JP&ceid=JP:ja") },
+
+  // ── 任意：各媒体の公式RSSを直接読む（実URLが取れる）──────
+  //   有効なものだけ有効化。type は付けない（direct扱い）。
+  // { name: "SUUMOジャーナル", url: "https://suumo.jp/journal/feed/" },
+];
+
+// ───────────────────────────────────────────────────────────
+// 2) タグ（キーワードのグループ化）
+//   タイトルにキーワードを含むグループのラベルを全部付ける（複数可）。
+// ───────────────────────────────────────────────────────────
+const TAG_GROUPS = [
+  { label: "金利・日銀",   keywords: ["日銀", "利上げ", "政策金利", "金融政策", "金利", "変動金利", "固定金利"] },
+  { label: "住宅ローン",   keywords: ["住宅ローン", "ローン", "繰上返済", "繰り上げ返済", "借入", "借り入れ", "団信"] },
+  { label: "不動産・市場", keywords: ["不動産", "マンション", "タワマン", "タワーマンション", "戸建", "新築", "中古", "地価", "再開発", "都心", "住宅価格", "市況"] },
+  { label: "制度・税制",   keywords: ["税制", "控除", "補助", "支援", "給付", "改正", "減税", "統計"] }
+];
+
+// ───────────────────────────────────────────────────────────
+// ヘルパー
+// ───────────────────────────────────────────────────────────
+
+// URL正規化（重複判定キー）: ハッシュとトラッキングパラメータを除去
+function normalizeUrl(raw) {
+  try {
+    const u = new URL(raw);
+    u.hash = "";
+    const drop = [...u.searchParams.keys()].filter(
+      k => /^utm_|^gclid$|^fbclid$|^yclid$|^ref$|^cmpid$/i.test(k)
+    );
+    drop.forEach(k => u.searchParams.delete(k));
+    return u.toString();
+  } catch {
+    return (raw || "").trim();
+  }
+}
+
+const tidy = s => (s || "").replace(/\s+/g, " ").trim();
+
+// Google ニュースのタイトルは「記事タイトル - 媒体名」。媒体名を切り出す。
+function splitGoogleTitle(rawTitle) {
+  const t = rawTitle || "";
+  const idx = t.lastIndexOf(" - ");
+  if (idx > 0) return { title: t.slice(0, idx), source: t.slice(idx + 3) };
+  return { title: t, source: "" };
+}
+
+// タグ判定（複数返す）
+function detectTags(title) {
+  const t = title || "";
+  const tags = TAG_GROUPS.filter(g => g.keywords.some(k => t.includes(k))).map(g => g.label);
+  return tags.length ? tags : ["その他"];
+}
+
+function toISO(item) {
+  const d = new Date(item.isoDate || item.pubDate || Date.now());
+  return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+}
+
+function loadExisting() {
+  try {
+    const arr = JSON.parse(fs.readFileSync(OUT_PATH, "utf-8"));
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+// ───────────────────────────────────────────────────────────
+// メイン
+// ───────────────────────────────────────────────────────────
+(async () => {
+  const existing = loadExisting();
+
+  const map = new Map();
+  for (const it of existing) {
+    if (it && it.id) map.set(it.id, it);
+  }
+
+  let added = 0;
+
+  for (const feed of FEEDS) {
+    try {
+      const parsed = await parser.parseURL(feed.url);
+      for (const item of parsed.items || []) {
+        const link = (item.link || "").trim();
+
+        // タイトルと媒体名
+        let title, source;
+        if (feed.type === "google") {
+          const sp = splitGoogleTitle(item.title || "");
+          title = tidy(sp.title);
+          source = sp.source || feed.name;
+        } else {
+          title = tidy(item.title || "");
+          source = feed.name;
+        }
+        if (!title) continue;
+
+        const id = normalizeUrl(link) || title;
+        const tags = detectTags(title);
+
+        if (map.has(id)) {
+          const cur = map.get(id);
+          cur.tags = Array.from(new Set([...(cur.tags || []), ...tags]));
+        } else {
+          map.set(id, { id, title, url: link, source, date: toISO(item), tags });
+          added++;
+        }
+      }
+      console.log(`OK   ${feed.name} (${(parsed.items || []).length}件)`);
+    } catch (e) {
+      console.warn(`SKIP ${feed.name}: ${e.message}`);
+    }
+  }
+
+  const all = Array.from(map.values())
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, MAX_ITEMS);
+
+  fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
+  fs.writeFileSync(OUT_PATH, JSON.stringify(all, null, 2));
+
+  console.log(`\n新規 ${added}件 / 合計 ${all.length}件 を ${OUT_PATH} に保存しました。`);
+})();

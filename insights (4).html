@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIRIN Insights | 住宅ローン・金利・不動産ニュース</title>
+<meta name="description" content="住宅ローン・金利・不動産の最新ニュース、KIRIN独自の分析レポートとコラム。">
+
+<!-- 既存サイトの共通スタイルを継承（ヘッダー/フォント/カラー） -->
+<link rel="stylesheet" href="site.css">
+<!-- site.css が Zen Kaku Gothic New を読み込んでいれば下記は不要（重複しても無害） -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================================
+   insights 専用スタイル（.ki- で名前空間化して site.css と衝突回避）
+   カスタムプロパティも --ki- 接頭辞でグローバル変数と衝突回避。
+   ※ --ki-accent を既存サイトのアクセント色に差し替えてください。
+   =========================================================== */
+.ki-insights {
+  --ki-accent: #1f5673;      /* ← 既存サイトのアクセント色に合わせて変更 */
+  --ki-ink: #1c1c1e;
+  --ki-sub: #6b7280;
+  --ki-line: #e5e7eb;
+  --ki-bg: #f7f8fa;
+  --ki-card: #ffffff;
+  --ki-radius: 14px;
+  font-family: "Zen Kaku Gothic New", system-ui, sans-serif;
+  color: var(--ki-ink);
+  background: var(--ki-bg);
+  line-height: 1.7;
+}
+.ki-insights *, .ki-insights *::before, .ki-insights *::after { box-sizing: border-box; }
+
+/* 固定ヘッダー（既存ヘッダーに置き換える場合はこのブロックを削除して差し替え） */
+.ki-header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--ki-line);
+}
+.ki-header__inner {
+  max-width: 1200px; margin: 0 auto; padding: 12px 20px;
+  display: flex; align-items: center; gap: 20px;
+}
+.ki-brand { font-weight: 700; font-size: 1.15rem; letter-spacing: .02em; text-decoration: none; color: var(--ki-ink); white-space: nowrap; }
+.ki-brand span { color: var(--ki-accent); }
+.ki-nav { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; }
+.ki-nav a {
+  text-decoration: none; color: var(--ki-sub); font-size: .9rem; font-weight: 500;
+  padding: 6px 12px; border-radius: 999px; transition: background .15s, color .15s;
+}
+.ki-nav a:hover { color: var(--ki-accent); background: rgba(31,86,115,.08); }
+.ki-nav a.ki-nav--home { color: var(--ki-accent); }
+
+/* レイアウト：左メイン＋右サイドバー */
+.ki-wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px 80px; }
+.ki-grid { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 36px; align-items: start; }
+.ki-main { min-width: 0; }
+.ki-aside { position: sticky; top: 76px; }
+
+/* セクション */
+.ki-section { scroll-margin-top: 80px; margin-bottom: 48px; }
+.ki-section__head { display: flex; align-items: baseline; gap: 12px; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--ki-ink); }
+.ki-section__title { font-size: 1.4rem; font-weight: 700; margin: 0; }
+.ki-section__en { font-size: .72rem; letter-spacing: .18em; color: var(--ki-sub); text-transform: uppercase; }
+
+/* ニュース一覧 */
+.ki-news { list-style: none; margin: 0; padding: 0; }
+.ki-news__item { padding: 14px 2px; border-bottom: 1px solid var(--ki-line); display: flex; flex-direction: column; gap: 6px; }
+.ki-news__item a.ki-news__title { color: var(--ki-ink); text-decoration: none; font-weight: 500; font-size: 1.02rem; }
+.ki-news__item a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
+.ki-news__meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: .8rem; color: var(--ki-sub); }
+.ki-news__date { font-variant-numeric: tabular-nums; }
+.ki-news__source::before { content: "・"; margin-right: 6px; }
+
+/* タグ（見出し後ろのピル） */
+.ki-tags { display: inline-flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.ki-tag { font-size: .72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; line-height: 1.5; white-space: nowrap; }
+.ki-tag[data-t="金利・日銀"]   { background:#e7f0f6; color:#1f5673; }
+.ki-tag[data-t="住宅ローン"]   { background:#eaf3ec; color:#2f6b43; }
+.ki-tag[data-t="不動産・市場"] { background:#f4eee6; color:#8a5a2b; }
+.ki-tag[data-t="制度・税制"]   { background:#efe9f4; color:#5a3f7a; }
+.ki-tag[data-t="その他"]       { background:#eef0f2; color:#6b7280; }
+
+.ki-more { display:block; width:100%; margin-top:16px; padding:10px; border:1px solid var(--ki-line); background:var(--ki-card); border-radius:10px; color:var(--ki-accent); font-weight:700; font-family:inherit; cursor:pointer; }
+.ki-more:hover { background:#fff; border-color:var(--ki-accent); }
+.ki-state { color: var(--ki-sub); padding: 16px 2px; font-size:.92rem; }
+
+/* Kirin Pics */
+.ki-pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 12px; }
+.ki-pic { position: relative; aspect-ratio: 4/3; border-radius: var(--ki-radius); overflow: hidden; background:#e9edf0; }
+.ki-pic img { width:100%; height:100%; object-fit: cover; display:block; }
+.ki-pic figcaption { position:absolute; left:0; right:0; bottom:0; padding:8px 10px; font-size:.78rem; color:#fff; background: linear-gradient(transparent, rgba(0,0,0,.55)); }
+
+/* カード（レポート/コラム） */
+.ki-cards { display: grid; gap: 12px; }
+.ki-cardlink { display:flex; flex-direction:column; gap:6px; padding:16px 18px; background:var(--ki-card); border:1px solid var(--ki-line); border-radius:var(--ki-radius); text-decoration:none; color:var(--ki-ink); transition: border-color .15s, transform .15s; }
+.ki-cardlink:hover { border-color: var(--ki-accent); transform: translateY(-2px); }
+.ki-cardlink h3 { margin:0; font-size:1.02rem; font-weight:700; }
+.ki-cardlink p { margin:0; font-size:.88rem; color:var(--ki-sub); }
+.ki-cardlink .ki-cardlink__go { font-size:.8rem; color:var(--ki-accent); font-weight:700; }
+
+/* 右サイドバー：X投稿（自前カード） */
+.ki-aside__head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.ki-aside__title { font-size:1rem; font-weight:700; margin:0; }
+.ki-follow { font-size:.8rem; font-weight:700; text-decoration:none; color:#fff; background:#000; padding:6px 14px; border-radius:999px; }
+.ki-xfeed { display:flex; flex-direction:column; gap:14px; max-height: calc(100vh - 140px); overflow:auto; padding-right:4px; }
+.ki-xcard { background:var(--ki-card); border:1px solid var(--ki-line); border-radius:var(--ki-radius); padding:14px; }
+.ki-xcard__top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.ki-xcard__avatar { width:40px; height:40px; border-radius:50%; background:var(--ki-accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex:0 0 auto; }
+.ki-xcard__id { display:flex; flex-direction:column; line-height:1.25; min-width:0; }
+.ki-xcard__name { font-weight:700; font-size:.9rem; }
+.ki-xcard__handle { font-size:.8rem; color:var(--ki-sub); }
+.ki-xcard__x { margin-left:auto; font-weight:900; font-size:1.1rem; color:var(--ki-ink); }
+.ki-xcard__body { font-size:.9rem; white-space:pre-line; word-break:break-word; }
+.ki-xcard__img { margin-top:10px; border-radius:10px; overflow:hidden; }
+.ki-xcard__img img { width:100%; display:block; }
+.ki-xcard__foot { margin-top:10px; display:flex; align-items:center; justify-content:space-between; font-size:.78rem; color:var(--ki-sub); }
+.ki-xcard__link { color:var(--ki-accent); font-weight:700; text-decoration:none; }
+
+/* レスポンシブ：1カラム化、Xは下に回り込み */
+@media (max-width: 880px) {
+  .ki-grid { grid-template-columns: 1fr; }
+  .ki-aside { position: static; }
+  .ki-xfeed { max-height: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ki-cardlink { transition: none; }
+}
+</style>
+</head>
+
+<body class="ki-insights">
+
+<!-- ============================================================
+     固定ヘッダー
+     ★ 既存サイトの共通ヘッダーHTMLがあるなら、この <header> を
+       それに差し替え、その中に下の .ki-nav のアンカーだけ足してください。
+     ============================================================ -->
+<header class="ki-header">
+  <div class="ki-header__inner">
+    <a class="ki-brand" href="index.html">KIRIN <span>Insights</span></a>
+    <nav class="ki-nav">
+      <a href="index.html" class="ki-nav--home">サイトトップ</a>
+      <a href="#news">ニュース</a>
+      <a href="#pics">Kirin Pics</a>
+      <a href="#reports">分析レポート</a>
+      <a href="#columns">コラム</a>
+    </nav>
+  </div>
+</header>
+
+<div class="ki-wrap">
+  <div class="ki-grid">
+
+    <!-- ===== 左：メイン（全カテゴリを縦に通読） ===== -->
+    <main class="ki-main">
+
+      <!-- ニュース（data/news.json から自動描画） -->
+      <section id="news" class="ki-section">
+        <div class="ki-section__head">
+          <h2 class="ki-section__title">ニュース</h2>
+          <span class="ki-section__en">News</span>
+        </div>
+        <ul id="newsList" class="ki-news"></ul>
+        <div id="newsState" class="ki-state">読み込み中…</div>
+        <button id="newsMore" class="ki-more" hidden>過去のニュースをもっと見る</button>
+      </section>
+
+      <!-- Kirin Pics（手動：下の picsData を編集） -->
+      <section id="pics" class="ki-section">
+        <div class="ki-section__head">
+          <h2 class="ki-section__title">Kirin Pics</h2>
+          <span class="ki-section__en">Pics</span>
+        </div>
+        <div id="picsGrid" class="ki-pics"></div>
+      </section>
+
+      <!-- 分析レポート（手動：reportsData。シミュレーターの該当シナリオへリンク） -->
+      <section id="reports" class="ki-section">
+        <div class="ki-section__head">
+          <h2 class="ki-section__title">分析レポート</h2>
+          <span class="ki-section__en">Reports</span>
+        </div>
+        <div id="reportsCards" class="ki-cards"></div>
+      </section>
+
+      <!-- コラム（手動：columnsData） -->
+      <section id="columns" class="ki-section">
+        <div class="ki-section__head">
+          <h2 class="ki-section__title">コラム</h2>
+          <span class="ki-section__en">Columns</span>
+        </div>
+        <div id="columnsCards" class="ki-cards"></div>
+      </section>
+
+    </main>
+
+    <!-- ===== 右：X投稿（自前カード） ===== -->
+    <aside class="ki-aside">
+      <div class="ki-aside__head">
+        <h2 class="ki-aside__title">X (@kirinsan4567)</h2>
+        <a class="ki-follow" href="https://x.com/kirinsan4567" target="_blank" rel="noopener">フォロー</a>
+      </div>
+      <div id="xFeed" class="ki-xfeed"></div>
+    </aside>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   1) X投稿（自前カード）— ここを手で編集して投稿を追加します
+   各フィールドの意味:
+     name  : 表示名（通常 "KIRIN"）
+     date  : 表示する日付（自由文字列。例 "2026.06.29"）
+     text  : 投稿本文（改行はそのまま反映されます）
+     url   : 実際のポストのURL（"Xで見る" のリンク先）
+     image : 画像URL（任意。無ければ省略可）
+   ★投稿を増やすときは、このリストにオブジェクトを1つ足すだけ。
+   ============================================================ */
+const xPosts = [
+  {
+    name: "KIRIN",
+    date: "2026.06.29",
+    text: "住宅ローンの繰上返済、「早く返す＝得」とは限りません。\n団信・流動性・運用機会まで含めて、シミュレーターで数字を見てから判断を。",
+    url: "https://x.com/kirinsan4567",
+    image: ""
+  },
+  {
+    name: "KIRIN",
+    date: "2026.06.27",
+    text: "変動金利1.25%時代の返済額推移を更新しました。5年ルール／125%ルールのトグルで動きが直感的に分かります。",
+    url: "https://x.com/kirinsan4567",
+    image: ""
+  },
+  {
+    name: "KIRIN",
+    date: "2026.06.25",
+    text: "政策金利2.0%シナリオを追加。借入1億円だと総返済額がどう変わるか、ぜひ触ってみてください。",
+    url: "https://x.com/kirinsan4567",
+    image: ""
+  }
+];
+
+/* 2) Kirin Pics（手動） */
+const picsData = [
+  // { src: "images/pic1.jpg", caption: "キャプション" },
+];
+
+/* 3) 分析レポート（手動）— reports.html の内容をリンクカード化 */
+const reportsData = [
+  { title: "借入8000万円 × 政策金利1.5%",  desc: "高額借入時の返済額シミュレーション", href: "simulator.html" },
+  { title: "借入1億円 × 政策金利2.0%",      desc: "金利上昇シナリオでの総返済額の変化", href: "simulator.html" },
+  { title: "500万円繰上返済の効果",          desc: "繰上返済による利息軽減と期間短縮",   href: "simulator.html" },
+  { title: "変動金利1.25%時代の返済額推移",  desc: "5年ルール・125%ルールの挙動を可視化", href: "simulator.html" },
+  { title: "政策金利2.0%シナリオ分析",       desc: "BOJ政策イベントを反映した試算",       href: "scenarios.html" }
+];
+
+/* 4) コラム（手動） */
+const columnsData = [
+  { title: "繰上返済の哲学", desc: "流動性・機会費用・団信・運用のトレードオフから考える", href: "scenarios.html#column" },
+];
+
+/* ---------- 共通ヘルパー ---------- */
+const $ = sel => document.querySelector(sel);
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtDate(iso){ const d=new Date(iso); if(isNaN(d)) return ""; return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`; }
+
+/* ---------- X投稿の描画 ---------- */
+function renderX(){
+  $('#xFeed').innerHTML = xPosts.map(p => `
+    <article class="ki-xcard">
+      <div class="ki-xcard__top">
+        <div class="ki-xcard__avatar">🦒</div>
+        <div class="ki-xcard__id">
+          <span class="ki-xcard__name">${esc(p.name)}</span>
+          <span class="ki-xcard__handle">@kirinsan4567</span>
+        </div>
+        <span class="ki-xcard__x">𝕏</span>
+      </div>
+      <div class="ki-xcard__body">${esc(p.text)}</div>
+      ${p.image ? `<div class="ki-xcard__img"><img src="${esc(p.image)}" alt=""></div>` : ""}
+      <div class="ki-xcard__foot">
+        <span>${esc(p.date)}</span>
+        <a class="ki-xcard__link" href="${esc(p.url)}" target="_blank" rel="noopener">Xで見る →</a>
+      </div>
+    </article>
+  `).join("");
+}
+
+/* ---------- Pics / Reports / Columns の描画 ---------- */
+function renderPics(){
+  const el = $('#picsGrid');
+  if(!picsData.length){ el.innerHTML = `<p class="ki-state">写真は準備中です。</p>`; return; }
+  el.innerHTML = picsData.map(p => `
+    <figure class="ki-pic">
+      <img src="${esc(p.src)}" alt="${esc(p.caption||'')}">
+      ${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ""}
+    </figure>`).join("");
+}
+function renderCards(target, data){
+  $(target).innerHTML = data.map(c => `
+    <a class="ki-cardlink" href="${esc(c.href)}">
+      <h3>${esc(c.title)}</h3>
+      <p>${esc(c.desc||"")}</p>
+      <span class="ki-cardlink__go">詳しく見る →</span>
+    </a>`).join("");
+}
+
+/* ---------- ニュースの描画（data/news.json を fetch） ---------- */
+const NEWS_INITIAL = 12;
+function newsItemHTML(n){
+  const tags = (n.tags||[]).map(t => `<span class="ki-tag" data-t="${esc(t)}">${esc(t)}</span>`).join("");
+  const hasLink = n.url && n.url !== "#";
+  const title = hasLink
+    ? `<a class="ki-news__title" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a>`
+    : `<span class="ki-news__title">${esc(n.title)}</span>`;
+  return `<li class="ki-news__item">
+      <div>${title}</div>
+      <div class="ki-news__meta">
+        <span class="ki-news__date">${fmtDate(n.date)}</span>
+        ${n.source ? `<span class="ki-news__source">${esc(n.source)}</span>` : ""}
+        <span class="ki-tags">${tags}</span>
+      </div>
+    </li>`;
+}
+async function renderNews(){
+  const list = $('#newsList'), state = $('#newsState'), more = $('#newsMore');
+  try {
+    const res = await fetch('data/news.json', { cache: 'no-store' });
+    if(!res.ok) throw new Error('not found');
+    const items = await res.json();
+    if(!Array.isArray(items) || !items.length){
+      state.textContent = '表示できるニュースがまだありません。'; return;
+    }
+    let expanded = false;
+    const draw = () => {
+      const shown = expanded ? items : items.slice(0, NEWS_INITIAL);
+      list.innerHTML = shown.map(newsItemHTML).join("");
+      more.hidden = items.length <= NEWS_INITIAL || expanded;
+    };
+    draw();
+    state.hidden = true;
+    more.addEventListener('click', () => { expanded = true; draw(); });
+  } catch (e) {
+    state.textContent = 'ニュースを読み込めませんでした。少し時間をおいて再読み込みしてください。';
+  }
+}
+
+/* ---------- 起動 ---------- */
+renderX();
+renderPics();
+renderCards('#reportsCards', reportsData);
+renderCards('#columnsCards', columnsData);
+renderNews();
+</script>
+
+</body>
+</html>
