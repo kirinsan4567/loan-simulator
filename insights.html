@@ -347,7 +347,7 @@ async function loadNews(){
 
   try{
 
-    const res = await fetch("news.json");
+    const res = await fetch("./news.json");
     const news = await res.json();
 
     const container = document.getElementById("news-container");
