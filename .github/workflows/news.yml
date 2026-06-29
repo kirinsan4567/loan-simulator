@@ -10,6 +10,7 @@ permissions:
   pages: write
   id-token: write
 
+# 【重要】実行中のデプロイを自動キャンセルして渋滞を防ぐ設定
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -21,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '24' # 20ではなく24に固定
       
       - run: npm install rss-parser
       - run: node scripts/fetch-news.js
@@ -33,10 +34,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    # 【重要】以下のenvironmentセクションを追加してください
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4 # 最新バージョン
