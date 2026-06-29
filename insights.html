@@ -26,18 +26,27 @@
         </aside>
     </div>
     <script>
-async function loadNews() {
+aasync function loadNews() {
   try {
-    // 1. JSONファイルを読み込む
-    const res = await fetch("data/news.json"); 
-    if (!res.ok) throw new Error("JSONが見つかりません");
+    const res = await fetch("data/news.json");
+    const allNews = await res.json();
     
-    // 2. データを解析
-    const news = await res.json();
+    // 【重要】ここにキーワードを設定
+    const keywords = ["日銀", "金融政策", "金利", "地価", "不動産", "住宅ローン", "マンション", "建設"];
     
-    // 3. 表示するHTMLを生成（item.tag を使うのがポイント！）
+    // フィルタリング処理：タイトルにキーワードが含まれるものだけ残す
+    const filteredNews = allNews.filter(item => 
+      keywords.some(keyword => item.title.includes(keyword))
+    );
+
     const container = document.getElementById("news-list");
-    container.innerHTML = news.map(item => `
+    
+    if (filteredNews.length === 0) {
+      container.innerHTML = "<p>該当するニュースがありませんでした。</p>";
+      return;
+    }
+
+    container.innerHTML = filteredNews.map(item => `
       <div class="news-row">
         <a href="${item.link}" target="_blank">${item.title}</a>
         <span class="tag">${item.tag}</span>
@@ -45,8 +54,7 @@ async function loadNews() {
     `).join('');
     
   } catch (err) {
-    console.error("ニュースの読み込みに失敗しました:", err);
-    document.getElementById("news-list").innerText = "ニュースの読み込みに失敗しました。";
+    console.error("読み込みエラー:", err);
   }
 }
 
