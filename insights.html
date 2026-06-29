@@ -2,400 +2,174 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>KIRIN Insights</title>
-
-<script async src="https://platform.twitter.com/widgets.js"></script>
+<title>Kirin Insights</title>
 
 <style>
-
-:root{
-  --accent:#E8821E;
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f7f7f7;
 }
 
-*{
-  box-sizing:border-box;
+/* ヘッダー */
+header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+  z-index: 10;
 }
 
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-  color:#222;
+/* メインレイアウト */
+.container {
+  display: flex;
 }
 
-/* ================= HEADER ================= */
-
-.header{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  height:72px;
-  background:#fff;
-  border-bottom:1px solid #eee;
-  z-index:1000;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  padding:0 24px;
+/* 左メイン */
+.main {
+  flex: 1;
+  padding: 16px;
 }
 
-.logo{
-  font-size:20px;
-  font-weight:700;
+/* 右サイド */
+.sidebar {
+  width: 300px;
+  height: 100vh;
+  overflow-y: auto;
+  background: #fff;
+  border-left: 1px solid #ddd;
+  padding: 10px;
 }
 
-.tabs{
-  display:flex;
-  gap:18px;
+/* 最新ニュース */
+#featured-title {
+  font-size: 20px;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
-.tab-btn{
-  border:none;
-  background:none;
-  cursor:pointer;
-  font-size:14px;
-  font-weight:600;
-  color:#666;
+/* ニュース */
+.news-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  transition: all 0.3s ease;
 }
 
-.tab-btn.active{
-  color:var(--accent);
+.news-item.active {
+  background: #fff7ed;
+  font-weight: bold;
 }
 
-/* ================= LAYOUT ================= */
-
-.layout{
-  margin-top:72px;
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 380px;
-  height:calc(100vh - 72px);
+.news-title {
+  font-size: 14px;
 }
 
-/* ================= MAIN ================= */
-
-.main{
-  overflow-y:auto;
-  padding:24px 28px;
+.news-category {
+  font-size: 12px;
+  color: gray;
 }
-
-.content{
-  display:none;
-}
-
-.content.active{
-  display:block;
-}
-
-.section-title{
-  font-size:28px;
-  margin:0 0 18px 0;
-}
-
-/* ================= FEATURED NEWS ================= */
-
-.featured{
-  background:#FFF8F0;
-  border-left:6px solid var(--accent);
-  padding:20px;
-  border-radius:10px;
-  margin-bottom:24px;
-}
-
-.featured-label{
-  display:inline-block;
-  background:var(--accent);
-  color:#fff;
-  font-size:11px;
-  font-weight:700;
-  padding:3px 8px;
-  border-radius:999px;
-  margin-bottom:10px;
-}
-
-.featured h2{
-  margin:0;
-  font-size:20px;
-}
-
-.featured p{
-  margin:8px 0 0;
-  color:#555;
-  font-size:14px;
-}
-
-/* ================= HEADLINES ================= */
-
-.headlines{
-  margin-top:18px;
-}
-
-.news-item{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-
-  padding:10px 0;
-  border-bottom:1px solid #eee;
-}
-
-.news-title{
-  flex:1;
-  font-size:14px;
-  font-weight:500;
-  line-height:1.4;
-}
-
-.news-category{
-  flex-shrink:0;
-  font-size:11px;
-  padding:3px 8px;
-  border-radius:999px;
-  background:#FFF3E6;
-  color:var(--accent);
-  font-weight:600;
-}
-
-/* ================= PICK ================= */
-
-.pick{
-  background:#FFF8F0;
-  border-left:5px solid var(--accent);
-  padding:16px;
-  border-radius:8px;
-  margin-bottom:12px;
-}
-
-/* ================= CARD ================= */
-
-.card{
-  border:1px solid #eee;
-  border-radius:10px;
-  padding:16px;
-  margin-bottom:12px;
-}
-
-/* ================= SIDEBAR ================= */
-
-.sidebar{
-  border-left:1px solid #eee;
-  overflow-y:auto;
-  padding:20px;
-}
-
-.sidebar-title{
-  margin:0 0 14px 0;
-  font-size:16px;
-}
-
-.x-tweet{
-  margin-bottom:16px;
-}
-
 </style>
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
-
-<header class="header">
-
-  <div class="logo">KIRIN Insights</div>
-
-  <nav class="tabs">
-
-    <button class="tab-btn active" onclick="showTab('news',event)">ニュース</button>
-    <button class="tab-btn" onclick="showTab('picks',event)">Picks</button>
-    <button class="tab-btn" onclick="showTab('reports',event)">分析</button>
-    <button class="tab-btn" onclick="showTab('columns',event)">コラム</button>
-
-  </nav>
-
+<header>
+  <div id="featured-title">読み込み中...</div>
+  <div id="featured-summary">最新ニュースを取得しています</div>
 </header>
 
-<!-- ================= LAYOUT ================= -->
+<div class="container">
 
-<div class="layout">
+  <!-- メイン -->
+  <div class="main">
+    <h2>News Feed</h2>
+    <div id="news-container">Loading...</div>
+  </div>
 
-  <!-- ============ LEFT ============ -->
-
-  <main class="main">
-
-    <!-- ===== NEWS ===== -->
-    <section id="news" class="content active">
-
-      <h1 class="section-title">最新ニュース</h1>
-
-      <!-- FEATURED -->
-      <div class="featured">
-
-        <div class="featured-label">🔥 注目</div>
-
-        <h2 id="featured-title">読み込み中...</h2>
-
-        <p id="featured-summary"></p>
-
-      </div>
-
-      <!-- HEADLINES -->
-      <div class="headlines" id="news-container">
-        読み込み中...
-      </div>
-
-    </section>
-
-    <!-- ===== PICKS ===== -->
-    <section id="picks" class="content">
-
-      <h1 class="section-title">KIRIN Picks</h1>
-
-      <div class="pick">日銀利上げが住宅ローンへ与える影響</div>
-      <div class="pick">借入8000万円世帯のリスク分析</div>
-      <div class="pick">変動金利上昇シナリオ</div>
-
-    </section>
-
-    <!-- ===== REPORTS ===== -->
-    <section id="reports" class="content">
-
-      <h1 class="section-title">分析レポート</h1>
-
-      <div class="card">借入8000万円・金利1.5%</div>
-      <div class="card">借入1億円・金利2.0%</div>
-      <div class="card">繰上返済500万円の効果</div>
-
-    </section>
-
-    <!-- ===== COLUMNS ===== -->
-    <section id="columns" class="content">
-
-      <h1 class="section-title">コラム</h1>
-
-      <div class="card">5年ルールとは？</div>
-      <div class="card">125%ルールとは？</div>
-      <div class="card">変動金利の仕組み</div>
-
-    </section>
-
-  </main>
-
-  <!-- ============ RIGHT ============ -->
-
-  <aside class="sidebar">
-
-    <h2 class="sidebar-title">𝕏 厳選投稿</h2>
-
-    <div id="x-container">
-
-      <blockquote class="twitter-tweet">
-        <a href="https://twitter.com/i/status/1931234567890123456"></a>
-      </blockquote>
-
-      <blockquote class="twitter-tweet">
-        <a href="https://twitter.com/i/status/1930987654321098765"></a>
-      </blockquote>
-
-      <blockquote class="twitter-tweet">
-        <a href="https://twitter.com/i/status/1929999999999999999"></a>
-      </blockquote>
-
-    </div>
-
-  </aside>
+  <!-- サイドバー -->
+  <div class="sidebar">
+    <h3>Live Panel</h3>
+    <div id="side-news">読み込み中...</div>
+  </div>
 
 </div>
 
-<!-- ================= SCRIPT ================= -->
-
 <script>
-
-function showTab(tab, e){
-
-  document.querySelectorAll('.content')
-    .forEach(el => el.classList.remove('active'));
-
-  document.getElementById(tab)
-    .classList.add('active');
-
-  document.querySelectorAll('.tab-btn')
-    .forEach(el => el.classList.remove('active'));
-
-  e.target.classList.add('active');
-
-  location.hash = tab;
-}
-
-window.addEventListener('load', () => {
-
-  const hash = location.hash.replace('#','');
-
-  if(hash){
-    const btn = document.querySelector(`[onclick*="${hash}"]`);
-    if(btn) btn.click();
-  }
-
-});
-
-/* ===== NEWS LOAD ===== */
-
 async function loadNews(){
 
-  try{
+  const container = document.getElementById("news-container");
+  const side = document.getElementById("side-news");
 
-    const res = await fetch("./news.json");
+  try {
+
+    container.style.opacity = 0.4;
+
+    const res = await fetch("./news.json?ts=" + Date.now());
     const news = await res.json();
 
-    const container = document.getElementById("news-container");
+    if(!Array.isArray(news) || news.length === 0){
+      container.innerHTML = "ニュース準備中";
+      return;
+    }
 
-    container.innerHTML = "";
+    /* 最新ニュース */
+    const featured = document.getElementById("featured-title");
 
-    if(news.length === 0) return;
-
-    // featured
-    document.getElementById("featured-title").textContent =
-      news[0].title;
+    featured.style.transform = "scale(1.03)";
+    featured.textContent = news[0].title;
 
     document.getElementById("featured-summary").textContent =
-      news[0].summary || "住宅ローンへの影響が注目されています。";
+      "市場ニュースをリアルタイム更新中";
 
-    // headlines
-    news.slice(1).forEach(item => {
+    setTimeout(() => {
+      featured.style.transform = "scale(1)";
+    }, 300);
+
+    /* メイン一覧 */
+    container.innerHTML = "";
+
+    news.forEach((item, i) => {
 
       container.innerHTML += `
-        <div class="news-item">
-
-          <div class="news-title">
-            ${item.title}
-          </div>
-
-          <div class="news-category">
-            ${item.category}
-          </div>
-
+        <div class="news-item ${i === 0 ? "active" : ""}">
+          <div class="news-title">${item.title}</div>
+          <div class="news-category">${item.category || ""}</div>
         </div>
       `;
 
     });
 
+    /* サイドバー（簡易ライブ） */
+    side.innerHTML = "";
+
+    news.slice(0, 10).forEach(item => {
+
+      side.innerHTML += `
+        <div class="news-item">
+          <div class="news-title">${item.title}</div>
+        </div>
+      `;
+
+    });
+
+    /* フェードイン */
+    requestAnimationFrame(() => {
+      container.style.transition = "opacity 0.4s ease";
+      container.style.opacity = 1;
+    });
+
   } catch(e){
-
-    document.getElementById("news-container").innerHTML =
-      "ニュース取得失敗";
-
+    console.error(e);
+    container.innerHTML = "取得エラー";
   }
-
 }
 
+/* 初回 */
 loadNews();
 
-/* render X */
-
-window.twttr?.widgets?.load();
+/* 3分ごと更新（世界の株価風） */
+setInterval(loadNews, 180000);
 
 </script>
 
