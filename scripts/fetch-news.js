@@ -45,14 +45,16 @@ const sources = [
         new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout (3s)")), 3000))
       ]);
       
-      feed.items.forEach(item => {
-        allNews.push({
-          title: item.title,
-          link: item.link,
-          date: item.pubDate || new Date().toISOString(),
-          tag: source.name
-        });
-      });
+      // feed.items.forEach の中身を以下のように修正
+　　　feed.items.forEach(item => {
+ 　　　 allNews.push({
+   　　　 title: item.title,
+   　　　 link: item.link,
+   　　　 // 公開日がある場合はそれを、なければ現在時刻を代入
+  　　　  date: item.pubDate ? new Date(item.pubDate).toLocaleDateString('ja-JP') : "日付不明",
+  　　　  tag: source.name // これが分類になります
+　　　  });
+　　　});
     } catch (e) { 
       console.error(`Error fetching ${source.name}: ${e.message}`);
     }
