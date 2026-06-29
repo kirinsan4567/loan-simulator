@@ -32,6 +32,13 @@ async function loadNews() {
     const news = await res.json();
     const container = document.getElementById("news-list");
     // ここでニュースを表示するHTMLを生成
+   
+      // parserの初期化を以下のように変更します
+    const parser = new Parser({
+    headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    });
     container.innerHTML = news.map(item => `
 　  <div class="news-row">
     <a href="${item.link}" target="_blank">${item.title}</a>
