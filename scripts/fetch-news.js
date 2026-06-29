@@ -40,6 +40,19 @@ const FEEDS = [
   { name: "不動産市況", type: "google", url: encodeURI("https://news.google.com/rss/search?q=不動産 マンション 地価 市況&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "金融政策",   type: "google", url: encodeURI("https://news.google.com/rss/search?q=日銀 金融政策 金利 住宅ローン&hl=ja&gl=JP&ceid=JP:ja") },
 
+  // ── 不動産・建設の専門メディア（Google site: 検索）──────────
+  //   公式RSSが無い媒体もここで拾える。リンクはGoogleリダイレクト・要約なし。
+  //   ログのヒット件数を見て、0件/SKIPは削除してください。
+  { name: "R.E.port",        type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:re-port.net 不動産 マンション 地価&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "全国賃貸住宅新聞", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:zenchin.com 賃貸 不動産 住宅&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "健美家",          type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kenbiya.com 不動産 投資 賃貸&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "不動産経済研究所", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:fudousankeizai.co.jp マンション 不動産&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "楽待新聞",        type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:rakumachi.jp 不動産 投資 金利&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "東急リバブル",    type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:livable.co.jp 不動産 マンション&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "建設通信新聞",    type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kensetsunews.com 不動産 住宅 再開発&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "日刊建設工業新聞", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:decn.co.jp 不動産 住宅 再開発&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "建設新聞",        type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kensetsu-sinbun.co.jp 不動産 住宅&hl=ja&gl=JP&ceid=JP:ja") },
+
   // ── 各媒体の公式RSS（実URL＋要約文が取れる。type省略＝direct）──
   //   要約は direct フィードのみ採用（Googleの説明欄は関連記事リストで使えないため）。
   //   死んでいれば自動スキップ。ログのヒット件数を見て取捨選択してください。
