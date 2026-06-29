@@ -8,15 +8,19 @@ const parser = new Parser({
 });
 
 const sources = [
-  { name: "ロイター・マーケット", url: "https://jp.reuters.com/rss/businessNews" },
-  { name: "ダイヤモンド・オンライン", url: "https://diamond.jp/list/feed/rss" },
-  { name: "東洋経済", url: "https://toyokeizai.net/list/feed/rss" },
-  { name: "市場トレンド", url: "https://news.google.com/rss/search?q=金融政策+金利+不動産+住宅ローン&hl=ja&gl=JP&ceid=JP:ja" },
-  { name: "日経（市場ニュース検索）", url: "https://news.google.com/rss/search?q=日経+経済+金融&hl=ja&gl=JP&ceid=JP:ja" },
-  { name: "不動産流通研究所", url: "https://www.re-port.net/rss/index.xml" },
-  { name: "建通新聞", url: "https://www.kentsu.co.jp/webnews/rss.xml" },
-  { name: "新建ハウジング", url: "https://www.s-housing.jp/feed" },
-  { name: "住宅新報", url: "https://www.jutaku-s.com/feed" }
+  // 不動産・住宅・金利に特化した強力な検索クエリ
+  { 
+    name: "不動産・住宅市況", 
+    url: encodeURI("https://news.google.com/rss/search?q=不動産+マンション+住宅ローン+金利+地価+市況&hl=ja&gl=JP&ceid=JP:ja") 
+  },
+  { 
+    name: "都市開発・建設", 
+    url: encodeURI("https://news.google.com/rss/search?q=都市開発+再開発+建設+不動産価格&hl=ja&gl=JP&ceid=JP:ja") 
+  },
+  { 
+    name: "日経・経済金融", 
+    url: encodeURI("https://news.google.com/rss/search?q=日銀+金融政策+金利+住宅&hl=ja&gl=JP&ceid=JP:ja") 
+  }
 ];
 
 (async () => {
@@ -46,16 +50,17 @@ const sources = [
     }
   }
 
-  const result = allNews
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 200);
-
+ // 保存処理の部分をこれに書き換えてください
   if (result.length > 0) {
     if (!fs.existsSync("data")) fs.mkdirSync("data");
-    fs.writeFileSync("data/news.json", JSON.stringify(result, null, 2));
-    console.log(`JSON successfully created with ${result.length} items`);
-  } else {
-    console.error("No news items found.");
-    process.exit(1);
+    
+    // 強制的に現在時刻を含めたデータを作る
+    const output = {
+        updatedAt: new Date().toISOString(),
+        items: result
+    };
+    
+    fs.writeFileSync("data/news.json", JSON.stringify(output, null, 2));
+    console.log("JSON successfully created with " + result.length + " items");
   }
 })();
