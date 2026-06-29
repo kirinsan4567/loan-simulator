@@ -11,10 +11,18 @@ function getCategory(title) {
   return "その他";
 }
 
-// 2. ソース取得関数
+// 2. ソース取得関数（Yahoo!等の配信元を可能な限りクリーンにする）
 function extractSource(item, defaultName) {
   if (item.source && item.source.title) return item.source.title;
-  if (item.title.includes(" - ")) return item.title.split(" - ").pop();
+  if (item.title.includes(" - ")) {
+    let parts = item.title.split(" - ");
+    let source = parts.pop();
+    // Yahooやポータルサイト名なら、記事タイトル部分を返す
+    if (/Yahoo!|au Web|ｄメニュー|Infoseek|ニコニコ|PR TIMES/.test(source)) {
+      return parts.join(" - ");
+    }
+    return source;
+  }
   return defaultName;
 }
 
@@ -35,34 +43,34 @@ const sources = [
 
 // 5. 実行処理
 (async () => {
-  let allNews = [];
+  const uniqueNews = [];
+  const seenTitles = new Set();
 
   for (const source of sources) {
     try {
       const feed = await parser.parseURL(source.url);
       feed.items.forEach(item => {
-        allNews.push({
-          title: item.title,
-          link: item.link,
-          date: item.pubDate ? new Date(item.pubDate).toLocaleDateString('ja-JP') : "日付不明",
-          tag: getCategory(item.title),
-          source: extractSource(item, source.name) // 修正：関数によるソース抽出
-        });
+        // 重複排除のための正規化：【】()や配信元を削除して純粋なタイトルにする
+        const normalizedTitle = item.title
+          .replace(/【.*?】/g, '')
+          .replace(/\(.*?\)/g, '')
+          .replace(/\s*-\s*.*$/, '')
+          .trim()
+          .substring(0, 15);
+
+        if (!seenTitles.has(normalizedTitle)) {
+          uniqueNews.push({
+            title: item.title,
+            link: item.link,
+            date: item.pubDate ? new Date(item.pubDate).toLocaleDateString('ja-JP') : "日付不明",
+            tag: getCategory(item.title),
+            source: extractSource(item, source.name)
+          });
+          seenTitles.add(normalizedTitle);
+        }
       });
     } catch (e) { console.error(`Error in ${source.name}: ${e.message}`); }
   }
-
-  // 重複排除ロジック
-  const uniqueNews = [];
-  const seenTitles = new Set();
-
-  allNews.forEach(item => {
-    const baseTitle = item.title.substring(0, 20).replace(/\s+/g, '');
-    if (!seenTitles.has(baseTitle)) {
-      uniqueNews.push(item);
-      seenTitles.add(baseTitle);
-    }
-  });
 
   // 保存
   if (uniqueNews.length > 0) {
