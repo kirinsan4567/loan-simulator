@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>KIRIN Insights</title>
+
+<script async src="https://platform.twitter.com/widgets.js"></script>
 
 <style>
 
@@ -23,49 +24,41 @@ body{
   color:#222;
 }
 
-/* ===== Header ===== */
+/* ================= HEADER ================= */
 
 .header{
-
   position:fixed;
   top:0;
   left:0;
   right:0;
-
   height:72px;
-
   background:#fff;
   border-bottom:1px solid #eee;
-
   z-index:1000;
 
   display:flex;
   align-items:center;
   justify-content:space-between;
 
-  padding:0 30px;
+  padding:0 24px;
 }
 
 .logo{
-  font-size:24px;
+  font-size:20px;
   font-weight:700;
 }
 
 .tabs{
   display:flex;
-  gap:20px;
+  gap:18px;
 }
 
 .tab-btn{
-
   border:none;
   background:none;
-
   cursor:pointer;
-
-  font-size:15px;
+  font-size:14px;
   font-weight:600;
-
   color:#666;
 }
 
@@ -73,28 +66,20 @@ body{
   color:var(--accent);
 }
 
-/* ===== Layout ===== */
+/* ================= LAYOUT ================= */
 
 .layout{
-
   margin-top:72px;
-
   display:grid;
-
-  grid-template-columns:
-    minmax(0,1fr)
-    360px;
-
+  grid-template-columns:minmax(0,1fr) 380px;
   height:calc(100vh - 72px);
 }
 
-/* ===== Main ===== */
+/* ================= MAIN ================= */
 
 .main{
-
   overflow-y:auto;
-
-  padding:30px;
+  padding:24px 28px;
 }
 
 .content{
@@ -106,338 +91,290 @@ body{
 }
 
 .section-title{
-
-  font-size:32px;
-
-  margin-top:0;
-
-  padding-bottom:12px;
-
-  border-bottom:2px solid #eee;
+  font-size:28px;
+  margin:0 0 18px 0;
 }
 
-.card{
+/* ================= FEATURED NEWS ================= */
 
-  border:1px solid #eee;
-
-  border-radius:12px;
-
-  padding:20px;
-
-  margin-bottom:16px;
-}
-
-.pick{
-
+.featured{
   background:#FFF8F0;
-
-  border-left:5px solid var(--accent);
-
+  border-left:6px solid var(--accent);
   padding:20px;
-
-  margin-bottom:16px;
-
-  border-radius:8px;
+  border-radius:10px;
+  margin-bottom:24px;
 }
 
-/* ===== News ===== */
+.featured-label{
+  display:inline-block;
+  background:var(--accent);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  padding:3px 8px;
+  border-radius:999px;
+  margin-bottom:10px;
+}
+
+.featured h2{
+  margin:0;
+  font-size:20px;
+}
+
+.featured p{
+  margin:8px 0 0;
+  color:#555;
+  font-size:14px;
+}
+
+/* ================= HEADLINES ================= */
+
+.headlines{
+  margin-top:18px;
+}
 
 .news-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
 
-  padding:16px 0;
-
+  padding:10px 0;
   border-bottom:1px solid #eee;
 }
 
-.news-category{
-
-  display:inline-block;
-
-  background:#FFF3E6;
-
-  color:var(--accent);
-
-  border-radius:999px;
-
-  padding:4px 10px;
-
-  font-size:12px;
+.news-title{
+  flex:1;
+  font-size:14px;
+  font-weight:500;
+  line-height:1.4;
 }
 
-.news-title{
-
-  margin-top:8px;
-
+.news-category{
+  flex-shrink:0;
+  font-size:11px;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#FFF3E6;
+  color:var(--accent);
   font-weight:600;
 }
 
-/* ===== Sidebar ===== */
+/* ================= PICK ================= */
+
+.pick{
+  background:#FFF8F0;
+  border-left:5px solid var(--accent);
+  padding:16px;
+  border-radius:8px;
+  margin-bottom:12px;
+}
+
+/* ================= CARD ================= */
+
+.card{
+  border:1px solid #eee;
+  border-radius:10px;
+  padding:16px;
+  margin-bottom:12px;
+}
+
+/* ================= SIDEBAR ================= */
 
 .sidebar{
-
   border-left:1px solid #eee;
-
   overflow-y:auto;
-
-  padding:25px;
+  padding:20px;
 }
 
 .sidebar-title{
-  margin-top:0;
+  margin:0 0 14px 0;
+  font-size:16px;
 }
 
-.x-card{
-
-  border:1px solid #eee;
-
-  border-radius:12px;
-
-  padding:15px;
-
+.x-tweet{
   margin-bottom:16px;
 }
 
 </style>
-
 </head>
 
 <body>
 
+<!-- ================= HEADER ================= -->
+
 <header class="header">
 
-  <div class="logo">
-    KIRIN Insights
-  </div>
+  <div class="logo">KIRIN Insights</div>
 
   <nav class="tabs">
 
-```
-<button class="tab-btn active"
-        onclick="showTab('news')">
-  ニュース
-</button>
-
-<button class="tab-btn"
-        onclick="showTab('picks')">
-  Picks
-</button>
-
-<button class="tab-btn"
-        onclick="showTab('reports')">
-  分析レポート
-</button>
-
-<button class="tab-btn"
-        onclick="showTab('columns')">
-  コラム
-</button>
-```
+    <button class="tab-btn active" onclick="showTab('news',event)">ニュース</button>
+    <button class="tab-btn" onclick="showTab('picks',event)">Picks</button>
+    <button class="tab-btn" onclick="showTab('reports',event)">分析</button>
+    <button class="tab-btn" onclick="showTab('columns',event)">コラム</button>
 
   </nav>
 
 </header>
 
+<!-- ================= LAYOUT ================= -->
+
 <div class="layout">
 
-  <!-- LEFT -->
+  <!-- ============ LEFT ============ -->
 
   <main class="main">
 
-```
-<!-- NEWS -->
+    <!-- ===== NEWS ===== -->
+    <section id="news" class="content active">
 
-<section id="news"
-         class="content active">
+      <h1 class="section-title">最新ニュース</h1>
 
-  <h1 class="section-title">
-    最新ニュース
-  </h1>
+      <!-- FEATURED -->
+      <div class="featured">
 
-  <div id="news-container">
-    読み込み中...
-  </div>
+        <div class="featured-label">🔥 注目</div>
 
-</section>
+        <h2 id="featured-title">読み込み中...</h2>
 
-<!-- PICKS -->
+        <p id="featured-summary"></p>
 
-<section id="picks"
-         class="content">
+      </div>
 
-  <h1 class="section-title">
-    KIRIN Picks
-  </h1>
+      <!-- HEADLINES -->
+      <div class="headlines" id="news-container">
+        読み込み中...
+      </div>
 
-  <div class="pick">
-    日銀利上げによる返済額影響分析
-  </div>
+    </section>
 
-  <div class="pick">
-    借入8000万円世帯への影響
-  </div>
+    <!-- ===== PICKS ===== -->
+    <section id="picks" class="content">
 
-  <div class="pick">
-    変動金利上昇シナリオ
-  </div>
+      <h1 class="section-title">KIRIN Picks</h1>
 
-</section>
+      <div class="pick">日銀利上げが住宅ローンへ与える影響</div>
+      <div class="pick">借入8000万円世帯のリスク分析</div>
+      <div class="pick">変動金利上昇シナリオ</div>
 
-<!-- REPORTS -->
+    </section>
 
-<section id="reports"
-         class="content">
+    <!-- ===== REPORTS ===== -->
+    <section id="reports" class="content">
 
-  <h1 class="section-title">
-    分析レポート
-  </h1>
+      <h1 class="section-title">分析レポート</h1>
 
-  <div class="card">
-    借入8000万円で政策金利1.5%
-  </div>
+      <div class="card">借入8000万円・金利1.5%</div>
+      <div class="card">借入1億円・金利2.0%</div>
+      <div class="card">繰上返済500万円の効果</div>
 
-  <div class="card">
-    借入1億円で政策金利2.0%
-  </div>
+    </section>
 
-  <div class="card">
-    500万円繰上返済の効果
-  </div>
+    <!-- ===== COLUMNS ===== -->
+    <section id="columns" class="content">
 
-</section>
+      <h1 class="section-title">コラム</h1>
 
-<!-- COLUMNS -->
+      <div class="card">5年ルールとは？</div>
+      <div class="card">125%ルールとは？</div>
+      <div class="card">変動金利の仕組み</div>
 
-<section id="columns"
-         class="content">
-
-  <h1 class="section-title">
-    コラム
-  </h1>
-
-  <div class="card">
-    5年ルールとは？
-  </div>
-
-  <div class="card">
-    125%ルールとは？
-  </div>
-
-  <div class="card">
-    変動金利はどこまで上がる？
-  </div>
-
-</section>
-```
+    </section>
 
   </main>
 
-  <!-- RIGHT -->
+  <!-- ============ RIGHT ============ -->
 
   <aside class="sidebar">
 
-```
-<h2 class="sidebar-title">
-  𝕏 厳選X投稿
-</h2>
+    <h2 class="sidebar-title">𝕏 厳選投稿</h2>
 
-<div class="x-card">
-  埋め込みポスト①
-</div>
+    <div id="x-container">
 
-<div class="x-card">
-  埋め込みポスト②
-</div>
+      <blockquote class="twitter-tweet">
+        <a href="https://twitter.com/i/status/1931234567890123456"></a>
+      </blockquote>
 
-<div class="x-card">
-  埋め込みポスト③
-</div>
+      <blockquote class="twitter-tweet">
+        <a href="https://twitter.com/i/status/1930987654321098765"></a>
+      </blockquote>
 
-<div class="x-card">
-  埋め込みポスト④
-</div>
-```
+      <blockquote class="twitter-tweet">
+        <a href="https://twitter.com/i/status/1929999999999999999"></a>
+      </blockquote>
+
+    </div>
 
   </aside>
 
 </div>
 
+<!-- ================= SCRIPT ================= -->
+
 <script>
 
-function showTab(tab){
+function showTab(tab, e){
 
-  document
-    .querySelectorAll('.content')
-    .forEach(el=>{
-      el.classList.remove('active');
-    });
+  document.querySelectorAll('.content')
+    .forEach(el => el.classList.remove('active'));
 
-  document
-    .getElementById(tab)
+  document.getElementById(tab)
     .classList.add('active');
 
-  document
-    .querySelectorAll('.tab-btn')
-    .forEach(el=>{
-      el.classList.remove('active');
-    });
+  document.querySelectorAll('.tab-btn')
+    .forEach(el => el.classList.remove('active'));
 
-  event.target.classList.add('active');
+  e.target.classList.add('active');
 
   location.hash = tab;
 }
 
-window.addEventListener('load',()=>{
+window.addEventListener('load', () => {
 
-  const hash =
-    location.hash.replace('#','');
+  const hash = location.hash.replace('#','');
 
   if(hash){
-
-    const btnMap = {
-      news:0,
-      picks:1,
-      reports:2,
-      columns:3
-    };
-
-    showTab(hash);
-
-    document
-      .querySelectorAll('.tab-btn')
-      [btnMap[hash]]
-      ?.classList.add('active');
+    const btn = document.querySelector(`[onclick*="${hash}"]`);
+    if(btn) btn.click();
   }
 
 });
+
+/* ===== NEWS LOAD ===== */
 
 async function loadNews(){
 
   try{
 
-    const res =
-      await fetch("news.json");
+    const res = await fetch("news.json");
+    const news = await res.json();
 
-    const news =
-      await res.json();
-
-    const container =
-      document.getElementById(
-        "news-container"
-      );
+    const container = document.getElementById("news-container");
 
     container.innerHTML = "";
 
-    news.forEach(item=>{
+    if(news.length === 0) return;
+
+    // featured
+    document.getElementById("featured-title").textContent =
+      news[0].title;
+
+    document.getElementById("featured-summary").textContent =
+      news[0].summary || "住宅ローンへの影響が注目されています。";
+
+    // headlines
+    news.slice(1).forEach(item => {
 
       container.innerHTML += `
         <div class="news-item">
 
-          <div class="news-category">
-            ${item.category}
-          </div>
-
           <div class="news-title">
             ${item.title}
+          </div>
+
+          <div class="news-category">
+            ${item.category}
           </div>
 
         </div>
@@ -445,12 +382,9 @@ async function loadNews(){
 
     });
 
-  }catch(e){
+  } catch(e){
 
-    document
-      .getElementById(
-        "news-container"
-      ).innerHTML =
+    document.getElementById("news-container").innerHTML =
       "ニュース取得失敗";
 
   }
@@ -458,6 +392,10 @@ async function loadNews(){
 }
 
 loadNews();
+
+/* render X */
+
+window.twttr?.widgets?.load();
 
 </script>
 
