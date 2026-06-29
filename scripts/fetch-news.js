@@ -40,9 +40,12 @@ const FEEDS = [
   { name: "不動産市況", type: "google", url: encodeURI("https://news.google.com/rss/search?q=不動産 マンション 地価 市況&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "金融政策",   type: "google", url: encodeURI("https://news.google.com/rss/search?q=日銀 金融政策 金利 住宅ローン&hl=ja&gl=JP&ceid=JP:ja") },
 
-  // ── 任意：各媒体の公式RSSを直接読む（実URLが取れる）──────
-  //   有効なものだけ有効化。type は付けない（direct扱い）。
-  // { name: "SUUMOジャーナル", url: "https://suumo.jp/journal/feed/" },
+  // ── 各媒体の公式RSS（実URL＋要約文が取れる。type省略＝direct）──
+  //   要約は direct フィードのみ採用（Googleの説明欄は関連記事リストで使えないため）。
+  //   死んでいれば自動スキップ。ログのヒット件数を見て取捨選択してください。
+  { name: "SUUMOジャーナル",   url: "https://suumo.jp/journal/feed/" },
+  { name: "ITmedia ビジネス",  url: "https://rss.itmedia.co.jp/rss/2.0/business.xml" },
+  { name: "東洋経済オンライン", url: "https://toyokeizai.net/list/feed/rss" },
 ];
 
 // ───────────────────────────────────────────────────────────
@@ -76,6 +79,13 @@ function normalizeUrl(raw) {
 }
 
 const tidy = s => (s || "").replace(/\s+/g, " ").trim();
+
+const stripTags = s => (s || "").replace(/<[^>]*>/g, " ");
+function cleanSummary(raw, max = 140) {
+  let s = tidy(stripTags(raw));
+  if (s.length > max) s = s.slice(0, max).trim() + "…";
+  return s;
+}
 
 // Google ニュースのタイトルは「記事タイトル - 媒体名」。媒体名を切り出す。
 function splitGoogleTitle(rawTitle) {
@@ -146,11 +156,19 @@ function loadExisting() {
         const id = normalizeUrl(link) || title;
         const tags = detectTags(title);
 
+        // 要約: directフィードのみ採用（Googleの説明欄はリンク集なので使わない）
+        let summary = "";
+        if (feed.type !== "google") {
+          summary = cleanSummary(item.contentSnippet || item.summary || item.content || "");
+          if (summary && (summary === title || title.includes(summary) || summary.length < 15)) summary = "";
+        }
+
         if (map.has(id)) {
           const cur = map.get(id);
           cur.tags = Array.from(new Set([...(cur.tags || []), ...tags]));
+          if (!cur.summary && summary) cur.summary = summary;
         } else {
-          map.set(id, { id, title, url: link, source, date: toISO(item), tags });
+          map.set(id, { id, title, url: link, source, date: toISO(item), tags, summary });
           added++;
         }
       }
