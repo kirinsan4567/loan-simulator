@@ -2,36 +2,24 @@ import fs from "fs";
 import Parser from "rss-parser";
 
 const parser = new Parser();
-const feeds = [
-  { url: "https://news.google.com/rss/search?q=日銀+利上げ&hl=ja&gl=JP&ceid=JP:ja", group: "金融政策" },
-  { url: "https://news.google.com/rss/search?q=住宅ローン+金利&hl=ja&gl=JP&ceid=JP:ja", group: "ローン金利" },
-  { url: "https://news.google.com/rss/search?q=不動産+マンション+開発&hl=ja&gl=JP&ceid=JP:ja", group: "不動産市場" }
-];
+const themes = ["不動産", "金利", "住宅ローン", "日銀", "景気", "マンション", "都市開発"];
 
 (async () => {
-  const newsMap = new Map(); // URLをキーにして重複を防ぐ
-
-  for (const feedConfig of feeds) {
-    const feed = await parser.parseURL(feedConfig.url);
+  const newsMap = new Map();
+  for (const theme of themes) {
+    const url = `https://news.google.com/rss/search?q=${theme}&hl=ja&gl=JP&ceid=JP:ja`;
+    const feed = await parser.parseURL(url);
     feed.items.forEach(item => {
-      // タイトル整形: 媒体名を削除
-      const cleanTitle = item.title.replace(/\s?-\s?[^-]+$/, "");
       if (!newsMap.has(item.link)) {
         newsMap.set(item.link, {
-          title: cleanTitle,
+          title: item.title.replace(/\s?-\s?[^-]+$/, ""),
           link: item.link,
           date: item.pubDate,
-          category: feedConfig.group
+          tag: theme
         });
       }
     });
   }
-
-  const sortedNews = Array.from(newsMap.values())
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 30); // 過去30件を保持
-
-  // dataフォルダに保存
-  if (!fs.existsSync("data")) fs.mkdirSync("data");
-  fs.writeFileSync("data/news.json", JSON.stringify(sortedNews, null, 2));
+  const sorted = Array.from(newsMap.values()).slice(0, 50);
+  fs.writeFileSync("data/news.json", JSON.stringify(sorted, null, 2));
 })();
