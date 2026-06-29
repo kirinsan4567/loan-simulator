@@ -10,30 +10,22 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
-      - name: Set up Node.js 24
-        uses: actions/setup-node@v4
+      # Node.js 24を明示的にインストールし、キャッシュを使わない設定にすることで
+      # 依存関係の不整合を回避します
+      - uses: actions/setup-node@v4
         with:
           node-version: '24'
       
-      - name: Install dependencies
-        run: npm install rss-parser
-      
-      - name: Run fetch script
-        run: node scripts/fetch-news.js
+      - run: npm install --no-package-lock
+      - run: node scripts/fetch-news.js
         
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
@@ -47,6 +39,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
