@@ -48,7 +48,6 @@ const FEEDS = [
   { name: "健美家",          type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kenbiya.com 不動産 投資 賃貸&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "不動産経済研究所", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:fudousankeizai.co.jp マンション 不動産&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "楽待新聞",        type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:rakumachi.jp 不動産 投資 金利&hl=ja&gl=JP&ceid=JP:ja") },
-  { name: "東急リバブル",    type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:livable.co.jp 不動産 マンション&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "建設通信新聞",    type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kensetsunews.com 不動産 住宅 再開発&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "日刊建設工業新聞", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:decn.co.jp 不動産 住宅 再開発&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "建設新聞",        type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kensetsu-sinbun.co.jp 不動産 住宅&hl=ja&gl=JP&ceid=JP:ja") },
