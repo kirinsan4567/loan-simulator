@@ -313,7 +313,7 @@ function renderCards(target, data){
 }
 
 /* ---------- ニュースの描画（data/news.json を fetch） ---------- */
-const NEWS_INITIAL = 12;
+const NEWS_INITIAL = 20;
 function newsItemHTML(n){
   const tags = (n.tags||[]).map(t => `<span class="ki-tag" data-t="${esc(t)}">${esc(t)}</span>`).join("");
   const hasLink = n.url && n.url !== "#";
