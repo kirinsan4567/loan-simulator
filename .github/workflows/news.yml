@@ -23,10 +23,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          # キャッシュの設定を追加することでNode 24環境での動作を安定させます
-          cache: 'npm'
       
+      # lockファイルがないため、直接インストールします
       - run: npm install rss-parser
+      
       - run: node scripts/fetch-news.js
         
       - uses: actions/upload-pages-artifact@v3
