@@ -1,54 +1,27 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KIRIN Insights | 住宅ローン分析・ニュース</title>
-    <link rel="stylesheet" href="site.css">
-    <style>
-        .container { max-width: 1100px; margin: auto; padding: 20px; display: grid; grid-template-columns: 1fr 320px; gap: 40px; }
-        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
-        .section-title { border-bottom: 2px solid #E8821E; padding-bottom: 10px; margin: 40px 0 20px; }
-        .news-item { padding: 15px 0; border-bottom: 1px solid #eee; }
-        .tag { background: #FFF3E6; color: #E8821E; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 10px; }
-        .x-card { border: 1px solid #e5e7eb; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-    </style>
-</head>
-<body>
-    <header></header>
-    
-    <div class="container">
-        <main>
-            <section id="news">
-                <h2 class="section-title">📰 最新ニュース</h2>
-                <div id="news-container">読み込み中...</div>
-            </section>
-            <section id="reports"><h2 class="section-title">📊 分析レポート</h2>...手動コンテンツ...</section>
-            <section id="columns"><h2 class="section-title">✍️ コラム</h2>...手動コンテンツ...</section>
-        </main>
-        <aside>
-            <h2 class="section-title">𝕏 厳選投稿</h2>
-            <div class="x-card">投稿1の引用・リンク</div>
-            <div class="x-card">投稿2の引用・リンク</div>
-        </aside>
-    </div>
+<div class="container">
+  <main class="left-col">
+    <section><h2>Top Pics</h2>...手動エリア...</section>
+    <section><h2>ニュース</h2><div id="news-list"></div></section>
+    <section><h2>コラム</h2>...手動エリア...</section>
+    <section><h2>レポート</h2>...手動エリア...</section>
+  </main>
 
-    <script>
-        async function loadNews() {
-            try {
-                const res = await fetch("data/news.json");
-                const news = await res.json();
-                const container = document.getElementById("news-container");
-                container.innerHTML = news.map(item => `
-                    <div class="news-item">
-                        <small>${item.date.split('T')[0]}</small>
-                        <div><strong><a href="${item.link}" target="_blank">${item.title}</a></strong>
-                        <span class="tag">${item.category}</span></div>
-                    </div>
-                `).join('');
-            } catch(e) { container.innerHTML = "現在ニュースを取得できません。"; }
-        }
-        loadNews();
-    </script>
-</body>
-</html>
+  <aside class="right-col">
+    <h2>厳選X投稿</h2>
+    </aside>
+</div>
+
+<script>
+  // ニュースの読み込みと表示
+  fetch('data/news.json')
+    .then(r => r.json())
+    .then(data => {
+      const list = document.getElementById('news-list');
+      list.innerHTML = data.map(item => `
+        <div class="news-row">
+          <a href="${item.link}">${item.title}</a>
+          <span class="tag">${item.tag}</span>
+        </div>
+      `).join('');
+    });
+</script>
