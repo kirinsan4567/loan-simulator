@@ -5,9 +5,15 @@ const parser = new Parser({ headers: { 'User-Agent': 'Mozilla/5.0' } });
 
 // 1. 分類関数
 function getCategory(title) {
-  if (title.includes("日銀") || title.includes("金利") || title.includes("金融")) return "金融政策";
-  if (title.includes("マンション") || title.includes("地価") || title.includes("不動産")) return "不動産市場";
-  if (title.includes("建設") || title.includes("再開発")) return "開発・建設";
+  // 1. 金融・政策: 金利、政策、日銀、為替など
+  if (/金融|政策|金利|為替|ドル円|日銀|FRB|財務省/.test(title)) return "金融・政策";
+  
+  // 2. 開発・建設: 再開発、竣工、移転、インフラ、駅前など
+  if (/再開発|竣工|移転|建設|インフラ|駅前|開発/.test(title)) return "開発・建設";
+  
+  // 3. 不動産市場: マンション、不動産、地価、価格など
+  if (/マンション|不動産|地価|価格|分譲|住宅/.test(title)) return "不動産市場";
+  
   return "その他";
 }
 
