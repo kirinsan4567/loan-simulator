@@ -23,7 +23,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # ファイルの更新がある場合のみコミット
           git add data/news.json
-          git commit -m "Update news.json" || echo "No changes to commit"
-          git push
+          # 変更がある場合のみコミット
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "Update news.json"
+            # ★ポイント：リモートの変更を先に取り込んでからプッシュする
+            git pull --rebase origin main
+            git push origin main
+          fi
