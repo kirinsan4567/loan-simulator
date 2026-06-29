@@ -42,35 +42,35 @@
   border-bottom: 1px solid var(--ki-line);
 }
 .ki-header__inner {
-  max-width: 1200px; margin: 0 auto; padding: 12px 20px;
-  display: flex; align-items: center; gap: 20px;
+  max-width: 1100px; margin: 0 auto; padding: 12px 20px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
 }
 .ki-brand { font-weight: 700; font-size: 1.15rem; letter-spacing: .02em; text-decoration: none; color: var(--ki-ink); white-space: nowrap; }
 .ki-brand span { color: var(--ki-accent); }
-.ki-nav { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; }
+.ki-nav { display: flex; gap: 4px; flex-wrap: wrap; }
 .ki-nav a {
-  text-decoration: none; color: var(--ki-sub); font-size: .9rem; font-weight: 500;
-  padding: 6px 12px; border-radius: 999px; transition: background .15s, color .15s;
+  text-decoration: none; color: var(--ki-sub); font-size: .88rem; font-weight: 500;
+  padding: 4px 10px; border-radius: 999px; transition: background .15s, color .15s;
 }
 .ki-nav a:hover { color: var(--ki-accent); background: rgba(31,86,115,.08); }
 .ki-nav a.ki-nav--home { color: var(--ki-accent); }
 
 /* レイアウト：左メイン＋右サイドバー */
-.ki-wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px 80px; }
-.ki-grid { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 36px; align-items: start; }
+.ki-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+.ki-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 32px; align-items: start; }
 .ki-main { min-width: 0; }
 .ki-aside { position: sticky; top: 76px; }
 
 /* セクション */
-.ki-section { scroll-margin-top: 80px; margin-bottom: 48px; }
-.ki-section__head { display: flex; align-items: baseline; gap: 12px; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--ki-ink); }
+.ki-section { scroll-margin-top: 80px; margin-bottom: 44px; }
+.ki-section__head { display: flex; align-items: baseline; gap: 12px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--ki-ink); }
 .ki-section__title { font-size: 1.4rem; font-weight: 700; margin: 0; }
 .ki-section__en { font-size: .72rem; letter-spacing: .18em; color: var(--ki-sub); text-transform: uppercase; }
 
-/* ニュース一覧 */
-.ki-news { list-style: none; margin: 0; padding: 0; }
-.ki-news__item { padding: 8px 2px; border-bottom: 1px solid var(--ki-line); display: flex; flex-direction: column; gap: 3px; }
-.ki-news__title { color: var(--ki-ink); text-decoration: none; font-weight: 500; font-size: .98rem; line-height: 1.4;
+/* ニュース一覧（読みやすい幅に絞ってコンパクトに） */
+.ki-news { list-style: none; margin: 0; padding: 0; max-width: 640px; }
+.ki-news__item { padding: 6px 2px; border-bottom: 1px solid var(--ki-line); display: flex; flex-direction: column; gap: 2px; }
+.ki-news__title { color: var(--ki-ink); text-decoration: none; font-weight: 500; font-size: .94rem; line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-news__summary { font-size: .82rem; color: var(--ki-sub); line-height: 1.5;
@@ -89,7 +89,7 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-tag[data-t="金利・日銀"]   { background:#e7f0f6; color:#1f5673; }
 .ki-tag[data-t="住宅ローン"]   { background:#eaf3ec; color:#2f6b43; }
 .ki-tag[data-t="不動産・市場"] { background:#f4eee6; color:#8a5a2b; }
-.ki-tag[data-t="制度・税制"]   { background:#efe9f4; color:#5a3f7a; }
+.ki-tag[data-t="開発・デベロッパー"] { background:#efe9f4; color:#5a3f7a; }
 .ki-tag[data-t="その他"]       { background:#eef0f2; color:#6b7280; }
 
 .ki-more { display:block; width:100%; margin-top:16px; padding:10px; border:1px solid var(--ki-line); background:var(--ki-card); border-radius:10px; color:var(--ki-accent); font-weight:700; font-family:inherit; cursor:pointer; }
@@ -175,8 +175,7 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
         </div>
         <ul id="newsList" class="ki-news"></ul>
         <div id="newsState" class="ki-state">読み込み中…</div>
-        <button id="newsMore" class="ki-more" hidden>過去のニュースを見る ▾</button>
-        <div id="newsArchive" hidden></div>
+        <a id="newsMore" class="ki-more" href="insights-archive.html" target="_blank" rel="noopener">過去のニュースをカレンダーで見る ↗</a>
       </section>
 
       <!-- Kirin Pics（手動：下の picsData を編集） -->
@@ -321,7 +320,7 @@ function renderCards(target, data){
 }
 
 /* ---------- ニュースの描画（data/news.json を fetch） ---------- */
-const NEWS_RECENT_MAX = 40; // デフォルト表示（昨日・今日）の上限
+const NEWS_RECENT_MAX = 20; // デフォルト表示件数（残りはカレンダーページへ）
 
 function newsItemHTML(n){
   const tags = (n.tags||[]).map(t => `<span class="ki-tag" data-t="${esc(t)}">${esc(t)}</span>`).join("");
@@ -342,7 +341,8 @@ function newsItemHTML(n){
 }
 
 async function renderNews(){
-  const list = $('#newsList'), state = $('#newsState'), more = $('#newsMore'), arc = $('#newsArchive');
+  const list = $('#newsList'), state = $('#newsState'), more = $('#newsMore');
+  more.hidden = true;
   try {
     const res = await fetch('data/news.json', { cache: 'no-store' });
     if(!res.ok) throw new Error('not found');
@@ -350,50 +350,10 @@ async function renderNews(){
     if(!Array.isArray(items) || !items.length){
       state.textContent = '表示できるニュースがまだありません。'; return;
     }
-    // 念のため新しい順に整列
     items.sort((a,b)=> new Date(b.date) - new Date(a.date));
-
-    // 日付の境界（ローカル＝JST）
-    const dayMs = 86400000;
-    const sod = d => { const x=new Date(d); x.setHours(0,0,0,0); return x.getTime(); };
-    const todayStart = sod(new Date());
-    const yesterdayStart = todayStart - dayMs;
-    const dow = (new Date(todayStart).getDay() + 6) % 7;     // 月曜=0
-    const thisWeekStart = todayStart - dow*dayMs;
-    const lastWeekStart = thisWeekStart - 7*dayMs;
-    const twoWeeksAgoStart = thisWeekStart - 14*dayMs;
-    const T = n => new Date(n.date).getTime();
-
-    // デフォルト：新しい順に最大40件（日付では絞らない）
-    const recent = items.slice(0, NEWS_RECENT_MAX);
-    const recentIds = new Set(recent.map(n => n.id));
-    const archive = items.filter(n => !recentIds.has(n.id));
-
-    list.innerHTML = recent.map(newsItemHTML).join("") || `<li class="ki-state">直近のニュースがありません。</li>`;
+    list.innerHTML = items.slice(0, NEWS_RECENT_MAX).map(newsItemHTML).join("");
     state.hidden = true;
-
-    // 過去ニュースを時期でグループ化
-    const groups = [
-      { label: "今週",     items: archive.filter(n => T(n) >= thisWeekStart) },
-      { label: "先週",     items: archive.filter(n => T(n) >= lastWeekStart && T(n) < thisWeekStart) },
-      { label: "先々週",   items: archive.filter(n => T(n) >= twoWeeksAgoStart && T(n) < lastWeekStart) },
-      { label: "先月以前", items: archive.filter(n => T(n) < twoWeeksAgoStart) },
-    ].filter(g => g.items.length);
-
-    if(!groups.length){ more.hidden = true; return; }
-
-    arc.innerHTML = groups.map(g => `
-      <div class="ki-arc__group">
-        <div class="ki-arc__label">${g.label}（${g.items.length}）</div>
-        <ul class="ki-news">${g.items.map(newsItemHTML).join("")}</ul>
-      </div>`).join("");
-
-    more.hidden = false;
-    more.addEventListener('click', () => {
-      const open = !arc.hidden;
-      arc.hidden = open;
-      more.textContent = open ? '過去のニュースを見る ▾' : '過去のニュースを閉じる ▴';
-    }, { passive: true });
+    more.hidden = items.length <= NEWS_RECENT_MAX; // 過去がある時だけカレンダーへの導線を出す
   } catch (e) {
     state.textContent = 'ニュースを読み込めませんでした。少し時間をおいて再読み込みしてください。';
   }
