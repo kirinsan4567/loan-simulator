@@ -1,7 +1,17 @@
-{
-  "name": "kirin-news",
-  "type": "module",
-  "dependencies": {
-    "rss-parser": "^3.13.0"
+[
+  {
+    "title": "日銀、追加利上げを検討",
+    "category": "日銀",
+    "date": "2026-06-29"
+  },
+  {
+    "title": "住宅ローン金利が上昇傾向",
+    "category": "金利",
+    "date": "2026-06-29"
+  },
+  {
+    "title": "変動金利のリスク拡大",
+    "category": "住宅ローン",
+    "date": "2026-06-29"
   }
-}
+]
