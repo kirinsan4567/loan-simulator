@@ -18,18 +18,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          # Node 24環境であることを明示し、警告を抑制します
-          cache: 'npm' 
       
       - name: Install dependencies
-        run: npm install rss-parser
+        # lockファイルがない場合でもエラーにせずインストールを強行する設定
+        run: npm install --no-package-lock
         
       - name: Fetch News
         run: node scripts/fetch-news.js
