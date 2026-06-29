@@ -18,3 +18,4 @@ jobs:
           git add data/news.json
           git commit -m "Update news.json" || exit 0
           git push
+　
