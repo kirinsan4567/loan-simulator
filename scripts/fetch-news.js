@@ -8,7 +8,6 @@ const parser = new Parser({
 });
 
 const sources = [
-  // 不動産・住宅・金利に特化した強力な検索クエリ
   { 
     name: "不動産・住宅市況", 
     url: encodeURI("https://news.google.com/rss/search?q=不動産+マンション+住宅ローン+金利+地価+市況&hl=ja&gl=JP&ceid=JP:ja") 
@@ -30,7 +29,6 @@ const sources = [
     try {
       console.log(`Fetching: ${source.name}`);
       
-      // 3秒でタイムアウトさせる処理
       const feed = await Promise.race([
         parser.parseURL(source.url),
         new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout (3s)")), 3000))
@@ -46,21 +44,21 @@ const sources = [
       });
     } catch (e) { 
       console.error(`Error fetching ${source.name}: ${e.message}`);
-      // エラーが発生しても処理を止めずに次へ進む
     }
   }
 
- // 保存処理の部分をこれに書き換えてください
-  if (result.length > 0) {
+  // 【修正箇所】result を allNews に書き換えました
+  if (allNews.length > 0) {
     if (!fs.existsSync("data")) fs.mkdirSync("data");
     
-    // 強制的に現在時刻を含めたデータを作る
     const output = {
         updatedAt: new Date().toISOString(),
-        items: result
+        items: allNews
     };
     
     fs.writeFileSync("data/news.json", JSON.stringify(output, null, 2));
-    console.log("JSON successfully created with " + result.length + " items");
+    console.log("JSON successfully created with " + allNews.length + " items");
+  } else {
+    console.log("No news items were fetched.");
   }
 })();
