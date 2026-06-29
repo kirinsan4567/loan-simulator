@@ -16,13 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
+      # Node.jsセットアップのアクションを全て削除しました
       
-      # npm installを使わず、rss-parserを直接インストールする
-      - run: npm install rss-parser
-      
+      - run: npm install rss-parser --no-save
       - run: node scripts/fetch-news.js
         
       - uses: actions/upload-pages-artifact@v3
