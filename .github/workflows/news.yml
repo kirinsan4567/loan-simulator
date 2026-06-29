@@ -16,9 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # Node.jsセットアップのアクションを全て削除しました
-      
-      - run: npm install rss-parser --no-save
+      # 警告の元凶である setup-node を使わず、標準環境のNodeを使う
+      - run: npm install
       - run: node scripts/fetch-news.js
         
       - uses: actions/upload-pages-artifact@v3
