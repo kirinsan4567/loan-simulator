@@ -2,52 +2,36 @@ import fs from "fs";
 import Parser from "rss-parser";
 
 const parser = new Parser();
-
 const feeds = [
-  "https://news.google.com/rss/search?q=日銀+利上げ&hl=ja&gl=JP&ceid=JP:ja",
-  "https://news.google.com/rss/search?q=住宅ローン+金利&hl=ja&gl=JP&ceid=JP:ja",
-  "https://news.google.com/rss/search?q=変動金利&hl=ja&gl=JP&ceid=JP:ja"
+  { url: "https://news.google.com/rss/search?q=日銀+利上げ&hl=ja&gl=JP&ceid=JP:ja", group: "金融政策" },
+  { url: "https://news.google.com/rss/search?q=住宅ローン+金利&hl=ja&gl=JP&ceid=JP:ja", group: "ローン金利" },
+  { url: "https://news.google.com/rss/search?q=不動産+マンション+開発&hl=ja&gl=JP&ceid=JP:ja", group: "不動産市場" }
 ];
 
-function detectCategory(t){
-  if(t.includes("日銀")) return "日銀";
-  if(t.includes("住宅ローン")) return "住宅ローン";
-  if(t.includes("金利")) return "金利";
-  if(t.includes("不動産")) return "不動産";
-  return "ニュース";
-}
-
 (async () => {
+  const newsMap = new Map(); // URLをキーにして重複を防ぐ
 
-  let items = [];
-
-  for(const url of feeds){
-
-    const feed = await parser.parseURL(url);
-
-    for(const item of feed.items){
-
-      items.push({
-        title: item.title.replace(/ - .*$/, ""),
-        link: item.link,
-        date: item.pubDate,
-        category: detectCategory(item.title)
-      });
-
-    }
+  for (const feedConfig of feeds) {
+    const feed = await parser.parseURL(feedConfig.url);
+    feed.items.forEach(item => {
+      // タイトル整形: 媒体名を削除
+      const cleanTitle = item.title.replace(/\s?-\s?[^-]+$/, "");
+      if (!newsMap.has(item.link)) {
+        newsMap.set(item.link, {
+          title: cleanTitle,
+          link: item.link,
+          date: item.pubDate,
+          category: feedConfig.group
+        });
+      }
+    });
   }
 
-  // 重複削除
-  const unique = [...new Map(items.map(i => [i.title, i])).values()];
+  const sortedNews = Array.from(newsMap.values())
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 30); // 過去30件を保持
 
-  // 新しい順
-  unique.sort((a,b)=> new Date(b.date) - new Date(a.date));
-
-  fs.writeFileSync(
-    "news.json",
-    JSON.stringify(unique.slice(0,20), null, 2)
-  );
-
-  console.log("news.json updated");
-
+  // dataフォルダに保存
+  if (!fs.existsSync("data")) fs.mkdirSync("data");
+  fs.writeFileSync("data/news.json", JSON.stringify(sortedNews, null, 2));
 })();
