@@ -33,11 +33,11 @@ async function loadNews() {
     const container = document.getElementById("news-list");
     // ここでニュースを表示するHTMLを生成
     container.innerHTML = news.map(item => `
-      <div class="news-row">
-        <a href="${item.link}" target="_blank">${item.title}</a>
-        <span class="tag">${item.category}</span>
-      </div>
-    `).join('');
+　  <div class="news-row">
+    <a href="${item.link}" target="_blank">${item.title}</a>
+    <span class="tag">${item.tag}</span> 
+　  </div>
+　　`).join('');
   } catch(e) {
     console.error("ニュースの読み込みに失敗しました", e);
   }
