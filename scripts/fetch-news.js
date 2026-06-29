@@ -44,10 +44,15 @@ const sources = [
     } catch (e) { console.error(`Error in ${source.name}: ${e.message}`); }
   }
 
-  // 重複排除
-  const uniqueNews = allNews.filter((item, index, self) =>
-    index === self.findIndex((t) => t.title === item.title)
-  );
+  // 重複排除ロジックの強化
+  // タイトル末尾の「 - 配信元名」などを取り除いて比較する
+  const uniqueNews = allNews.filter((item, index, self) => {
+    const cleanTitle = item.title.replace(/\s*-\s*.*$/, "").trim();
+    return index === self.findIndex((t) => {
+      const cleanT = t.title.replace(/\s*-\s*.*$/, "").trim();
+      return cleanT === cleanTitle;
+    });
+  });
 
   // 保存
   if (uniqueNews.length > 0) {
