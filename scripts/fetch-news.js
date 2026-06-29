@@ -112,8 +112,14 @@ function loadExisting() {
 (async () => {
   const existing = loadExisting();
 
+  // サンプル/プレースホルダは取り込まない（次回実行で自動的に消える）
+  const isPlaceholder = it =>
+    !it || it.url === "#" || it.source === "（サンプル）" ||
+    (typeof it.id === "string" && it.id.startsWith("sample"));
+
   const map = new Map();
   for (const it of existing) {
+    if (isPlaceholder(it)) continue;
     if (it && it.id) map.set(it.id, it);
   }
 
