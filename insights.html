@@ -1,210 +1,459 @@
-<!-- insights.html -->
-
 <!DOCTYPE html>
 
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>KIRIN Insights</title>
 
 <style>
+
+:root{
+  --accent:#E8821E;
+}
+
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
-  font-family:-apple-system,sans-serif;
-  background:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
   color:#222;
 }
 
+/* ===== Header ===== */
+
 .header{
+
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+
+  height:72px;
+
   background:#fff;
   border-bottom:1px solid #eee;
-  padding:20px 40px;
-}
 
-.nav{
+  z-index:1000;
+
   display:flex;
-  gap:24px;
-  margin-top:10px;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 30px;
 }
 
-.nav a{
-  text-decoration:none;
-  color:#444;
+.logo{
+  font-size:24px;
+  font-weight:700;
 }
 
-.container{
-  max-width:1400px;
-  margin:auto;
+.tabs{
+  display:flex;
+  gap:20px;
+}
+
+.tab-btn{
+
+  border:none;
+  background:none;
+
+  cursor:pointer;
+
+  font-size:15px;
+  font-weight:600;
+
+  color:#666;
+}
+
+.tab-btn.active{
+  color:var(--accent);
+}
+
+/* ===== Layout ===== */
+
+.layout{
+
+  margin-top:72px;
+
+  display:grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    360px;
+
+  height:calc(100vh - 72px);
+}
+
+/* ===== Main ===== */
+
+.main{
+
+  overflow-y:auto;
+
   padding:30px;
 }
 
-.layout{
-  display:grid;
-  grid-template-columns:3fr 1fr;
-  gap:40px;
+.content{
+  display:none;
 }
 
-.section{
-  margin-bottom:50px;
+.content.active{
+  display:block;
 }
 
-.section h2{
+.section-title{
+
+  font-size:32px;
+
+  margin-top:0;
+
+  padding-bottom:12px;
+
   border-bottom:2px solid #eee;
-  padding-bottom:10px;
-}
-
-.news-item{
-  padding:12px 0;
-  border-bottom:1px solid #eee;
-}
-
-.pick{
-  background:#FFF8F0;
-  border-left:5px solid #E8821E;
-  padding:20px;
-  margin-bottom:15px;
-}
-
-.sidebar{
-  position:sticky;
-  top:20px;
-}
-
-.x-card{
-  border:1px solid #eee;
-  border-radius:10px;
-  padding:15px;
-  margin-bottom:15px;
 }
 
 .card{
+
   border:1px solid #eee;
+
   border-radius:12px;
+
   padding:20px;
-  margin-bottom:15px;
+
+  margin-bottom:16px;
 }
+
+.pick{
+
+  background:#FFF8F0;
+
+  border-left:5px solid var(--accent);
+
+  padding:20px;
+
+  margin-bottom:16px;
+
+  border-radius:8px;
+}
+
+/* ===== News ===== */
+
+.news-item{
+
+  padding:16px 0;
+
+  border-bottom:1px solid #eee;
+}
+
+.news-category{
+
+  display:inline-block;
+
+  background:#FFF3E6;
+
+  color:var(--accent);
+
+  border-radius:999px;
+
+  padding:4px 10px;
+
+  font-size:12px;
+}
+
+.news-title{
+
+  margin-top:8px;
+
+  font-weight:600;
+}
+
+/* ===== Sidebar ===== */
+
+.sidebar{
+
+  border-left:1px solid #eee;
+
+  overflow-y:auto;
+
+  padding:25px;
+}
+
+.sidebar-title{
+  margin-top:0;
+}
+
+.x-card{
+
+  border:1px solid #eee;
+
+  border-radius:12px;
+
+  padding:15px;
+
+  margin-bottom:16px;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<div class="header">
+<header class="header">
 
-<h1>KIRIN Insights</h1>
+  <div class="logo">
+    KIRIN Insights
+  </div>
 
-<div class="nav">
-<a href="insights.html">ホーム</a>
-<a href="reports.html">分析レポート</a>
-<a href="columns.html">コラム</a>
-</div>
+  <nav class="tabs">
 
-</div>
+```
+<button class="tab-btn active"
+        onclick="showTab('news')">
+  ニュース
+</button>
 
-<div class="container">
+<button class="tab-btn"
+        onclick="showTab('picks')">
+  Picks
+</button>
+
+<button class="tab-btn"
+        onclick="showTab('reports')">
+  分析レポート
+</button>
+
+<button class="tab-btn"
+        onclick="showTab('columns')">
+  コラム
+</button>
+```
+
+  </nav>
+
+</header>
 
 <div class="layout">
 
-<main>
+  <!-- LEFT -->
 
-<section class="section">
-<h2>📰 最新ニュース</h2>
+  <main class="main">
 
-<div id="news-container">
-読み込み中...
-</div>
+```
+<!-- NEWS -->
 
-</section>
+<section id="news"
+         class="content active">
 
-<section class="section">
+  <h1 class="section-title">
+    最新ニュース
+  </h1>
 
-<h2>⭐ KIRIN Picks</h2>
-
-<div class="pick">
-日銀利上げが住宅ローンへ与える影響
-</div>
-
-<div class="pick">
-借入8000万円世帯への影響分析
-</div>
+  <div id="news-container">
+    読み込み中...
+  </div>
 
 </section>
 
-<section class="section">
+<!-- PICKS -->
 
-<h2>📊 分析レポート</h2>
+<section id="picks"
+         class="content">
 
-<div class="card">
-借入8000万円で政策金利1.5%
-</div>
+  <h1 class="section-title">
+    KIRIN Picks
+  </h1>
 
-<div class="card">
-借入1億円で政策金利2.0%
-</div>
+  <div class="pick">
+    日銀利上げによる返済額影響分析
+  </div>
 
-</section>
+  <div class="pick">
+    借入8000万円世帯への影響
+  </div>
 
-<section class="section">
-
-<h2>✍️ コラム</h2>
-
-<div class="card">
-5年ルールとは？
-</div>
-
-<div class="card">
-125%ルールとは？
-</div>
+  <div class="pick">
+    変動金利上昇シナリオ
+  </div>
 
 </section>
 
-</main>
+<!-- REPORTS -->
 
-<aside class="sidebar">
+<section id="reports"
+         class="content">
 
-<h2>𝕏 厳選X投稿</h2>
+  <h1 class="section-title">
+    分析レポート
+  </h1>
+
+  <div class="card">
+    借入8000万円で政策金利1.5%
+  </div>
+
+  <div class="card">
+    借入1億円で政策金利2.0%
+  </div>
+
+  <div class="card">
+    500万円繰上返済の効果
+  </div>
+
+</section>
+
+<!-- COLUMNS -->
+
+<section id="columns"
+         class="content">
+
+  <h1 class="section-title">
+    コラム
+  </h1>
+
+  <div class="card">
+    5年ルールとは？
+  </div>
+
+  <div class="card">
+    125%ルールとは？
+  </div>
+
+  <div class="card">
+    変動金利はどこまで上がる？
+  </div>
+
+</section>
+```
+
+  </main>
+
+  <!-- RIGHT -->
+
+  <aside class="sidebar">
+
+```
+<h2 class="sidebar-title">
+  𝕏 厳選X投稿
+</h2>
 
 <div class="x-card">
-埋め込みポスト①
+  埋め込みポスト①
 </div>
 
 <div class="x-card">
-埋め込みポスト②
+  埋め込みポスト②
 </div>
 
 <div class="x-card">
-埋め込みポスト③
+  埋め込みポスト③
 </div>
 
-</aside>
-
+<div class="x-card">
+  埋め込みポスト④
 </div>
+```
+
+  </aside>
 
 </div>
 
 <script>
 
-async function loadNews(){
+function showTab(tab){
 
-const res = await fetch("news.json");
-const news = await res.json();
+  document
+    .querySelectorAll('.content')
+    .forEach(el=>{
+      el.classList.remove('active');
+    });
 
-const container =
-document.getElementById("news-container");
+  document
+    .getElementById(tab)
+    .classList.add('active');
 
-container.innerHTML="";
+  document
+    .querySelectorAll('.tab-btn')
+    .forEach(el=>{
+      el.classList.remove('active');
+    });
 
-news.forEach(item=>{
+  event.target.classList.add('active');
 
-container.innerHTML += `
-<div class="news-item">
-<strong>${item.category}</strong><br>
-${item.title}
-</div>
-`;
+  location.hash = tab;
+}
+
+window.addEventListener('load',()=>{
+
+  const hash =
+    location.hash.replace('#','');
+
+  if(hash){
+
+    const btnMap = {
+      news:0,
+      picks:1,
+      reports:2,
+      columns:3
+    };
+
+    showTab(hash);
+
+    document
+      .querySelectorAll('.tab-btn')
+      [btnMap[hash]]
+      ?.classList.add('active');
+  }
 
 });
+
+async function loadNews(){
+
+  try{
+
+    const res =
+      await fetch("news.json");
+
+    const news =
+      await res.json();
+
+    const container =
+      document.getElementById(
+        "news-container"
+      );
+
+    container.innerHTML = "";
+
+    news.forEach(item=>{
+
+      container.innerHTML += `
+        <div class="news-item">
+
+          <div class="news-category">
+            ${item.category}
+          </div>
+
+          <div class="news-title">
+            ${item.title}
+          </div>
+
+        </div>
+      `;
+
+    });
+
+  }catch(e){
+
+    document
+      .getElementById(
+        "news-container"
+      ).innerHTML =
+      "ニュース取得失敗";
+
+  }
 
 }
 
