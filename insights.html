@@ -28,27 +28,29 @@
     <script>
 async function loadNews() {
   try {
-    const res = await fetch("data/news.json"); // GitHub直下にnews.jsonがある前提
+    // 1. JSONファイルを読み込む
+    const res = await fetch("data/news.json"); 
+    if (!res.ok) throw new Error("JSONが見つかりません");
+    
+    // 2. データを解析
     const news = await res.json();
+    
+    // 3. 表示するHTMLを生成（item.tag を使うのがポイント！）
     const container = document.getElementById("news-list");
-    // ここでニュースを表示するHTMLを生成
-   
-      // parserの初期化を以下のように変更します
-    const parser = new Parser({
-    headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    }
-    });
     container.innerHTML = news.map(item => `
-　  <div class="news-row">
-    <a href="${item.link}" target="_blank">${item.title}</a>
-    <span class="tag">${item.tag}</span> 
-　  </div>
-　　`).join('');
-  } catch(e) {
-    console.error("ニュースの読み込みに失敗しました", e);
+      <div class="news-row">
+        <a href="${item.link}" target="_blank">${item.title}</a>
+        <span class="tag">${item.tag}</span>
+      </div>
+    `).join('');
+    
+  } catch (err) {
+    console.error("ニュースの読み込みに失敗しました:", err);
+    document.getElementById("news-list").innerText = "ニュースの読み込みに失敗しました。";
   }
 }
+
+// ページを開いた時に実行
 loadNews();
 　　</script>
 </body>
