@@ -12,21 +12,26 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true # 新しいデプロイが来たら古いのは即キャンセルする（重要）
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+      
       - name: Install dependencies
         run: npm install rss-parser
+        
       - name: Fetch News
         run: node scripts/fetch-news.js
+        
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
