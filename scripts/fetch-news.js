@@ -15,30 +15,36 @@ function getCategory(title) {
   return "その他";
 }
 
+// 保存処理の直前で重複を排除する
+const uniqueNews = allNews.filter((item, index, self) =>
+  index === self.findIndex((t) => (
+    t.title === item.title
+  ))
+);
+
+// 保存処理の allNews を uniqueNews に置き換える
+const output = {
+    updatedAt: new Date().toISOString(),
+    items: uniqueNews
+};
+
+
+// 1週間前の日付を自動生成（YYYY-MM-DD形式）
+const oneWeekAgo = new Date();
+oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+const dateQuery = `after:${oneWeekAgo.toISOString().split('T')[0]}`;
+
 const sources = [
   // --- 1. 専門サイト指定（ノイズ排除・高信頼度）---
-  { 
-    name: "ブルームバーグ不動産", 
-    url: encodeURI("https://news.google.com/rss/search?q=site:bloomberg.co.jp+不動産+金利+マンション+地価+市況&hl=ja&gl=JP&ceid=JP:ja") 
-  },
+  { name: "ブルームバーグ不動産", url: encodeURI("https://news.google.com/rss/search?q=site:bloomberg.co.jp+不動産+金利+マンション+地価+市況&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "日銀・政策", url: encodeURI("https://news.google.com/rss/search?q=site:boj.or.jp+金融政策+金利+住宅ローン&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "ロイター経済", url: encodeURI("https://news.google.com/rss/search?q=site:reuters.com+日本+不動産+住宅&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "国交省発表", url: encodeURI("https://news.google.com/rss/search?q=site:mlit.go.jp+不動産+住宅+地価+統計&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "住宅新報", url: encodeURI("https://news.google.com/rss/search?q=site:jutaku-s.com+ニュース&hl=ja&gl=JP&ceid=JP:ja") },
-
   // --- 2. 広範囲キーワード検索（カバレッジ補完）---
-  { 
-    name: "不動産・住宅市況", 
-    url: encodeURI("https://news.google.com/rss/search?q=不動産+マンション+住宅ローン+金利+地価+市況&hl=ja&gl=JP&ceid=JP:ja") 
-  },
-  { 
-    name: "都市開発・建設", 
-    url: encodeURI("https://news.google.com/rss/search?q=都市開発+再開発+建設+不動産価格&hl=ja&gl=JP&ceid=JP:ja") 
-  },
-  { 
-    name: "経済金融", 
-    url: encodeURI("https://news.google.com/rss/search?q=日銀+金融政策+金利+住宅&hl=ja&gl=JP&ceid=JP:ja") 
-  }
+  { name: "不動産・住宅市況", url: encodeURI("https://news.google.com/rss/search?q=不動産+マンション+住宅ローン+金利+地価+市況&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "都市開発・建設", url: encodeURI("https://news.google.com/rss/search?q=都市開発+再開発+建設+不動産価格&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "経済金融", url: encodeURI("https://news.google.com/rss/search?q=日銀+金融政策+金利+住宅&hl=ja&gl=JP&ceid=JP:ja") }
 ];
 
 (async () => {
