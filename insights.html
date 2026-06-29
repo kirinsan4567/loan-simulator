@@ -1,62 +1,96 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>不動産ニュース一覧</title>
-  <style>
-    body { font-family: "Helvetica Neue", Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-    #news-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    
-    .news-row {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
-      white-space: nowrap; overflow: hidden;
-    }
-    .tag {
-      padding: 3px 10px; border-radius: 4px; font-size: 0.75em; font-weight: bold;
-      min-width: 80px; text-align: center; flex-shrink: 0;
-    }
-    .news-title {
-      text-decoration: none; color: #333; font-size: 0.95em;
-      overflow: hidden; text-overflow: ellipsis;
-    }
-    .news-title:hover { text-decoration: underline; }
-
-    /* カテゴリカラー */
-    .tag-finance { background: #e0f7fa; color: #006064; }
-    .tag-market { background: #fff3e0; color: #bf360c; }
-    .tag-dev { background: #e8f5e9; color: #1b5e20; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不動産・経済ニュース</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; color: #333; max-width: 800px; margin: 0 auto; }
+        h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }
+        
+        /* ニュース行のレイアウト */
+        .news-row { 
+            display: flex; align-items: center; gap: 10px; margin-bottom: 8px; 
+            white-space: nowrap; overflow: hidden; 
+        }
+        
+        /* カテゴリごとの配色 */
+        .tag { 
+            padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; 
+            min-width: 70px; text-align: center; flex-shrink: 0; 
+        }
+        .tag-finance { background: #e0f7fa; color: #006064; } /* 金融・政策 */
+        .tag-market { background: #fff3e0; color: #bf360c; }  /* 不動産市場 */
+        .tag-dev { background: #e8f5e9; color: #1b5e20; }     /* 開発・建設 */
+        
+        .news-title { 
+            text-decoration: none; color: #333; overflow: hidden; 
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        .news-title:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
 
-<div id="news-container"></div>
+    <h1>マーケットニュース</h1>
+    <div id="news-container">ニュースを読み込んでいます...</div>
 
-<<script>
-  // 実際の運用ではfetchでjsonを取得しているはずですので、
-  // ここで読み込んだデータを処理する形にします
-  const newsData = /* ここに生成されたJSONデータが入ります */;
+    <script>
+      // カテゴリごとのCSSクラス定義
+      const tagClassMap = {
+          "金融・政策": "tag-finance",
+          "不動産市場": "tag-market",
+          "開発・建設": "tag-dev"
+      };
 
-  const tagClassMap = { 
-    "金融・政策": "tag-finance", 
-    "不動産市場": "tag-market", 
-    "開発・建設": "tag-dev" 
-  };
+      fetch('data/news.json?cache_buster=' + new Date().getTime())
+        .then(res => res.json())
+        .then(data => {
+          const keywords = ["日銀", "金融政策", "金利", "地価", "不動産", "住宅ローン", "マンション", "建設", "株価", "円安", "円高", "ドル円", "為替", "日経平均", "デベロッパー", "建設", "建築", "住宅"];
+          const filteredNews = data.items.filter(item => 
+            keywords.some(keyword => item.title.includes(keyword))
+          );
 
-  const container = document.getElementById('news-container');
-  let html = "";
+          const now = new Date();
+          now.setHours(0,0,0,0);
+          
+          const groups = {
+            "今日のニュース": [], "昨日のニュース": [], "一昨日のニュース": [],
+            "今週のニュース": [], "先週のニュース": [], "それ以前": []
+          };
 
-  // カテゴリごとのグループを回す形式
-  for (const category in newsData) {
-    newsData[category].forEach(item => {
-      html += `
-        <div class="news-row">
-          <span class="tag ${tagClassMap[category] || ''}">${category}</span>
-          <a href="${item.link}" target="_blank" class="news-title">${item.title}</a>
-        </div>`;
-    });
-  }
+          filteredNews.forEach(item => {
+            const [y, m, d] = item.date.split('/');
+            const itemDate = new Date(y, m - 1, d);
+            const diffDays = Math.floor((now - itemDate) / (1000 * 60 * 60 * 24));
 
-  container.innerHTML = html;
-</script>
+            if (diffDays === 0) groups["今日のニュース"].push(item);
+            else if (diffDays === 1) groups["昨日のニュース"].push(item);
+            else if (diffDays <= 7) groups["今週のニュース"].push(item);
+            else if (diffDays <= 14) groups["先週のニュース"].push(item);
+            else groups["それ以前"].push(item);
+          });
+
+          let html = "";
+          for (const [title, items] of Object.entries(groups)) {
+            if (items.length === 0) continue;
+
+            html += `<h3 style="margin-top:25px; border-bottom: 2px solid #333;">${title} (${items.length}件)</h3>`;
+            items.forEach(item => {
+              // カテゴリに応じたクラスを取得
+              const tagClass = tagClassMap[item.tag] || "";
+              html += `
+                <div class="news-row">
+                  <span class="tag ${tagClass}">${item.tag}</span>
+                  <a href="${item.link}" target="_blank" class="news-title">${item.title}</a>
+                </div>`;
+            });
+          }
+          document.getElementById("news-container").innerHTML = html;
+        })
+        .catch(err => {
+          document.getElementById("news-container").innerHTML = "ニュースの読み込みに失敗しました。";
+        });
+    </script>
 </body>
 </html>
