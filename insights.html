@@ -31,23 +31,32 @@
 
 <div id="news-container"></div>
 
-<script>
-  // サンプルデータ：実際の運用ではJSONから読み込んでください
-  const items = [
-    { title: "日銀、追加利上げの可能性を示唆", link: "#", tag: "金融・政策" },
-    { title: "港区の高級マンション価格が過去最高", link: "#", tag: "不動産市場" },
-    { title: "品川駅前、トヨタ本社移転と再開発の全貌", link: "#", tag: "開発・建設" }
-  ];
+<<script>
+  // 実際の運用ではfetchでjsonを取得しているはずですので、
+  // ここで読み込んだデータを処理する形にします
+  const newsData = /* ここに生成されたJSONデータが入ります */;
 
-  const tagClassMap = { "金融・政策": "tag-finance", "不動産市場": "tag-market", "開発・建設": "tag-dev" };
+  const tagClassMap = { 
+    "金融・政策": "tag-finance", 
+    "不動産市場": "tag-market", 
+    "開発・建設": "tag-dev" 
+  };
 
   const container = document.getElementById('news-container');
-  container.innerHTML = items.map(item => `
-    <div class="news-row">
-      <span class="tag ${tagClassMap[item.tag] || ''}">${item.tag}</span>
-      <a href="${item.link}" target="_blank" class="news-title">${item.title}</a>
-    </div>
-  `).join('');
+  let html = "";
+
+  // カテゴリごとのグループを回す形式
+  for (const category in newsData) {
+    newsData[category].forEach(item => {
+      html += `
+        <div class="news-row">
+          <span class="tag ${tagClassMap[category] || ''}">${category}</span>
+          <a href="${item.link}" target="_blank" class="news-title">${item.title}</a>
+        </div>`;
+    });
+  }
+
+  container.innerHTML = html;
 </script>
 </body>
 </html>
