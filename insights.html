@@ -32,7 +32,7 @@ aasync function loadNews() {
     const allNews = await res.json();
     
     // 【重要】ここにキーワードを設定
-    const keywords = ["日銀", "金融政策", "金利", "地価", "不動産", "住宅ローン", "マンション", "建設"];
+    const keywords = ["日銀", "金融政策", "金利", "地価", "不動産", "住宅ローン", "マンション", "建設", "株価",　"円安",　"円高", "ドル円", "為替", "日経平均", "デベロッパー", "建設", "建築", "住宅"];
     
     // フィルタリング処理：タイトルにキーワードが含まれるものだけ残す
     const filteredNews = allNews.filter(item => 
