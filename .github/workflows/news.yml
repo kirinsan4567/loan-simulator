@@ -10,19 +10,20 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      # Node.js 24を明示的にインストールし、キャッシュを使わない設定にすることで
-      # 依存関係の不整合を回避します
       - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
+        # バージョン指定を削除し、デフォルトの最新ランナーに任せます
       
-      - run: npm install --no-package-lock
+      - run: npm install rss-parser
       - run: node scripts/fetch-news.js
         
       - uses: actions/upload-pages-artifact@v3
