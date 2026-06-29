@@ -9,11 +9,11 @@ const feeds = [
   "https://news.google.com/rss/search?q=変動金利&hl=ja&gl=JP&ceid=JP:ja"
 ];
 
-function detectCategory(title){
-  if(title.includes("日銀")) return "日銀";
-  if(title.includes("住宅ローン")) return "住宅ローン";
-  if(title.includes("金利")) return "金利";
-  if(title.includes("不動産")) return "不動産";
+function detectCategory(t){
+  if(t.includes("日銀")) return "日銀";
+  if(t.includes("住宅ローン")) return "住宅ローン";
+  if(t.includes("金利")) return "金利";
+  if(t.includes("不動産")) return "不動産";
   return "ニュース";
 }
 
@@ -21,11 +21,11 @@ function detectCategory(title){
 
   let items = [];
 
-  for (const url of feeds) {
+  for(const url of feeds){
 
     const feed = await parser.parseURL(url);
 
-    feed.items.forEach(item => {
+    for(const item of feed.items){
 
       items.push({
         title: item.title.replace(/ - .*$/, ""),
@@ -34,21 +34,20 @@ function detectCategory(title){
         category: detectCategory(item.title)
       });
 
-    });
-
+    }
   }
 
   // 重複削除
-  const unique = Array.from(
-    new Map(items.map(i => [i.title, i])).values()
-  );
+  const unique = [...new Map(items.map(i => [i.title, i])).values()];
 
-  // 最新順
-  unique.sort((a,b) => new Date(b.date) - new Date(a.date));
+  // 新しい順
+  unique.sort((a,b)=> new Date(b.date) - new Date(a.date));
 
   fs.writeFileSync(
     "news.json",
-    JSON.stringify(unique.slice(0, 20), null, 2)
+    JSON.stringify(unique.slice(0,20), null, 2)
   );
+
+  console.log("news.json updated");
 
 })();
