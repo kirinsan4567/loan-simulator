@@ -27,6 +27,8 @@
 
           // 2. 日付ごとのグルーピング
           const now = new Date();
+          now.setHours(0,0,0,0); // 時間をリセットして日付のみで比較
+          
           const groups = {
             "今日のニュース": [],
             "昨日のニュース": [],
@@ -37,7 +39,10 @@
           };
 
           filteredNews.forEach(item => {
-            const itemDate = new Date(item.date);
+            // YYYY/MM/DD 形式の日付を安全に解析
+            const [y, m, d] = item.date.split('/');
+            const itemDate = new Date(y, m - 1, d);
+            
             const diffDays = Math.floor((now - itemDate) / (1000 * 60 * 60 * 24));
 
             if (diffDays === 0) groups["今日のニュース"].push(item);
