@@ -1,0 +1,29 @@
+/* 基本の見た目 */
+body {
+  font-family: sans-serif;
+  line-height: 1.6;
+  margin: 20px;
+}
+
+/* ニュース欄の枠線と余白 */
+#news-list {
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+/* 各ニュースの行 */
+.news-row {
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.tag {
+  background-color: #e0e0e0;
+  padding: 2px 5px;
+  font-size: 0.8em;
+  border-radius: 4px;
+  margin-left: 10px;
+}
