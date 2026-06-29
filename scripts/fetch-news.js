@@ -1,5 +1,5 @@
-const fs = require("fs");
-const Parser = require("rss-parser");
+import fs from "fs";
+import Parser from "rss-parser";
 
 const parser = new Parser();
 
@@ -8,6 +8,14 @@ const feeds = [
   "https://news.google.com/rss/search?q=住宅ローン+金利&hl=ja&gl=JP&ceid=JP:ja",
   "https://news.google.com/rss/search?q=変動金利&hl=ja&gl=JP&ceid=JP:ja"
 ];
+
+function detectCategory(title){
+  if(title.includes("日銀")) return "日銀";
+  if(title.includes("住宅ローン")) return "住宅ローン";
+  if(title.includes("金利")) return "金利";
+  if(title.includes("不動産")) return "不動産";
+  return "ニュース";
+}
 
 (async () => {
 
@@ -44,13 +52,3 @@ const feeds = [
   );
 
 })();
-
-function detectCategory(title){
-
-  if(title.includes("日銀")) return "日銀";
-  if(title.includes("住宅ローン")) return "住宅ローン";
-  if(title.includes("金利")) return "金利";
-  if(title.includes("不動産")) return "不動産";
-
-  return "ニュース";
-}
