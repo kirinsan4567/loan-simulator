@@ -3,6 +3,13 @@ import Parser from "rss-parser";
 
 const parser = new Parser();
 
+// 1. ここにキーワードを定義
+const keywords = [
+  "住宅ローン", "日銀", "金融政策", "金利", "地価", "不動産価格", 
+  "市況", "マンション", "タワマン", "新築", "住宅", "建設", 
+  "賃貸", "不動産", "都市開発"
+];
+
 // ニュースソースのリスト
 const sources = [
   { name: "Yahooビジネス", url: "https://news.yahoo.co.jp/rss/topics/business.xml" },
