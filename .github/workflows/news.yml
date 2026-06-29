@@ -10,6 +10,10 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: true # 新しいデプロイが来たら古いのは即キャンセルする（重要）
+
 jobs:
   build:
     runs-on: ubuntu-latest
