@@ -8,10 +8,9 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  background: #f7f7f7;
+  background: #f6f7f9;
 }
 
-/* ヘッダー */
 header {
   position: sticky;
   top: 0;
@@ -21,18 +20,15 @@ header {
   z-index: 10;
 }
 
-/* メインレイアウト */
 .container {
   display: flex;
 }
 
-/* 左メイン */
 .main {
   flex: 1;
   padding: 16px;
 }
 
-/* 右サイド */
 .sidebar {
   width: 300px;
   height: 100vh;
@@ -42,22 +38,19 @@ header {
   padding: 10px;
 }
 
-/* 最新ニュース */
 #featured-title {
   font-size: 20px;
   font-weight: bold;
   transition: all 0.3s ease;
 }
 
-/* ニュース */
 .news-item {
   padding: 10px;
   border-bottom: 1px solid #eee;
-  transition: all 0.3s ease;
 }
 
 .news-item.active {
-  background: #fff7ed;
+  background: #fff7e6;
   font-weight: bold;
 }
 
@@ -69,106 +62,123 @@ header {
   font-size: 12px;
   color: gray;
 }
+
+/* ティッカー */
+#ticker {
+  background: black;
+  color: white;
+  padding: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  <div id="featured-title">読み込み中...</div>
-  <div id="featured-summary">最新ニュースを取得しています</div>
+  <div id="featured-title">Loading...</div>
+  <div id="featured-summary">ニュース取得中</div>
 </header>
+
+<div id="ticker">Loading...</div>
 
 <div class="container">
 
-  <!-- メイン -->
   <div class="main">
     <h2>News Feed</h2>
     <div id="news-container">Loading...</div>
   </div>
 
-  <!-- サイドバー -->
   <div class="sidebar">
-    <h3>Live Panel</h3>
-    <div id="side-news">読み込み中...</div>
+    <h3>Stored News</h3>
+    <div id="side-container"></div>
   </div>
 
 </div>
 
 <script>
+
+let newsStore = [];
+
 async function loadNews(){
 
-  const container = document.getElementById("news-container");
-  const side = document.getElementById("side-news");
-
   try {
-
-    container.style.opacity = 0.4;
 
     const res = await fetch("./news.json?ts=" + Date.now());
     const news = await res.json();
 
-    if(!Array.isArray(news) || news.length === 0){
-      container.innerHTML = "ニュース準備中";
-      return;
+    if(!Array.isArray(news)) return;
+
+    // ストック追加（重複防止）
+    news.forEach(item => {
+
+      if(!newsStore.find(n => n.title === item.title)){
+        newsStore.unshift(item);
+      }
+
+    });
+
+    if(newsStore.length > 50){
+      newsStore = newsStore.slice(0, 50);
     }
 
-    /* 最新ニュース */
-    const featured = document.getElementById("featured-title");
-
-    featured.style.transform = "scale(1.03)";
-    featured.textContent = news[0].title;
-
-    document.getElementById("featured-summary").textContent =
-      "市場ニュースをリアルタイム更新中";
-
-    setTimeout(() => {
-      featured.style.transform = "scale(1)";
-    }, 300);
-
-    /* メイン一覧 */
-    container.innerHTML = "";
-
-    news.forEach((item, i) => {
-
-      container.innerHTML += `
-        <div class="news-item ${i === 0 ? "active" : ""}">
-          <div class="news-title">${item.title}</div>
-          <div class="news-category">${item.category || ""}</div>
-        </div>
-      `;
-
-    });
-
-    /* サイドバー（簡易ライブ） */
-    side.innerHTML = "";
-
-    news.slice(0, 10).forEach(item => {
-
-      side.innerHTML += `
-        <div class="news-item">
-          <div class="news-title">${item.title}</div>
-        </div>
-      `;
-
-    });
-
-    /* フェードイン */
-    requestAnimationFrame(() => {
-      container.style.transition = "opacity 0.4s ease";
-      container.style.opacity = 1;
-    });
+    render();
 
   } catch(e){
     console.error(e);
-    container.innerHTML = "取得エラー";
   }
 }
 
-/* 初回 */
+function render(){
+
+  const container = document.getElementById("news-container");
+  const side = document.getElementById("side-container");
+
+  // 最新
+  if(newsStore[0]){
+    document.getElementById("featured-title").textContent =
+      newsStore[0].title;
+  }
+
+  document.getElementById("featured-summary").textContent =
+    "ストリーミング更新中";
+
+  // メイン一覧（最新順）
+  container.innerHTML = "";
+  newsStore.forEach((item, i) => {
+
+    container.innerHTML += `
+      <div class="news-item ${i === 0 ? "active" : ""}">
+        <div class="news-title">${item.title}</div>
+      </div>
+    `;
+
+  });
+
+  // サイド（ストック）
+  side.innerHTML = "";
+  newsStore.slice(0, 20).forEach(item => {
+
+    side.innerHTML += `
+      <div class="news-item">
+        ${item.title}
+      </div>
+    `;
+
+  });
+
+  // ティッカー（世界の株価風）
+  document.getElementById("ticker").innerHTML =
+    newsStore.slice(0, 10)
+      .map(n => `【${n.title}】`)
+      .join(" ");
+}
+
+// 初回
 loadNews();
 
-/* 3分ごと更新（世界の株価風） */
+// 3分ごと更新（データ追加）
 setInterval(loadNews, 180000);
 
 </script>
