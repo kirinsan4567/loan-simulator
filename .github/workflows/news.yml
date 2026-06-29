@@ -10,7 +10,6 @@ permissions:
   pages: write
   id-token: write
 
-# 【重要】実行中のデプロイを自動キャンセルして渋滞を防ぐ設定
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -20,9 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-node@v4
         with:
-          node-version: '24' # 20ではなく24に固定
+          node-version: '24'
+          # キャッシュの設定を追加することでNode 24環境での動作を安定させます
+          cache: 'npm'
       
       - run: npm install rss-parser
       - run: node scripts/fetch-news.js
@@ -39,4 +41,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4 # 最新バージョン
+        uses: actions/deploy-pages@v4
