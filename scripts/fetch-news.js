@@ -60,13 +60,17 @@ const sources = [
     });
   });
 
-  // 保存
-  if (uniqueNews.length > 0) {
-    if (!fs.existsSync("data")) fs.mkdirSync("data");
-    const output = {
-      updatedAt: new Date().toISOString(),
-      items: uniqueNews
-    };
-    fs.writeFileSync("data/news.json", JSON.stringify(output, null, 2));
+// 重複排除ロジックの修正
+const uniqueNews = [];
+const seenTitles = new Set();
+
+items.forEach(item => {
+  // タイトルの全文字ではなく、冒頭の20文字程度をキーにする
+  // これにより「プレジデントオンライン版」と「Yahoo!版」を同一とみなせる
+  const baseTitle = item.title.substring(0, 20).replace(/\s+/g, '');
+  
+  if (!seenTitles.has(baseTitle)) {
+    uniqueNews.push(item);
+    seenTitles.add(baseTitle);
   }
-})();
+});
