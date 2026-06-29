@@ -7,6 +7,14 @@ const parser = new Parser({
   }
 });
 
+// ★ 1. ここに分類関数を置く
+function getCategory(title) {
+  if (title.includes("日銀") || title.includes("金利") || title.includes("金融")) return "金融政策";
+  if (title.includes("マンション") || title.includes("地価") || title.includes("不動産")) return "不動産市場";
+  if (title.includes("建設") || title.includes("再開発")) return "開発・建設";
+  return "その他";
+}
+
 const sources = [
   // --- 1. 専門サイト指定（ノイズ排除・高信頼度）---
   { 
