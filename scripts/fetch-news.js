@@ -22,6 +22,8 @@ const parser = new Parser({ timeout: 15000 });
 const OUT_PATH = "data/news.json";
 const MAX_ITEMS = 400; // ストック上限（古いものから捨てる）
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 // ───────────────────────────────────────────────────────────
 // 1) フィード一覧
 //   ⚠️ 確認は手動でしなくてOK。Actionを1回回して、ログの
@@ -40,13 +42,29 @@ const FEEDS = [
   { name: "不動産市況", type: "google", url: encodeURI("https://news.google.com/rss/search?q=不動産 マンション 地価 市況&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "金融政策",   type: "google", url: encodeURI("https://news.google.com/rss/search?q=日銀 金融政策 金利 住宅ローン&hl=ja&gl=JP&ceid=JP:ja") },
 
+  // ── ハードニュース（一般紙・通信社。速報性の高い記事を増やす）────
+  { name: "日本経済新聞", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:nikkei.com 住宅ローン 金利 不動産 マンション&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "NHK",         type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:www3.nhk.or.jp 金利 住宅ローン 不動産 日銀&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "時事通信",     type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:jiji.com 日銀 金利 不動産 住宅&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "産経ニュース",  type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:sankei.com 日銀 金利 不動産 住宅ローン マンション&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "47NEWS",       type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:47news.jp 日銀 金利 不動産 住宅ローン&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "みんかぶ",      type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:minkabu.jp 金利 不動産 REIT 日銀&hl=ja&gl=JP&ceid=JP:ja") },
+
+  // ── 業界・プレス（開発・デベロッパー・物流施設）──────────────
+  { name: "PR TIMES",      type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:prtimes.jp 不動産 マンション 再開発 デベロッパー&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "日刊工業新聞",  type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:nikkan.co.jp 不動産 再開発 建設 住宅&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "ニュースイッチ", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:newswitch.jp 不動産 再開発 建設 住宅&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "LNEWS",         type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:lnews.jp 物流施設 不動産 開発&hl=ja&gl=JP&ceid=JP:ja") },
+
   // ── 不動産・建設の専門メディア（Google site: 検索）──────────
   //   公式RSSが無い媒体もここで拾える。リンクはGoogleリダイレクト・要約なし。
   //   ログのヒット件数を見て、0件/SKIPは削除してください。
   { name: "R.E.port",        type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:re-port.net 不動産 マンション 地価&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "全国賃貸住宅新聞", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:zenchin.com 賃貸 不動産 住宅&hl=ja&gl=JP&ceid=JP:ja") },
-  { name: "健美家",          type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kenbiya.com 不動産 投資 賃貸&hl=ja&gl=JP&ceid=JP:ja") },
-  { name: "不動産経済研究所", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:fudousankeizai.co.jp マンション 不動産&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "健美家",          type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kenbiya.com/ar&hl=ja&gl=JP&ceid=JP:ja") },
+  // 不動産経済研究所: タイトルが「日刊不動産経済通信」ばかりで実記事が拾えないため一旦停止。
+  //   正しい「最新記事一覧」やRSSのURLが分かれば差し替えます。
+  // { name: "不動産経済研究所", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:fudousankeizai.co.jp マンション 不動産&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "楽待新聞",        type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:rakumachi.jp 不動産 投資 金利&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "建設通信新聞",    type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kensetsunews.com 不動産 住宅 再開発&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "日刊建設工業新聞", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:decn.co.jp 不動産 住宅 再開発&hl=ja&gl=JP&ceid=JP:ja") },
@@ -91,6 +109,18 @@ function normalizeUrl(raw) {
 }
 
 const tidy = s => (s || "").replace(/\s+/g, " ").trim();
+
+// 転載アグリゲーター（同一記事を量産する。名寄せ時は元媒体を優先）
+const AGGREGATORS = ["Yahoo", "ヤフー", "au Webポータル", "auサービス", "Excite", "エキサイト", "SmartNews", "スマートニュース", "livedoor", "ライブドア", "goo", "BIGLOBE", "ニフティ", "Infoseek", "dメニュー"];
+const isAgg = s => AGGREGATORS.some(a => (s || "").includes(a));
+
+// タイトル正規化キー（全半角・記号・末尾の（媒体名）を除去して比較）
+function titleKey(t) {
+  let s = (t || "").normalize("NFKC");
+  s = s.replace(/[(（][^()（）]*[)）]\s*$/u, "");   // 末尾の括弧（媒体名等）を1つ除去
+  s = s.replace(/[^\p{L}\p{N}]/gu, "").toLowerCase(); // 記号・空白を全部落とす
+  return s;
+}
 
 const stripTags = s => (s || "").replace(/<[^>]*>/g, " ");
 function cleanSummary(raw, max = 140) {
@@ -191,9 +221,24 @@ function loadExisting() {
     } catch (e) {
       console.warn(`SKIP ${feed.name}: ${e.message}`);
     }
+    await sleep(700); // レート制限回避：フィード間に待機
   }
 
-  const all = Array.from(map.values())
+  // タイトル名寄せ：同一記事の転載を1本に（元媒体 > アグリゲーター）
+  const byTitle = new Map();
+  for (const it of map.values()) {
+    const k = titleKey(it.title);
+    if (!k) { byTitle.set(Symbol(), it); continue; }
+    const cur = byTitle.get(k);
+    if (!cur) { byTitle.set(k, it); continue; }
+    let winner = cur, loser = it;
+    if (isAgg(cur.source) && !isAgg(it.source)) { winner = it; loser = cur; }
+    winner.tags = Array.from(new Set([...(winner.tags || []), ...(loser.tags || [])]));
+    if (!winner.summary && loser.summary) winner.summary = loser.summary;
+    byTitle.set(k, winner);
+  }
+
+  const all = Array.from(byTitle.values())
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, MAX_ITEMS);
 
