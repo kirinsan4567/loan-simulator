@@ -154,6 +154,7 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
     <nav class="ki-nav">
       <a href="index.html" class="ki-nav--home">サイトトップ</a>
       <a href="#news">ニュース</a>
+      <a href="#press">プレスリリース</a>
       <a href="#pics">Kirin Pics</a>
       <a href="#reports">分析レポート</a>
       <a href="#columns">コラム</a>
@@ -175,7 +176,18 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
         </div>
         <ul id="newsList" class="ki-news"></ul>
         <div id="newsState" class="ki-state">読み込み中…</div>
-        <a id="newsMore" class="ki-more" href="insights-archive.html" target="_blank" rel="noopener">過去のニュースをカレンダーで見る ↗</a>
+        <a id="newsMore" class="ki-more" href="insights-archive.html" target="_blank" rel="noopener">過去・その他のニュースをカレンダーで見る ↗</a>
+      </section>
+
+      <!-- プレスリリース（data/news.json の kind=press を抽出） -->
+      <section id="press" class="ki-section">
+        <div class="ki-section__head">
+          <h2 class="ki-section__title">プレスリリース</h2>
+          <span class="ki-section__en">Press</span>
+        </div>
+        <ul id="pressList" class="ki-news"></ul>
+        <div id="pressState" class="ki-state">読み込み中…</div>
+        <a id="pressMore" class="ki-more" href="press-archive.html" target="_blank" rel="noopener">過去・その他のプレスリリースをカレンダーで見る ↗</a>
       </section>
 
       <!-- Kirin Pics（手動：下の picsData を編集） -->
@@ -340,22 +352,29 @@ function newsItemHTML(n){
     </li>`;
 }
 
-async function renderNews(){
-  const list = $('#newsList'), state = $('#newsState'), more = $('#newsMore');
+function fillList(items, listSel, stateSel, moreSel, emptyMsg){
+  const list = $(listSel), state = $(stateSel), more = $(moreSel);
   more.hidden = true;
+  if(!items.length){ state.textContent = emptyMsg; state.hidden = false; return; }
+  list.innerHTML = items.slice(0, NEWS_RECENT_MAX).map(newsItemHTML).join("");
+  state.hidden = true;
+  more.hidden = items.length <= NEWS_RECENT_MAX; // 残りがある時だけカレンダー導線を表示
+}
+
+async function renderNews(){
   try {
     const res = await fetch('data/news.json', { cache: 'no-store' });
     if(!res.ok) throw new Error('not found');
     let items = await res.json();
-    if(!Array.isArray(items) || !items.length){
-      state.textContent = '表示できるニュースがまだありません。'; return;
-    }
+    if(!Array.isArray(items)) items = [];
     items.sort((a,b)=> new Date(b.date) - new Date(a.date));
-    list.innerHTML = items.slice(0, NEWS_RECENT_MAX).map(newsItemHTML).join("");
-    state.hidden = true;
-    more.hidden = items.length <= NEWS_RECENT_MAX; // 過去がある時だけカレンダーへの導線を出す
+
+    // ニュース欄＝全件（プレス含む）／プレスリリース欄＝kind:press のみ
+    fillList(items, '#newsList', '#newsState', '#newsMore', '表示できるニュースがまだありません。');
+    fillList(items.filter(n => n.kind === 'press'), '#pressList', '#pressState', '#pressMore', 'プレスリリースがまだありません。');
   } catch (e) {
-    state.textContent = 'ニュースを読み込めませんでした。少し時間をおいて再読み込みしてください。';
+    $('#newsState').textContent = 'ニュースを読み込めませんでした。少し時間をおいて再読み込みしてください。';
+    $('#pressState').textContent = 'プレスリリースを読み込めませんでした。';
   }
 }
 
