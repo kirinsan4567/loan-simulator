@@ -181,6 +181,20 @@ function devTags(title) {
   return DEV_SHORT.filter(([full]) => t.includes(full)).map(([, sh]) => sh);
 }
 
+// プレスリリース選別用
+//  ・JUNK: ログイン/採用/会社情報など、プレスでないページを除外
+//  ・PRESS_SIGNAL: 開発・竣工・取得・開業・決算 等「発表らしい語」。pressはこれを含むもののみ採用
+const JUNK = ["ログイン", "ログアウト", "会員", "マイページ", "採用", "求人", "エントリー", "新卒", "中途",
+  "お問い合わせ", "プライバシー", "個人情報", "サイトマップ", "利用規約", "アクセス", "会社概要", "企業情報",
+  "よくあるご質問", "メンテナンス", "404", "Not Found", "ページが見つかりません"];
+const PRESS_SIGNAL = ["竣工", "着工", "起工", "完成", "取得", "売却", "開業", "開発", "再開発", "分譲", "賃貸",
+  "リニューアル", "改修", "建替", "締結", "提携", "出店", "開設", "プロジェクト", "タワー", "マンション",
+  "オフィス", "ビル", "商業施設", "ホテル", "物流", "施設", "まちづくり", "用地", "区画", "街区",
+  "決算", "業績", "増益", "営業利益", "受注", "販売", "供給", "建設", "新築", "リーシング",
+  "グランドオープン", "竣功", "取組", "実証", "認定", "受賞"];
+const isJunk = t => JUNK.some(k => (t || "").includes(k));
+const isPressRelevant = t => PRESS_SIGNAL.some(k => (t || "").includes(k));
+
 function toISO(item) {
   const d = new Date(item.isoDate || item.pubDate || Date.now());
   return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
@@ -231,6 +245,11 @@ function loadExisting() {
           source = feed.name;
         }
         if (!title) continue;
+
+        // ニュース・プレス共通: ログイン/採用/会社情報などの非記事ページを除外
+        if (isJunk(title)) continue;
+        // プレスは「発表らしい語」を含むものだけ（マンション/オフィス/都市開発/決算 等）
+        if (feed.kind === "press" && !isPressRelevant(title)) continue;
 
         const id = normalizeUrl(link) || title;
         let tags = Array.from(new Set([...detectTags(title), ...devTags(title)]));
