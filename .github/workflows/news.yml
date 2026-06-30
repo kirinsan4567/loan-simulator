@@ -2,7 +2,7 @@ name: Update News
 
 on:
   schedule:
-    - cron: "0 */4 * * *"   # 4時間ごと（毎時はやりすぎなので抑えめ）
+    - cron: "0 */3 * * *"   # 3時間ごと
   workflow_dispatch:         # 手動実行も可
 
 # git push するために書き込み権限が必要（ChatGPT版はこれが無く push に失敗する）
