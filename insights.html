@@ -34,12 +34,12 @@
 }
 .ki-insights *, .ki-insights *::before, .ki-insights *::after { box-sizing: border-box; }
 
-/* 固定ヘッダー（既存ヘッダーに置き換える場合はこのブロックを削除して差し替え） */
+/* 固定ヘッダー */
 .ki-header {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(255,255,255,.85);
-  backdrop-filter: saturate(180%) blur(12px);
+  background: #ffffff;
   border-bottom: 1px solid var(--ki-line);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 .ki-header__inner {
   max-width: 1100px; margin: 0 auto; padding: 12px 20px;
@@ -104,7 +104,9 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-state { color: var(--ki-sub); padding: 16px 2px; font-size:.92rem; }
 
 /* Kirin Pics */
-.ki-pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 12px; }
+.ki-pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap: 16px; align-items: start; }
+.ki-embed { min-width: 0; }
+.ki-embed .twitter-tweet { margin: 0 !important; }
 .ki-pic { position: relative; aspect-ratio: 4/3; border-radius: var(--ki-radius); overflow: hidden; background:#e9edf0; }
 .ki-pic img { width:100%; height:100%; object-fit: cover; display:block; }
 .ki-pic figcaption { position:absolute; left:0; right:0; bottom:0; padding:8px 10px; font-size:.78rem; color:#fff; background: linear-gradient(transparent, rgba(0,0,0,.55)); }
@@ -157,14 +159,14 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
      ============================================================ -->
 <header class="ki-header">
   <div class="ki-header__inner">
-    <a class="ki-brand" href="index.html">KIRIN <span>Insights</span></a>
+    <a class="ki-brand" href="insights.html">KIRIN <span>Insights</span></a>
     <nav class="ki-nav">
-      <a href="index.html" class="ki-nav--home">サイトトップ</a>
       <a href="#news">ニュース</a>
       <a href="#press">プレスリリース</a>
       <a href="#pics">Kirin Pics</a>
       <a href="#reports">分析レポート</a>
       <a href="#columns">コラム</a>
+      <a href="index.html" class="ki-nav--home">住宅ローン返済シミュレーター</a>
     </nav>
   </div>
 </header>
@@ -250,45 +252,30 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
      image : 画像URL（任意。無ければ省略可）
    ★投稿を増やすときは、このリストにオブジェクトを1つ足すだけ。
    ============================================================ */
-const xPosts = [
-  {
-    name: "KIRIN",
-    date: "2026.06.29",
-    text: "住宅ローンの繰上返済、「早く返す＝得」とは限りません。\n団信・流動性・運用機会まで含めて、シミュレーターで数字を見てから判断を。",
-    url: "https://x.com/kirinsan4567",
-    image: ""
-  },
-  {
-    name: "KIRIN",
-    date: "2026.06.27",
-    text: "変動金利1.25%時代の返済額推移を更新しました。5年ルール／125%ルールのトグルで動きが直感的に分かります。",
-    url: "https://x.com/kirinsan4567",
-    image: ""
-  },
-  {
-    name: "KIRIN",
-    date: "2026.06.25",
-    text: "政策金利2.0%シナリオを追加。借入1億円だと総返済額がどう変わるか、ぜひ触ってみてください。",
-    url: "https://x.com/kirinsan4567",
-    image: ""
-  }
+/* 1) 右サイドバー：自分のX投稿（@kirinsan4567）。埋め込みで内容表示・クリックでXへ。 */
+const myXPosts = [
+  "https://x.com/kirinsan4567/status/2054187727458058293",
+  "https://x.com/kirinsan4567/status/2054572866918809670",
+  "https://x.com/kirinsan4567/status/2069822071358771578",
+  "https://x.com/kirinsan4567/status/1864640000455069871",
+  "https://x.com/kirinsan4567/status/1883059198927450123",
+  "https://x.com/kirinsan4567/status/1880762996919836984",
+  "https://x.com/kirinsan4567/status/1842827932349440210"
 ];
 
-/* 2) Kirin Pics（手動） */
-const picsData = [
-  // { src: "images/pic1.jpg", caption: "キャプション" },
+/* 2) Kirin Pics：注目のXポスト（埋め込み）＋記事（リンクカード） */
+const picTweets = [
+  "https://x.com/bloombergjapan/status/2071753442423390654",
+  "https://x.com/nikkei/status/2069965575514718660",
+  "https://x.com/nikkei/status/2066614249950986639",
+  "https://x.com/bloombergjapan/status/2069956572567003620",
+  "https://x.com/nikkei/status/2069587081576251567"
+];
+const picArticles = [
+  { source: "日本経済新聞", url: "https://www.nikkei.com/article/DGXZQOUB090T70Z00C24A8000000/" }
 ];
 
-/* 3) 分析レポート（手動）— reports.html の内容をリンクカード化 */
-const reportsData = [
-  { title: "借入8000万円 × 政策金利1.5%",  desc: "高額借入時の返済額シミュレーション", href: "simulator.html" },
-  { title: "借入1億円 × 政策金利2.0%",      desc: "金利上昇シナリオでの総返済額の変化", href: "simulator.html" },
-  { title: "500万円繰上返済の効果",          desc: "繰上返済による利息軽減と期間短縮",   href: "simulator.html" },
-  { title: "変動金利1.25%時代の返済額推移",  desc: "5年ルール・125%ルールの挙動を可視化", href: "simulator.html" },
-  { title: "政策金利2.0%シナリオ分析",       desc: "BOJ政策イベントを反映した試算",       href: "scenarios.html" }
-];
-
-/* 4) コラム（手動） */
+/* 3) コラム（手動） */
 const columnsData = [
   { title: "繰上返済の哲学", desc: "流動性・機会費用・団信・運用のトレードオフから考える", href: "scenarios.html#column" },
 ];
@@ -298,38 +285,34 @@ const $ = sel => document.querySelector(sel);
 function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtDate(iso){ const d=new Date(iso); if(isNaN(d)) return ""; return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`; }
 
-/* ---------- X投稿の描画 ---------- */
+/* ---------- X投稿の描画（公式埋め込み） ---------- */
 function renderX(){
-  $('#xFeed').innerHTML = xPosts.map(p => `
-    <article class="ki-xcard">
-      <div class="ki-xcard__top">
-        <div class="ki-xcard__avatar">🦒</div>
-        <div class="ki-xcard__id">
-          <span class="ki-xcard__name">${esc(p.name)}</span>
-          <span class="ki-xcard__handle">@kirinsan4567</span>
-        </div>
-        <span class="ki-xcard__x">𝕏</span>
-      </div>
-      <div class="ki-xcard__body">${esc(p.text)}</div>
-      ${p.image ? `<div class="ki-xcard__img"><img src="${esc(p.image)}" alt=""></div>` : ""}
-      <div class="ki-xcard__foot">
-        <span>${esc(p.date)}</span>
-        <a class="ki-xcard__link" href="${esc(p.url)}" target="_blank" rel="noopener">Xで見る →</a>
-      </div>
-    </article>
-  `).join("");
+  $('#xFeed').innerHTML = myXPosts.map(u =>
+    `<blockquote class="twitter-tweet" data-dnt="true"><a href="${esc(u)}"></a></blockquote>`
+  ).join("");
 }
 
-/* ---------- Pics / Reports / Columns の描画 ---------- */
+/* ---------- Pics（Xポスト埋め込み＋記事カード） ---------- */
 function renderPics(){
   const el = $('#picsGrid');
-  if(!picsData.length){ el.innerHTML = `<p class="ki-state">写真は準備中です。</p>`; return; }
-  el.innerHTML = picsData.map(p => `
-    <figure class="ki-pic">
-      <img src="${esc(p.src)}" alt="${esc(p.caption||'')}">
-      ${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ""}
-    </figure>`).join("");
+  const tweets = picTweets.map(u =>
+    `<div class="ki-embed"><blockquote class="twitter-tweet" data-dnt="true"><a href="${esc(u)}"></a></blockquote></div>`
+  ).join("");
+  const arts = picArticles.map(a =>
+    `<a class="ki-cardlink" href="${esc(a.url)}" target="_blank" rel="noopener">
+       <h3>${esc(a.source)}の記事</h3>
+       <span class="ki-cardlink__go">記事を見る →</span>
+     </a>`
+  ).join("");
+  el.innerHTML = (tweets + arts) || `<p class="ki-state">準備中</p>`;
 }
+
+/* X埋め込みウィジェットの読み込み（widgets.js が用意でき次第レンダリング） */
+function loadTweets(){
+  if (window.twttr && window.twttr.widgets) { window.twttr.widgets.load(); }
+  else { setTimeout(loadTweets, 300); }
+}
+
 function renderCards(target, data){
   $(target).innerHTML = data.map(c => `
     <a class="ki-cardlink" href="${esc(c.href)}">
@@ -414,10 +397,12 @@ async function renderNews(){
 /* ---------- 起動 ---------- */
 renderX();
 renderPics();
-renderCards('#reportsCards', reportsData);
+$('#reportsCards').innerHTML = '<p class="ki-state">準備中</p>';
 renderCards('#columnsCards', columnsData);
+loadTweets();
 renderNews();
 </script>
 
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </body>
 </html>
