@@ -52,7 +52,16 @@ const FEEDS = [
 
   // ── 業界・プレス（開発・デベロッパー・物流施設）──────────────
   { name: "PR TIMES",      type: "google", kind: "press", url: encodeURI("https://news.google.com/rss/search?q=site:prtimes.jp 不動産 マンション 再開発 デベロッパー&hl=ja&gl=JP&ceid=JP:ja") },
-  { name: "PR TIMES(デベロッパー)", type: "google", kind: "press", url: encodeURI("https://news.google.com/rss/search?q=site:prtimes.jp (三井不動産 OR 三菱地所 OR 野村不動産 OR 東急不動産 OR 東京建物 OR 森ビル OR 住友不動産 OR 日鉄興和不動産)&hl=ja&gl=JP&ceid=JP:ja") },
+
+  // ── デベロッパー各社（社名で直接収集。重複はPR TIMESより各社/報道を優先）──
+  { name: "三井不動産",     type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="三井不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
+  { name: "三菱地所",       type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="三菱地所" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
+  { name: "野村不動産",     type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="野村不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
+  { name: "東急不動産",     type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="東急不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
+  { name: "東京建物",       type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="東京建物" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
+  { name: "森ビル",         type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="森ビル" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
+  { name: "住友不動産",     type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="住友不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
+  { name: "日鉄興和不動産",  type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="日鉄興和不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
   { name: "日刊工業新聞",  type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:nikkan.co.jp 不動産 再開発 建設 住宅&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "ニュースイッチ", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:newswitch.jp 不動産 再開発 建設 住宅&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "LNEWS",         type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:lnews.jp 物流施設 不動産 開発&hl=ja&gl=JP&ceid=JP:ja") },
@@ -122,6 +131,13 @@ const tidy = s => (s || "").replace(/\s+/g, " ").trim();
 // 転載アグリゲーター（同一記事を量産する。名寄せ時は元媒体を優先）
 const AGGREGATORS = ["Yahoo", "ヤフー", "au Webポータル", "auサービス", "Excite", "エキサイト", "SmartNews", "スマートニュース", "livedoor", "ライブドア", "goo", "BIGLOBE", "ニフティ", "Infoseek", "dメニュー"];
 const isAgg = s => AGGREGATORS.some(a => (s || "").includes(a));
+
+// 重複時の優先順位: 各社サイト・報道(2) > PR TIMES(1) > アグリゲーター(0)
+function rank(src) {
+  if (isAgg(src)) return 0;
+  if (/PR\s?TIMES/i.test(src || "")) return 1;
+  return 2;
+}
 
 // タイトル正規化キー（全半角・記号・末尾の（媒体名）を除去して比較）
 function titleKey(t) {
@@ -230,7 +246,7 @@ function loadExisting() {
     } catch (e) {
       console.warn(`SKIP ${feed.name}: ${e.message}`);
     }
-    await sleep(700); // レート制限回避：フィード間に待機
+    await sleep(1000); // レート制限回避：フィード間に待機（フィード本数が多いので長め）
   }
 
   // タイトル名寄せ：同一記事の転載を1本に（元媒体 > アグリゲーター）
@@ -241,7 +257,7 @@ function loadExisting() {
     const cur = byTitle.get(k);
     if (!cur) { byTitle.set(k, it); continue; }
     let winner = cur, loser = it;
-    if (isAgg(cur.source) && !isAgg(it.source)) { winner = it; loser = cur; }
+    if (rank(it.source) > rank(cur.source)) { winner = it; loser = cur; }
     winner.tags = Array.from(new Set([...(winner.tags || []), ...(loser.tags || [])]));
     if (!winner.summary && loser.summary) winner.summary = loser.summary;
     if (winner.kind !== "press" && loser.kind === "press") winner.kind = "press";
