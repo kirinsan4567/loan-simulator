@@ -59,7 +59,12 @@ a.ki-news__title:hover { color:var(--ki-accent); text-decoration:underline; }
 .ki-tag[data-t="不動産・市場"] { background:#f4eee6; color:#8a5a2b; }
 .ki-tag[data-t="開発・デベロッパー"] { background:#efe9f4; color:#5a3f7a; }
 .ki-tag[data-t="その他"]       { background:#eef0f2; color:#6b7280; }
+.ki-tag[data-t="三井"], .ki-tag[data-t="三菱"], .ki-tag[data-t="野村"], .ki-tag[data-t="住友"], .ki-tag[data-t="東建"], .ki-tag[data-t="日鉄"], .ki-tag[data-t="東急"] { background:#e8e3da; color:#5b4a35; }
 .ki-state { color:var(--ki-sub); padding:16px 2px; }
+.ki-devfilter { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 16px; }
+.ki-devchip { font-size:.8rem; font-weight:700; padding:4px 12px; border-radius:999px; border:1px solid var(--ki-line); background:#fff; color:var(--ki-sub); cursor:pointer; font-family:inherit; }
+.ki-devchip:hover { border-color:var(--ki-accent); color:var(--ki-accent); }
+.ki-devchip.active { background:var(--ki-accent); color:#fff; border-color:var(--ki-accent); }
 
 @media (max-width:760px){
   .ki-arch__wrap { grid-template-columns:1fr; }
@@ -72,6 +77,7 @@ a.ki-news__title:hover { color:var(--ki-accent); text-decoration:underline; }
 <div class="ki-arch__top">
   <a class="ki-arch__back" href="insights.html">← KIRIN Insights に戻る</a>
   <h1 class="ki-arch__title">過去のプレスリリース <span>カレンダー</span></h1>
+  <div id="devFilter" class="ki-devfilter"></div>
 </div>
 
 <div class="ki-arch__wrap">
@@ -154,26 +160,55 @@ function selectDay(key){
   renderCalendar();
 }
 
+const DEVS = ["三井", "三菱", "野村", "住友", "東建", "日鉄", "東急", "森"];
+let allPress = [];
+let curDev = "すべて";
+
+function applyDev(){
+  const items = (curDev === "すべて") ? allPress : allPress.filter(n => (n.tags || []).includes(curDev));
+  byDate = {};
+  items.forEach(n => { const key = ymd(new Date(n.date)); (byDate[key] = byDate[key] || []).push(n); });
+  if(!items.length){
+    $('#calGrid').innerHTML = "";
+    $('#panelDate').textContent = `${curDev === "すべて" ? "" : curDev + "の"}プレスリリースはありません`;
+    $('#panelSub').textContent = "";
+    $('#panelList').innerHTML = "";
+    $('#calLabel').textContent = "";
+    return;
+  }
+  const latest = new Date(items.reduce((m,n)=> new Date(n.date)>new Date(m)?n.date:m, items[0].date));
+  viewY = latest.getFullYear(); viewM = latest.getMonth();
+  selectedKey = null;
+  renderCalendar();
+  selectDay(ymd(latest));
+}
+
+function buildDevFilter(){
+  const wrap = $('#devFilter');
+  const chips = ["すべて", ...DEVS];
+  wrap.innerHTML = chips.map((d,i) => `<button class="ki-devchip${i===0?' active':''}" data-dev="${d}">${d}</button>`).join("");
+  wrap.querySelectorAll('.ki-devchip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      wrap.querySelectorAll('.ki-devchip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      curDev = btn.dataset.dev;
+      applyDev();
+    });
+  });
+}
+
 async function init(){
   try {
     const res = await fetch('data/news.json', { cache:'no-store' });
     if(!res.ok) throw new Error('not found');
     const all = await res.json();
-    const items = Array.isArray(all) ? all.filter(n => n.kind === "press") : [];
-    if(!Array.isArray(items) || !items.length){
+    allPress = Array.isArray(all) ? all.filter(n => n.kind === "press") : [];
+    if(!allPress.length){
       $('#archState').textContent = '過去のプレスリリースがまだありません。'; return;
     }
-    byDate = {};
-    items.forEach(n => {
-      const key = ymd(new Date(n.date));
-      (byDate[key] = byDate[key] || []).push(n);
-    });
-    // 最新の記事がある月・日を初期表示
-    const latest = new Date(items.reduce((m,n)=> new Date(n.date)>new Date(m)?n.date:m, items[0].date));
-    viewY = latest.getFullYear(); viewM = latest.getMonth();
     $('#archState').hidden = true;
-    renderCalendar();
-    selectDay(ymd(latest));
+    buildDevFilter();
+    applyDev();
 
     $('#prev').addEventListener('click', ()=>{ viewM--; if(viewM<0){viewM=11;viewY--;} renderCalendar(); });
     $('#next').addEventListener('click', ()=>{ viewM++; if(viewM>11){viewM=0;viewY++;} renderCalendar(); });

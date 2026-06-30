@@ -91,6 +91,13 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-tag[data-t="不動産・市場"] { background:#f4eee6; color:#8a5a2b; }
 .ki-tag[data-t="開発・デベロッパー"] { background:#efe9f4; color:#5a3f7a; }
 .ki-tag[data-t="その他"]       { background:#eef0f2; color:#6b7280; }
+.ki-tag[data-t="三井"], .ki-tag[data-t="三菱"], .ki-tag[data-t="野村"], .ki-tag[data-t="住友"], .ki-tag[data-t="東建"], .ki-tag[data-t="日鉄"], .ki-tag[data-t="東急"] { background:#e8e3da; color:#5b4a35; }
+
+/* デベロッパー絞り込みチップ */
+.ki-devfilter { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+.ki-devchip { font-size:.8rem; font-weight:700; padding:4px 12px; border-radius:999px; border:1px solid var(--ki-line); background:#fff; color:var(--ki-sub); cursor:pointer; font-family:inherit; }
+.ki-devchip:hover { border-color:var(--ki-accent); color:var(--ki-accent); }
+.ki-devchip.active { background:var(--ki-accent); color:#fff; border-color:var(--ki-accent); }
 
 .ki-more { display:block; width:100%; margin-top:16px; padding:10px; border:1px solid var(--ki-line); background:var(--ki-card); border-radius:10px; color:var(--ki-accent); font-weight:700; font-family:inherit; cursor:pointer; }
 .ki-more:hover { background:#fff; border-color:var(--ki-accent); }
@@ -185,6 +192,7 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
           <h2 class="ki-section__title">プレスリリース</h2>
           <span class="ki-section__en">Press</span>
         </div>
+        <div id="pressFilter" class="ki-devfilter"></div>
         <ul id="pressList" class="ki-news"></ul>
         <div id="pressState" class="ki-state">読み込み中…</div>
         <a id="pressMore" class="ki-more" href="press-archive.html" target="_blank" rel="noopener">過去・その他のプレスリリースをカレンダーで見る ↗</a>
@@ -361,6 +369,27 @@ function fillList(items, listSel, stateSel, moreSel, emptyMsg){
   more.hidden = items.length <= NEWS_RECENT_MAX; // 残りがある時だけカレンダー導線を表示
 }
 
+const DEVS = ["三井", "三菱", "野村", "住友", "東建", "日鉄", "東急", "森"];
+let allPress = [];
+
+function renderPressFiltered(dev){
+  const items = (dev === "すべて") ? allPress : allPress.filter(n => (n.tags || []).includes(dev));
+  fillList(items, '#pressList', '#pressState', '#pressMore', `${dev === "すべて" ? "" : dev + "の"}プレスリリースがまだありません。`);
+}
+
+function buildPressFilter(){
+  const wrap = $('#pressFilter');
+  const chips = ["すべて", ...DEVS];
+  wrap.innerHTML = chips.map((d,i) => `<button class="ki-devchip${i===0?' active':''}" data-dev="${d}">${d}</button>`).join("");
+  wrap.querySelectorAll('.ki-devchip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      wrap.querySelectorAll('.ki-devchip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderPressFiltered(btn.dataset.dev);
+    });
+  });
+}
+
 async function renderNews(){
   try {
     const res = await fetch('data/news.json', { cache: 'no-store' });
@@ -369,9 +398,13 @@ async function renderNews(){
     if(!Array.isArray(items)) items = [];
     items.sort((a,b)=> new Date(b.date) - new Date(a.date));
 
-    // ニュース欄＝全件（プレス含む）／プレスリリース欄＝kind:press のみ
+    // ニュース欄＝全件（プレス含む）
     fillList(items, '#newsList', '#newsState', '#newsMore', '表示できるニュースがまだありません。');
-    fillList(items.filter(n => n.kind === 'press'), '#pressList', '#pressState', '#pressMore', 'プレスリリースがまだありません。');
+
+    // プレスリリース欄＝kind:press のみ＋デベロッパー絞り込み
+    allPress = items.filter(n => n.kind === 'press');
+    buildPressFilter();
+    renderPressFiltered("すべて");
   } catch (e) {
     $('#newsState').textContent = 'ニュースを読み込めませんでした。少し時間をおいて再読み込みしてください。';
     $('#pressState').textContent = 'プレスリリースを読み込めませんでした。';
