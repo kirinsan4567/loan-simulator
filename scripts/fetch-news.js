@@ -51,17 +51,19 @@ const FEEDS = [
   { name: "みんかぶ",      type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:minkabu.jp 金利 不動産 REIT 日銀&hl=ja&gl=JP&ceid=JP:ja") },
 
   // ── 業界・プレス（開発・デベロッパー・物流施設）──────────────
-  { name: "PR TIMES",      type: "google", kind: "press", url: encodeURI("https://news.google.com/rss/search?q=site:prtimes.jp 不動産 マンション 再開発 デベロッパー&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "PR TIMES",      type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:prtimes.jp 不動産 マンション 再開発 デベロッパー&hl=ja&gl=JP&ceid=JP:ja") },
 
-  // ── デベロッパー各社（社名で直接収集。重複はPR TIMESより各社/報道を優先）──
-  { name: "三井不動産",     type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="三井不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
-  { name: "三菱地所",       type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="三菱地所" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
-  { name: "野村不動産",     type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="野村不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
-  { name: "東急不動産",     type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="東急不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
-  { name: "東京建物",       type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="東京建物" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
-  { name: "森ビル",         type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="森ビル" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
-  { name: "住友不動産",     type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="住友不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
-  { name: "日鉄興和不動産",  type: "google", kind: "press", url: encodeURI('https://news.google.com/rss/search?q="日鉄興和不動産" -人事 -株価&hl=ja&gl=JP&ceid=JP:ja') },
+  // ── デベロッパー各社の「公式サイトのみ」をプレスとして収集 ──────
+  //   site:各社ドメイン で公式サイトに限定。dev は絞り込みボタン用の短縮名。
+  //   採用・IR・株主等の非プレスはマイナス検索で除外。
+  { name: "三井不動産",     type: "google", kind: "press", dev: "三井", url: encodeURI("https://news.google.com/rss/search?q=site:mitsuifudosan.co.jp -採用 -求人 -IR -株主 -人事 -株価&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "三菱地所",       type: "google", kind: "press", dev: "三菱", url: encodeURI("https://news.google.com/rss/search?q=site:mec.co.jp -採用 -求人 -IR -株主 -人事 -株価&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "野村不動産",     type: "google", kind: "press", dev: "野村", url: encodeURI("https://news.google.com/rss/search?q=site:nomura-re.co.jp -採用 -求人 -IR -株主 -人事 -株価&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "東急不動産",     type: "google", kind: "press", dev: "東急", url: encodeURI("https://news.google.com/rss/search?q=site:tokyu-land.co.jp -採用 -求人 -IR -株主 -人事 -株価&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "東京建物",       type: "google", kind: "press", dev: "東建", url: encodeURI("https://news.google.com/rss/search?q=site:tatemono.com -採用 -求人 -IR -株主 -人事 -株価&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "森ビル",         type: "google", kind: "press", dev: "森",   url: encodeURI("https://news.google.com/rss/search?q=site:mori.co.jp -採用 -求人 -IR -株主 -人事 -株価&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "住友不動産",     type: "google", kind: "press", dev: "住友", url: encodeURI("https://news.google.com/rss/search?q=site:sumitomo-rd.co.jp -採用 -求人 -IR -株主 -人事 -株価&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "日鉄興和不動産",  type: "google", kind: "press", dev: "日鉄", url: encodeURI("https://news.google.com/rss/search?q=site:nskre.co.jp -採用 -求人 -IR -株主 -人事 -株価&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "日刊工業新聞",  type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:nikkan.co.jp 不動産 再開発 建設 住宅&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "ニュースイッチ", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:newswitch.jp 不動産 再開発 建設 住宅&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "LNEWS",         type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:lnews.jp 物流施設 不動産 開発&hl=ja&gl=JP&ceid=JP:ja") },
@@ -169,6 +171,16 @@ function detectTags(title) {
   return tags.length ? tags : ["その他"];
 }
 
+// 短縮デベロッパー名タグ（正式名→短縮）。物件名やプレスに付与。
+const DEV_SHORT = [
+  ["三井不動産", "三井"], ["三菱地所", "三菱"], ["野村不動産", "野村"],
+  ["住友不動産", "住友"], ["東京建物", "東建"], ["日鉄興和不動産", "日鉄"], ["東急不動産", "東急"], ["森ビル", "森"]
+];
+function devTags(title) {
+  const t = title || "";
+  return DEV_SHORT.filter(([full]) => t.includes(full)).map(([, sh]) => sh);
+}
+
 function toISO(item) {
   const d = new Date(item.isoDate || item.pubDate || Date.now());
   return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
@@ -221,7 +233,12 @@ function loadExisting() {
         if (!title) continue;
 
         const id = normalizeUrl(link) || title;
-        const tags = detectTags(title);
+        let tags = Array.from(new Set([...detectTags(title), ...devTags(title)]));
+        // 公式サイト由来のプレスは、タイトルに社名が無くても所属デベロッパーを付与
+        if (feed.dev) {
+          tags = tags.filter(t => t !== "その他");
+          tags = Array.from(new Set([...tags, feed.dev, "開発・デベロッパー"]));
+        }
 
         // 厳選: 興味関心の外（タグが「その他」だけ）はストックしない
         if (tags.length === 1 && tags[0] === "その他") continue;
