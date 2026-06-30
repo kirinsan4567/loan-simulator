@@ -51,10 +51,17 @@ const FEEDS = [
   { name: "みんかぶ",      type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:minkabu.jp 金利 不動産 REIT 日銀&hl=ja&gl=JP&ceid=JP:ja") },
 
   // ── 業界・プレス（開発・デベロッパー・物流施設）──────────────
-  { name: "PR TIMES",      type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:prtimes.jp 不動産 マンション 再開発 デベロッパー&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "PR TIMES",      type: "google", kind: "press", url: encodeURI("https://news.google.com/rss/search?q=site:prtimes.jp 不動産 マンション 再開発 デベロッパー&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "PR TIMES(デベロッパー)", type: "google", kind: "press", url: encodeURI("https://news.google.com/rss/search?q=site:prtimes.jp (三井不動産 OR 三菱地所 OR 野村不動産 OR 東急不動産 OR 東京建物 OR 森ビル OR 住友不動産 OR 日鉄興和不動産)&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "日刊工業新聞",  type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:nikkan.co.jp 不動産 再開発 建設 住宅&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "ニュースイッチ", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:newswitch.jp 不動産 再開発 建設 住宅&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "LNEWS",         type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:lnews.jp 物流施設 不動産 開発&hl=ja&gl=JP&ceid=JP:ja") },
+
+  // ── コラム・読み物（不動産関連のものだけタグ厳選で残る）──────
+  { name: "ゴールドオンライン", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:gentosha-go.com 不動産 マンション 相続 不動産投資 住宅ローン&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "Forbes JAPAN",   type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:forbesjapan.com 不動産 デベロッパー 再開発 マンション&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "マイナビニュース", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:news.mynavi.jp 住宅ローン 金利 不動産 マンション&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "CNET Japan",     type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:japan.cnet.com 不動産 再開発 スマートシティ&hl=ja&gl=JP&ceid=JP:ja") },
 
   // ── 不動産・建設の専門メディア（Google site: 検索）──────────
   //   公式RSSが無い媒体もここで拾える。リンクはGoogleリダイレクト・要約なし。
@@ -69,6 +76,8 @@ const FEEDS = [
   { name: "建設通信新聞",    type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kensetsunews.com 不動産 住宅 再開発&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "日刊建設工業新聞", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:decn.co.jp 不動産 住宅 再開発&hl=ja&gl=JP&ceid=JP:ja") },
   { name: "建設新聞",        type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:kensetsu-sinbun.co.jp 不動産 住宅&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "日経不動産マーケット情報", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:nfm.nikkeibp.co.jp 不動産 マンション 再開発 金利&hl=ja&gl=JP&ceid=JP:ja") },
+  { name: "住宅産業新聞(sjt)", type: "google", url: encodeURI("https://news.google.com/rss/search?q=site:sjt.co.jp/news&hl=ja&gl=JP&ceid=JP:ja") },
 
   // ── 各媒体の公式RSS（実URL＋要約文が取れる。type省略＝direct）──
   //   要約は direct フィードのみ採用（Googleの説明欄は関連記事リストで使えないため）。
@@ -86,7 +95,7 @@ const TAG_GROUPS = [
   { label: "金利・日銀",   keywords: ["日銀", "利上げ", "利下げ", "政策金利", "金融政策", "金利", "変動金利", "固定金利"] },
   { label: "住宅ローン",   keywords: ["住宅ローン", "ローン", "繰上返済", "繰り上げ返済", "借入", "借り入れ", "団信", "フラット35", "控除", "減税"] },
   { label: "不動産・市場", keywords: ["不動産", "マンション", "タワマン", "タワーマンション", "戸建", "新築", "中古", "分譲", "地価", "住宅価格", "市況", "賃貸"] },
-  { label: "開発・デベロッパー", keywords: ["デベロッパー", "ディベロッパー", "再開発", "都市開発", "大規模開発", "三井不動産", "三菱地所", "住友不動産", "野村不動産", "東急不動産", "森ビル", "大和ハウス", "積水ハウス", "住友林業", "東京建物"] }
+  { label: "開発・デベロッパー", keywords: ["デベロッパー", "ディベロッパー", "再開発", "都市開発", "大規模開発", "三井不動産", "三菱地所", "住友不動産", "野村不動産", "東急不動産", "森ビル", "大和ハウス", "積水ハウス", "住友林業", "東京建物", "日鉄興和不動産"] }
 ];
 
 // ───────────────────────────────────────────────────────────
@@ -213,7 +222,7 @@ function loadExisting() {
           cur.tags = Array.from(new Set([...(cur.tags || []), ...tags]));
           if (!cur.summary && summary) cur.summary = summary;
         } else {
-          map.set(id, { id, title, url: link, source, date: toISO(item), tags, summary });
+          map.set(id, { id, title, url: link, source, date: toISO(item), tags, summary, kind: feed.kind || "news" });
           added++;
         }
       }
@@ -235,6 +244,7 @@ function loadExisting() {
     if (isAgg(cur.source) && !isAgg(it.source)) { winner = it; loser = cur; }
     winner.tags = Array.from(new Set([...(winner.tags || []), ...(loser.tags || [])]));
     if (!winner.summary && loser.summary) winner.summary = loser.summary;
+    if (winner.kind !== "press" && loser.kind === "press") winner.kind = "press";
     byTitle.set(k, winner);
   }
 
