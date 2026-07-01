@@ -92,7 +92,7 @@
 #news .ki-section__head, #press .ki-section__head { max-width: 680px; }
 .ki-news__item { padding: 6px 2px; border-bottom: 1px solid var(--ki-line); display: flex; gap: 10px; align-items: baseline; }
 .ki-news__no { flex: none; font-family: "Space Grotesk", system-ui, sans-serif; font-size: .78rem; font-weight: 600; color: var(--ki-accent); min-width: 1.6em; text-align: right; font-variant-numeric: tabular-nums; }
-.ki-news__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ki-news__body { min-width: 0; flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px; }
 .ki-news__title { color: var(--ki-ink); text-decoration: none; font-weight: 500; font-size: .94rem; line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
@@ -341,48 +341,52 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
     <!-- ===== 右：マーケット速報（TradingViewの準リアルタイム相場） ===== -->
     <aside class="ki-aside">
       <div class="ki-aside__head">
-        <h2 class="ki-aside__title">マーケット速報</h2>
+        <h2 class="ki-aside__title">Markets</h2>
       </div>
       <div class="ki-ticker">
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"FX_IDC:USDJPY","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"FX_IDC:USDJPY","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"FX_IDC:EURJPY","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"FX_IDC:EURJPY","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"TVC:NI225","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"TVC:NI225","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"TVC:TPX","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"TVC:TPX","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"TVC:DJI","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"TVC:DJI","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"TVC:JP10Y","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"SP:SPX","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"TVC:US10Y","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"TVC:JP10Y","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"TVC:GOLD","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"TVC:US10Y","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"TVC:USOIL","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"TVC:GOLD","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
         <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"BITFLYER:BTCJPY","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          {"symbol":"TVC:USOIL","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"BITFLYER:BTCJPY","width":"100%","height":104,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
           </script></div></div>
       </div>
       <p class="ki-ticker__note">相場：TradingView（準リアルタイム／取引所により遅延あり・参考値）</p>
