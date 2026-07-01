@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q94YYVKNFG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-Q94YYVKNFG');
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KIRIN Insights | 住宅ローン・金利・不動産ニュース</title>
@@ -36,10 +45,11 @@
 
 /* 固定ヘッダー */
 .ki-header {
-  position: sticky; top: 0; z-index: 50;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
   background: #ffffff;
   border-bottom: 1px solid var(--ki-line);
   box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  transform: translateZ(0);
 }
 .ki-header__inner {
   max-width: 1100px; margin: 0 auto; padding: 12px 20px;
@@ -58,11 +68,10 @@
 .ki-nav a.ki-nav__ext { color: #fff; background: var(--ki-accent); font-weight: 700; }
 .ki-nav a.ki-nav__ext:hover { color: #fff; background: var(--ki-accent); opacity: .9; }
 
-/* レイアウト：左メイン＋右サイドバー */
+/* レイアウト：1カラム（右サイドバーは廃止し、Xはコラムへ移設） */
 .ki-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
-.ki-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 32px; align-items: start; }
+.ki-grid { display: block; }
 .ki-main { min-width: 0; }
-.ki-aside { position: sticky; top: 76px; }
 
 /* セクション */
 .ki-section { scroll-margin-top: calc(var(--ki-header-h, 96px) + 16px); margin-bottom: 44px; }
@@ -105,6 +114,7 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-more { display:block; width:100%; margin-top:16px; padding:10px; border:1px solid var(--ki-line); background:var(--ki-card); border-radius:10px; color:var(--ki-accent); font-weight:700; font-family:inherit; cursor:pointer; }
 .ki-more:hover { background:#fff; border-color:var(--ki-accent); }
 .ki-state { color: var(--ki-sub); padding: 16px 2px; font-size:.92rem; }
+.ki-updated { font-size:.76rem; color: var(--ki-sub); margin: 0 0 12px; }
 
 /* Kirin Pics */
 .ki-pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap: 16px; align-items: start; }
@@ -136,6 +146,7 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-aside__head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .ki-aside__title { font-size:1rem; font-weight:700; margin:0; }
 .ki-follow { font-size:.8rem; font-weight:700; text-decoration:none; color:#fff; background:#000; padding:6px 14px; border-radius:999px; }
+.ki-follow--inline { margin-left: auto; align-self: center; }
 .ki-xfeed { display:flex; flex-direction:column; gap:14px; max-height: calc(100vh - 140px); overflow:auto; padding-right:4px; }
 .ki-xcard { background:var(--ki-card); border:1px solid var(--ki-line); border-radius:var(--ki-radius); padding:14px; }
 .ki-xcard__top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
@@ -207,6 +218,7 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
           <h2 class="ki-section__title">ニュース</h2>
           <span class="ki-section__en">News</span>
         </div>
+        <p class="ki-updated" id="newsUpdated"></p>
         <ul id="newsList" class="ki-news"></ul>
         <div id="newsState" class="ki-state">読み込み中…</div>
         <a id="newsMore" class="ki-more" href="insights-archive.html" target="_blank" rel="noopener">過去・その他のニュースをカレンダーで見る ↗</a>
@@ -218,6 +230,7 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
           <h2 class="ki-section__title">プレスリリース</h2>
           <span class="ki-section__en">Press</span>
         </div>
+        <p class="ki-updated" id="pressUpdated"></p>
         <div id="pressFilter" class="ki-devfilter"></div>
         <ul id="pressList" class="ki-news"></ul>
         <div id="pressState" class="ki-state">読み込み中…</div>
@@ -271,25 +284,18 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
         <p class="ki-state">準備中</p>
       </section>
 
-      <!-- コラム（手動：columnsData） -->
+      <!-- コラム（Xの引用パネル＋リンクカード） -->
       <section id="columns" class="ki-section">
         <div class="ki-section__head">
           <h2 class="ki-section__title">コラム</h2>
           <span class="ki-section__en">Columns</span>
+          <a class="ki-follow ki-follow--inline" href="https://x.com/kirinsan4567" target="_blank" rel="noopener">＠kirinsan4567 をフォロー ↗</a>
         </div>
+        <div id="columnsX" class="ki-pics"></div>
         <div id="columnsCards" class="ki-cards"></div>
       </section>
 
     </main>
-
-    <!-- ===== 右：X投稿（自前カード） ===== -->
-    <aside class="ki-aside">
-      <div class="ki-aside__head">
-        <h2 class="ki-aside__title">X (@kirinsan4567)</h2>
-        <a class="ki-follow" href="https://x.com/kirinsan4567" target="_blank" rel="noopener">フォロー</a>
-      </div>
-      <div id="xFeed" class="ki-xfeed"></div>
-    </aside>
 
   </div>
 </div>
@@ -348,10 +354,12 @@ const $ = sel => document.querySelector(sel);
 function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtDate(iso){ const d=new Date(iso); if(isNaN(d)) return ""; return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`; }
 
-/* ---------- X投稿の描画（公式埋め込み） ---------- */
+/* ---------- X投稿の描画（コラムにパネル埋め込み） ---------- */
 function renderX(){
-  $('#xFeed').innerHTML = myXPosts.map(u =>
-    `<blockquote class="twitter-tweet" data-dnt="true"><a href="${esc(u)}"></a></blockquote>`
+  const el = $('#columnsX');
+  if (!el) return;
+  el.innerHTML = myXPosts.map(u =>
+    `<div class="ki-embed"><blockquote class="twitter-tweet" data-dnt="true"><a href="${esc(u)}"></a></blockquote></div>`
   ).join("");
 }
 
@@ -591,17 +599,41 @@ async function renderNews(){
   }
 }
 
+/* ---------- 更新時刻の表示（Action由来。HTML編集ではカウントしない） ---------- */
+async function showUpdated(){
+  const n = $('#newsUpdated'), p = $('#pressUpdated');
+  let txt = '3時間ごとに自動更新';
+  try {
+    const res = await fetch('data/news_updated.json', { cache: 'no-store' });
+    if (res.ok){
+      const j = await res.json();
+      const d = new Date(j.updatedAt);
+      if (!isNaN(d)){
+        const s = d.toLocaleString('ja-JP', { timeZone:'Asia/Tokyo', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+        txt += `／最終更新 ${s}`;
+      }
+    }
+  } catch (e) { /* 未生成時はデフォルト文のみ */ }
+  if (n) n.textContent = txt;
+  if (p) p.textContent = txt;
+}
+
 /* ---------- 起動 ---------- */
 renderX();
 renderPics();
 whenChartReady(renderReports);
 renderCards('#columnsCards', columnsData);
 loadTweets();
+showUpdated();
 
 /* 固定ヘッダーの実高さをCSS変数へ（アンカー飛び先の隠れを防ぐ） */
 function setHeaderOffset(){
   const h = document.querySelector('.ki-header');
-  if (h) document.body.style.setProperty('--ki-header-h', h.offsetHeight + 'px');
+  if (h){
+    const px = h.offsetHeight;
+    document.body.style.setProperty('--ki-header-h', px + 'px');
+    document.body.style.paddingTop = px + 'px';
+  }
 }
 setHeaderOffset();
 window.addEventListener('resize', setHeaderOffset);
