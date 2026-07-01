@@ -65,7 +65,7 @@
 .ki-aside { position: sticky; top: 76px; }
 
 /* セクション */
-.ki-section { scroll-margin-top: 80px; margin-bottom: 44px; }
+.ki-section { scroll-margin-top: calc(var(--ki-header-h, 96px) + 16px); margin-bottom: 44px; }
 .ki-section__head { display: flex; align-items: baseline; gap: 12px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--ki-ink); }
 .ki-section__title { font-size: 1.4rem; font-weight: 700; margin: 0; }
 .ki-section__en { font-size: .72rem; letter-spacing: .18em; color: var(--ki-sub); text-transform: uppercase; }
@@ -116,6 +116,11 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 
 /* カード（レポート/コラム） */
 .ki-cards { display: grid; gap: 12px; }
+.ki-report__title { font-size: 1.02rem; font-weight: 700; margin: 18px 0 8px; }
+.ki-report__title:first-child { margin-top: 4px; }
+.ki-chartwrap { position: relative; height: 340px; background: var(--ki-card); border: 1px solid var(--ki-line); border-radius: var(--ki-radius); padding: 12px 10px 6px; }
+.ki-report__note { font-size: .8rem; color: var(--ki-sub); margin: 10px 2px 0; }
+@media (max-width: 600px){ .ki-chartwrap { height: 280px; } }
 .ki-cardlink { display:flex; flex-direction:column; gap:6px; padding:16px 18px; background:var(--ki-card); border:1px solid var(--ki-line); border-radius:var(--ki-radius); text-decoration:none; color:var(--ki-ink); transition: border-color .15s, transform .15s; }
 .ki-cardlink:hover { border-color: var(--ki-accent); transform: translateY(-2px); }
 .ki-cardlink h3 { margin:0; font-size:1.02rem; font-weight:700; }
@@ -213,13 +218,20 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
         <div id="picsGrid" class="ki-pics"></div>
       </section>
 
-      <!-- 分析レポート（手動：reportsData。シミュレーターの該当シナリオへリンク） -->
+      <!-- 分析レポート：金利・為替・株価の月次推移グラフ -->
       <section id="reports" class="ki-section">
         <div class="ki-section__head">
           <h2 class="ki-section__title">分析レポート</h2>
           <span class="ki-section__en">Reports</span>
         </div>
-        <div id="reportsCards" class="ki-cards"></div>
+        <div id="reportsBody">
+          <h3 class="ki-report__title">金利の推移（変動・固定・政策金利・長期金利）</h3>
+          <div class="ki-chartwrap"><canvas id="chartRates"></canvas></div>
+          <h3 class="ki-report__title">ドル円・日経平均の推移</h3>
+          <div class="ki-chartwrap"><canvas id="chartMacro"></canvas></div>
+          <p class="ki-report__note">月次データ。凡例をクリックすると各系列の表示/非表示を切り替えられます。</p>
+        </div>
+        <div id="reportsState" class="ki-state" hidden></div>
       </section>
 
       <!-- コラム（手動：columnsData） -->
@@ -276,7 +288,7 @@ const picArticles = [
 
 /* 3) コラム（手動） */
 const columnsData = [
-  { title: "住宅ローンのコラム（Xで読む）", desc: "KIRINのXコラム記事", href: "https://x.com/kirinsan4567/article/2054187727458058293" },
+  { title: "都心タワマンをカツカツで買うリスクのお話", desc: "Xで読む", href: "https://x.com/kirinsan4567/article/2054187727458058293" },
   { title: "繰上返済の哲学", desc: "流動性・機会費用・団信・運用のトレードオフから考える", href: "scenarios.html#column" },
 ];
 
@@ -311,6 +323,87 @@ function renderPics(){
 function loadTweets(){
   if (window.twttr && window.twttr.widgets) { window.twttr.widgets.load(); }
   else { setTimeout(loadTweets, 300); }
+}
+
+/* ---------- 分析レポート：金利/為替/株価の月次グラフ ---------- */
+function whenChartReady(cb){
+  if (typeof Chart !== 'undefined') cb();
+  else setTimeout(() => whenChartReady(cb), 100);
+}
+function parseCSV(text){
+  const rows = []; let row = [], field = '', q = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (q){
+      if (c === '"'){ if (text[i+1] === '"'){ field += '"'; i++; } else q = false; }
+      else field += c;
+    } else {
+      if (c === '"') q = true;
+      else if (c === ','){ row.push(field); field = ''; }
+      else if (c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c === '\r'){ /* skip */ }
+      else field += c;
+    }
+  }
+  if (field !== '' || row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+function toNum(s){ if (s == null) return null; s = String(s).replace(/[",\s]/g, ''); return s === '' ? null : Number(s); }
+
+let rateChart, macroChart;
+async function renderReports(){
+  const state = $('#reportsState');
+  try {
+    const res = await fetch('data/market.csv', { cache: 'no-store' });
+    if (!res.ok) throw new Error('not found');
+    const rows = parseCSV(await res.text());
+    rows.shift(); // ヘッダー
+    const L=[], vr=[], f3=[], f10=[], pol=[], jgb=[], usd=[], nk=[];
+    for (const r of rows){
+      const ym = (r[0] || '').trim();
+      if (!/^\d{4}-\d{2}/.test(ym)) continue;
+      L.push(ym);
+      vr.push(toNum(r[1])); f3.push(toNum(r[2])); f10.push(toNum(r[3]));
+      pol.push(toNum(r[4])); jgb.push(toNum(r[5])); usd.push(toNum(r[6])); nk.push(toNum(r[7]));
+    }
+    const base = {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      elements:{ point:{ radius:0, hitRadius:6 } },
+      plugins:{ legend:{ labels:{ boxWidth:12, font:{ size:11 } } } },
+      scales:{ x:{ ticks:{ maxTicksLimit:12, autoSkip:true, font:{ size:10 } }, grid:{ display:false } } }
+    };
+    const ds = (label, data, color, axis) => ({ label, data, borderColor:color, backgroundColor:color, borderWidth:1.6, tension:0.15, spanGaps:false, yAxisID: axis || 'y' });
+
+    if (rateChart) rateChart.destroy();
+    rateChart = new Chart($('#chartRates'), {
+      type:'line',
+      data:{ labels:L, datasets:[
+        ds('変動金利', vr, '#d64545'),
+        ds('固定3年', f3, '#2f8f4e'),
+        ds('固定10年', f10, '#2f6fb0'),
+        ds('政策金利', pol, '#e0932f'),
+        ds('10年国債', jgb, '#7a5aa0')
+      ]},
+      options:{ ...base, scales:{ ...base.scales,
+        y:{ ticks:{ callback:v=>v+'%', font:{ size:10 } }, title:{ display:true, text:'金利(%)' } } } }
+    });
+
+    if (macroChart) macroChart.destroy();
+    macroChart = new Chart($('#chartMacro'), {
+      type:'line',
+      data:{ labels:L, datasets:[
+        ds('ドル円', usd, '#c98a2b', 'y'),
+        ds('日経平均', nk, '#3a6ea5', 'y1')
+      ]},
+      options:{ ...base, scales:{ ...base.scales,
+        y:{ position:'left', ticks:{ font:{ size:10 } }, title:{ display:true, text:'ドル円' } },
+        y1:{ position:'right', ticks:{ font:{ size:10 } }, grid:{ drawOnChartArea:false }, title:{ display:true, text:'日経平均' } } } }
+    });
+    if (state) state.hidden = true;
+  } catch (e) {
+    if (state){ state.hidden = false; state.textContent = 'グラフデータ(data/market.csv)を読み込めませんでした。'; }
+  }
 }
 
 function renderCards(target, data){
@@ -401,12 +494,22 @@ async function renderNews(){
 /* ---------- 起動 ---------- */
 renderX();
 renderPics();
-$('#reportsCards').innerHTML = '<p class="ki-state">準備中</p>';
+whenChartReady(renderReports);
 renderCards('#columnsCards', columnsData);
 loadTweets();
+
+/* 固定ヘッダーの実高さをCSS変数へ（アンカー飛び先の隠れを防ぐ） */
+function setHeaderOffset(){
+  const h = document.querySelector('.ki-header');
+  if (h) document.body.style.setProperty('--ki-header-h', h.offsetHeight + 'px');
+}
+setHeaderOffset();
+window.addEventListener('resize', setHeaderOffset);
+window.addEventListener('load', setHeaderOffset);
 renderNews();
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </body>
 </html>
