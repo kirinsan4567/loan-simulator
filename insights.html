@@ -389,11 +389,7 @@ const picArticles = [
 
 /* 3) コラム（手動） */
 /* 「都心タワマン」はXのコラム記事。トップ画像付きの記事カードで表示。 */
-const columnFeature = {
-  title: "都心タワマンをカツカツで買うリスクのお話",
-  url: "https://x.com/kirinsan4567/article/2054187727458058293",
-  image: "column-towerman.jpg"   /* ★リポジトリ直下にこのファイル名で表紙画像を置いてください */
-};
+const columnFeature = null;
 const columnsData = [];
 
 /* ---------- 共通ヘルパー ---------- */
@@ -404,7 +400,7 @@ function fmtDate(iso){ const d=new Date(iso); if(isNaN(d)) return ""; return `${
 /* ---------- X投稿の描画（コラムにパネル埋め込み＋コラム記事カード） ---------- */
 function renderX(){
   const el = $('#columnsX');
-  if (!el) return;
+  if (!columnFeature) return;
   const feat = columnFeature ? `
     <a class="ki-embed ki-xart" href="${esc(columnFeature.url)}" target="_blank" rel="noopener">
       <div class="ki-xart__img"><img src="${esc(columnFeature.image)}" alt="" loading="lazy"></div>
