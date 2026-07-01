@@ -124,6 +124,7 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-data-period { display: inline-block; font-size: .82rem; font-weight: 700; color: var(--ki-accent); background: #eef3f6; border-radius: 999px; padding: 4px 12px; margin: 0 0 14px; }
 .ki-report__desc { font-size: .85rem; color: var(--ki-sub); line-height: 1.75; margin: 10px 2px 4px; }
 .ki-report__desc b { color: var(--ki-ink); font-weight: 700; }
+.ki-report__src { font-size: .74rem; color: var(--ki-sub); line-height: 1.7; margin: 6px 2px 0; }
 @media (max-width: 600px){ .ki-chartwrap { height: 280px; } }
 .ki-cardlink { display:flex; flex-direction:column; gap:6px; padding:16px 18px; background:var(--ki-card); border:1px solid var(--ki-line); border-radius:var(--ki-radius); text-decoration:none; color:var(--ki-ink); transition: border-color .15s, transform .15s; }
 .ki-cardlink:hover { border-color: var(--ki-accent); transform: translateY(-2px); }
@@ -245,15 +246,18 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
           <p class="ki-report__desc">
             <b>変動金利・固定3年・固定10年</b>は各行の<b>店頭表示金利（基準金利）</b>です。実際に借りる際の適用金利は、ここから<b>引き下げ幅（優遇幅）</b>を差し引いた水準になります（例：変動は店頭2.475%でも、優遇後はおおむね0.3〜0.7%程度）。<b>政策金利</b>は日銀の政策金利、<b>10年国債</b>は長期金利の代表指標です。
           </p>
+          <p class="ki-report__src">出所：住宅ローン金利（変動・固定3年・固定10年）＝住宅金融支援機構「民間金融機関の住宅ローン金利推移」／政策金利＝日本銀行／10年国債（長期金利）＝財務省「国債金利情報」（月末値）。いずれも月次。</p>
           <h3 class="ki-report__title">ドル円・日経平均の推移<span class="ki-report__period" id="macroPeriod"></span></h3>
           <div class="ki-chartwrap"><canvas id="chartMacro"></canvas></div>
           <p class="ki-report__note">月次データ。凡例をクリックすると各系列の表示/非表示を切り替えられます。</p>
+          <p class="ki-report__src">出所：ドル円＝FRED（DEXJPUS・月末値）／日本銀行「外国為替相場状況」、日経平均＝日本経済新聞社「日経平均プロファイル」（月末終値）。</p>
 
           <h3 class="ki-report__title">中古マンション70㎡価格：3大都市圏<span class="ki-report__period" id="city3Period"></span></h3>
           <div class="ki-chartwrap"><canvas id="chartCity3"></canvas></div>
           <h3 class="ki-report__title">中古マンション70㎡価格：東京<span class="ki-report__period" id="tokyoPeriod"></span></h3>
           <div class="ki-chartwrap"><canvas id="chartTokyo"></canvas></div>
-          <p class="ki-report__note">中古マンション70㎡・月次（東京カンテイをもとに作成）。価格データは2014年12月以降。</p>
+          <p class="ki-report__note">中古マンション70㎡・月次。価格データは2014年12月以降。</p>
+          <p class="ki-report__src">出所：東京カンテイ（中古マンション70㎡・月次）をもとにKIRIN作成。</p>
         </div>
         <div id="reportsState" class="ki-state" hidden></div>
       </section>
