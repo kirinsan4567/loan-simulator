@@ -159,6 +159,15 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) {
   .ki-cardlink { transition: none; }
 }
+
+/* ---------- Footer（index.html と統一） ---------- */
+footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e2e0db; padding: 16px 24px 22px; text-align: center; margin-top: 48px; }
+.footer-disclaimer { font-size: 10px; color: #6b6861; line-height: 1.7; max-width: 680px; margin: 0 auto 14px; }
+.footer-credit { display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 12px; color: #6b6861; flex-wrap: wrap; }
+.footer-icon { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e0db; flex-shrink: 0; }
+.footer-x-link { display: inline-flex; align-items: center; gap: 6px; color: #1a1a1a; text-decoration: none; font-weight: 700; font-size: 12px; padding: 5px 12px; border: 1px solid #e2e0db; border-radius: 20px; transition: background .15s, border-color .15s; }
+.footer-x-link:hover { background: #f8f7f4; border-color: #1a1a1a; }
+.x-logo { flex-shrink: 0; }
 </style>
 </head>
 
@@ -280,6 +289,20 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 
   </div>
 </div>
+
+<footer class="site-footer">
+  <div class="footer-disclaimer">
+    本ページの金利・為替・株価・不動産価格などの情報は、各種公表データをもとにKIRINが作成したもので、正確性・完全性を保証するものではありません。特定の金融商品の売買や投資を推奨するものではなく、ご判断はご自身の責任で行ってください。
+  </div>
+  <div class="footer-credit">
+    <img src="icon.jpg" alt="KIRIN" class="footer-icon">
+    <span>© 2026 KIRIN</span>
+    <a class="footer-x-link" href="https://x.com/kirinsan4567" target="_blank" rel="noopener noreferrer">
+      <svg class="x-logo" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      <span>@kirinsan4567</span>
+    </a>
+  </div>
+</footer>
 
 <script>
 /* ============================================================
@@ -420,6 +443,7 @@ async function renderReports(){
     const fitL = s => { s.width = LW; };
     const fitR = s => { s.width = RW; };
     const spacerR = () => ({ position:'right', display:true, grid:{ drawOnChartArea:false }, ticks:{ display:false }, afterFit: fitR });
+    const spacerL = () => ({ position:'left', display:true, grid:{ drawOnChartArea:false }, ticks:{ display:false }, afterFit: fitL });
 
     if (rateChart) rateChart.destroy();
     rateChart = new Chart($('#chartRates'), {
@@ -449,7 +473,7 @@ async function renderReports(){
     });
     if (state) state.hidden = true;
 
-    const yenY = () => ({ ticks:{ callback:v=>Number(v).toLocaleString(), font:{ size:10 } }, title:{ display:true, text:'70㎡価格（万円）' }, afterFit: fitL });
+    const yenY = () => ({ position:'right', ticks:{ callback:v=>Number(v).toLocaleString(), font:{ size:10 } }, title:{ display:true, text:'70㎡価格（万円）' }, afterFit: fitR });
 
     if (city3Chart) city3Chart.destroy();
     city3Chart = new Chart($('#chartCity3'), {
@@ -459,7 +483,7 @@ async function renderReports(){
         ds('大阪6区', osaka, '#2f8f4e'),
         ds('名古屋3区', nagoya, '#2f6fb0')
       ]},
-      options:{ ...base, scales:{ ...base.scales, y: yenY(), y1: spacerR() } }
+      options:{ ...base, scales:{ ...base.scales, y: yenY(), yL: spacerL() } }
     });
 
     if (tokyoChart) tokyoChart.destroy();
@@ -471,7 +495,7 @@ async function renderReports(){
         ds('城南・城西6区', jyonan, '#2f8f4e'),
         ds('城北・城東11区', jyohoku, '#2f6fb0')
       ]},
-      options:{ ...base, scales:{ ...base.scales, y: yenY(), y1: spacerR() } }
+      options:{ ...base, scales:{ ...base.scales, y: yenY(), yL: spacerL() } }
     });
   } catch (e) {
     if (state){ state.hidden = false; state.textContent = 'グラフデータ(data/market.csv)を読み込めませんでした。'; }
