@@ -239,6 +239,12 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
           <h3 class="ki-report__title">ドル円・日経平均の推移<span class="ki-report__period" id="macroPeriod"></span></h3>
           <div class="ki-chartwrap"><canvas id="chartMacro"></canvas></div>
           <p class="ki-report__note">月次データ。凡例をクリックすると各系列の表示/非表示を切り替えられます。</p>
+
+          <h3 class="ki-report__title">中古マンション70㎡価格：3大都市圏<span class="ki-report__period" id="city3Period"></span></h3>
+          <div class="ki-chartwrap"><canvas id="chartCity3"></canvas></div>
+          <h3 class="ki-report__title">中古マンション70㎡価格：東京<span class="ki-report__period" id="tokyoPeriod"></span></h3>
+          <div class="ki-chartwrap"><canvas id="chartTokyo"></canvas></div>
+          <p class="ki-report__note">中古マンション70㎡・月次（東京カンテイをもとに作成）。価格データは2014年12月以降。</p>
         </div>
         <div id="reportsState" class="ki-state" hidden></div>
       </section>
@@ -368,7 +374,7 @@ function parseCSV(text){
 }
 function toNum(s){ if (s == null) return null; s = String(s).replace(/[",\s]/g, ''); return s === '' ? null : Number(s); }
 
-let rateChart, macroChart;
+let rateChart, macroChart, city3Chart, tokyoChart;
 async function renderReports(){
   const state = $('#reportsState');
   try {
@@ -377,12 +383,15 @@ async function renderReports(){
     const rows = parseCSV(await res.text());
     rows.shift(); // ヘッダー
     const L=[], vr=[], f3=[], f10=[], pol=[], jgb=[], usd=[], nk=[];
+    const tk23=[], tk6=[], jyonan=[], jyohoku=[], osaka=[], nagoya=[];
     for (const r of rows){
       const ym = (r[0] || '').trim();
       if (!/^\d{4}-\d{2}/.test(ym)) continue;
       L.push(ym);
       vr.push(toNum(r[1])); f3.push(toNum(r[2])); f10.push(toNum(r[3]));
       pol.push(toNum(r[4])); jgb.push(toNum(r[5])); usd.push(toNum(r[6])); nk.push(toNum(r[7]));
+      tk23.push(toNum(r[8])); tk6.push(toNum(r[9])); jyonan.push(toNum(r[10]));
+      jyohoku.push(toNum(r[11])); osaka.push(toNum(r[12])); nagoya.push(toNum(r[13]));
     }
     const fmt = s => s.replace('-', '/');
     const period = L.length ? `（${fmt(L[0])}〜${fmt(L[L.length-1])}）` : '';
@@ -391,6 +400,12 @@ async function renderReports(){
     if (mp) mp.textContent = period;
     const dp = $('#dataPeriod');
     if (dp && L.length) dp.textContent = `データ期間：${fmt(L[0])}〜${fmt(L[L.length-1])}（月次）`;
+    // 価格データの実期間（2014-12〜）
+    const pIdx = L.map((_, i) => i).filter(i => tk23[i] != null);
+    const pPeriod = pIdx.length ? `（${fmt(L[pIdx[0]])}〜${fmt(L[pIdx[pIdx.length-1]])}）` : '';
+    const cp = $('#city3Period'), tp = $('#tokyoPeriod');
+    if (cp) cp.textContent = pPeriod;
+    if (tp) tp.textContent = pPeriod;
     const base = {
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
@@ -426,6 +441,31 @@ async function renderReports(){
         y1:{ position:'right', ticks:{ font:{ size:10 } }, grid:{ drawOnChartArea:false }, title:{ display:true, text:'日経平均' } } } }
     });
     if (state) state.hidden = true;
+
+    const yenTicks = { ticks:{ callback:v=>Number(v).toLocaleString(), font:{ size:10 } }, title:{ display:true, text:'70㎡価格（万円）' } };
+
+    if (city3Chart) city3Chart.destroy();
+    city3Chart = new Chart($('#chartCity3'), {
+      type:'line',
+      data:{ labels:L, datasets:[
+        ds('東京23区', tk23, '#d64545'),
+        ds('大阪6区', osaka, '#2f8f4e'),
+        ds('名古屋3区', nagoya, '#2f6fb0')
+      ]},
+      options:{ ...base, scales:{ ...base.scales, y: yenTicks } }
+    });
+
+    if (tokyoChart) tokyoChart.destroy();
+    tokyoChart = new Chart($('#chartTokyo'), {
+      type:'line',
+      data:{ labels:L, datasets:[
+        ds('東京23区', tk23, '#d64545'),
+        ds('都心6区', tk6, '#e0932f'),
+        ds('城南・城西6区', jyonan, '#2f8f4e'),
+        ds('城北・城東11区', jyohoku, '#2f6fb0')
+      ]},
+      options:{ ...base, scales:{ ...base.scales, y: yenTicks } }
+    });
   } catch (e) {
     if (state){ state.hidden = false; state.textContent = 'グラフデータ(data/market.csv)を読み込めませんでした。'; }
   }
