@@ -86,8 +86,10 @@
 .ki-head-more { margin-left: auto; align-self: center; font-size: .76rem; font-weight: 700; color: var(--ki-accent); text-decoration: none; white-space: nowrap; }
 .ki-head-more:hover { text-decoration: underline; }
 
-/* ニュース一覧（読みやすい幅に絞ってコンパクトに） */
+/* ニュース一覧（読みやすい幅に絞ってコンパクト） */
 .ki-news { list-style: none; margin: 0; padding: 0; max-width: 640px; }
+/* 見出し行を本文幅に合わせ、「カレンダーで見る」を右端に寄せる（真下の余白を解消） */
+#news .ki-section__head, #press .ki-section__head { max-width: 680px; }
 .ki-news__item { padding: 6px 2px; border-bottom: 1px solid var(--ki-line); display: flex; gap: 10px; align-items: baseline; }
 .ki-news__no { flex: none; font-family: "Space Grotesk", system-ui, sans-serif; font-size: .78rem; font-weight: 600; color: var(--ki-accent); min-width: 1.6em; text-align: right; font-variant-numeric: tabular-nums; }
 .ki-news__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -127,6 +129,14 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 
 /* Kirin Pics */
 .ki-pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap: 16px; align-items: start; }
+/* コラム：スリムな3タイル横並び */
+#columnsX { grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 12px; align-items: start; }
+#columnsX .ki-xart__img { aspect-ratio: 16/9; }
+#columnsX .ki-xart__body { padding: 9px 11px; gap: 4px; }
+#columnsX .ki-xart__title { font-size: .86rem; }
+#columnsX .ki-xart__badge { font-size: .68rem; }
+#columnsX .ki-xart__go { font-size: .76rem; }
+#columnsX .twitter-tweet { margin: 0 !important; }
 .ki-embed { min-width: 0; }
 .ki-xart { display:flex; flex-direction:column; text-decoration:none; color:var(--ki-ink); border:1px solid var(--ki-line); border-radius:14px; overflow:hidden; background:#fff; transition:border-color .15s, transform .15s; }
 .ki-xart:hover { border-color:var(--ki-accent); transform:translateY(-2px); }
@@ -165,8 +175,9 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-follow { font-size:.8rem; font-weight:700; text-decoration:none; color:#fff; background:#000; padding:6px 14px; border-radius:999px; }
 .ki-follow--inline { margin-left: auto; align-self: center; }
 .ki-follow--sm { font-size:.72rem; padding:4px 11px; }
-.ki-ticker { border:1px solid var(--ki-line); border-radius:12px; overflow:hidden; background:#fff; }
-.ki-ticker__note { font-size:.68rem; color:var(--ki-sub); margin:8px 2px 0; line-height:1.6; }
+.ki-ticker { display: flex; flex-direction: column; gap: 10px; }
+.ki-mkt { border: 1px solid var(--ki-line); border-radius: 12px; overflow: hidden; background: #fff; }
+.ki-ticker__note { font-size:.68rem; color:var(--ki-sub); margin:10px 2px 0; line-height:1.6; }
 .ki-xfeed { display:flex; flex-direction:column; gap:14px; max-height: calc(100vh - 140px); overflow:auto; padding-right:4px; }
 .ki-xcard { background:var(--ki-card); border:1px solid var(--ki-line); border-radius:var(--ki-radius); padding:14px; }
 .ki-xcard__top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
@@ -320,7 +331,6 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
         <div class="ki-section__head">
           <h2 class="ki-section__title">コラム</h2>
           <span class="ki-section__en">Columns</span>
-          <a class="ki-follow ki-follow--inline" href="https://x.com/kirinsan4567" target="_blank" rel="noopener">＠kirinsan4567 をフォロー ↗</a>
         </div>
         <div id="columnsX" class="ki-pics"></div>
         <div id="columnsCards" class="ki-cards"></div>
@@ -332,46 +342,48 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
     <aside class="ki-aside">
       <div class="ki-aside__head">
         <h2 class="ki-aside__title">マーケット速報</h2>
-        <a class="ki-follow ki-follow--sm" href="https://x.com/kirinsan4567" target="_blank" rel="noopener">Follow</a>
       </div>
       <div class="ki-ticker">
-        <div class="tradingview-widget-container">
-          <div class="tradingview-widget-container__widget"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
-          {
-            "width": "100%",
-            "height": 620,
-            "symbolsGroups": [
-              { "name": "為替", "symbols": [
-                { "name": "FX_IDC:USDJPY", "displayName": "ドル円" },
-                { "name": "FX_IDC:EURJPY", "displayName": "ユーロ円" }
-              ]},
-              { "name": "株価指数", "symbols": [
-                { "name": "TVC:NI225", "displayName": "日経平均" },
-                { "name": "OSE:NK1!", "displayName": "日経平均先物（時間外）" },
-                { "name": "TSE:TOPIX", "displayName": "TOPIX" },
-                { "name": "TVC:DJI", "displayName": "NYダウ" },
-                { "name": "CBOT_MINI:YM1!", "displayName": "ダウ先物" }
-              ]},
-              { "name": "金利", "symbols": [
-                { "name": "TVC:JP10Y", "displayName": "日本10年国債" },
-                { "name": "TVC:US10Y", "displayName": "米国10年国債" }
-              ]},
-              { "name": "商品", "symbols": [
-                { "name": "COMEX:GC1!", "displayName": "金先物" },
-                { "name": "TVC:USOIL", "displayName": "WTI原油" }
-              ]},
-              { "name": "暗号資産", "symbols": [
-                { "name": "BITFLYER:BTCJPY", "displayName": "ビットコイン（円）" }
-              ]}
-            ],
-            "showSymbolLogo": false,
-            "isTransparent": true,
-            "colorTheme": "light",
-            "locale": "ja"
-          }
-          </script>
-        </div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"FX_IDC:USDJPY","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"FX_IDC:EURJPY","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"TVC:NI225","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"TVC:TPX","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"TVC:DJI","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"TVC:JP10Y","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"TVC:US10Y","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"TVC:GOLD","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"TVC:USOIL","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
+        <div class="ki-mkt"><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"BITFLYER:BTCJPY","width":"100%","height":128,"locale":"ja","dateRange":"1D","colorTheme":"light","isTransparent":true,"autosize":false}
+          </script></div></div>
       </div>
       <p class="ki-ticker__note">相場：TradingView（準リアルタイム／取引所により遅延あり・参考値）</p>
     </aside>
@@ -429,9 +441,7 @@ const columnFeature = {
   url: "https://x.com/kirinsan4567/article/2054187727458058293",
   image: "column-towerman.jpg"   /* ★リポジトリ直下にこのファイル名で表紙画像を置いてください */
 };
-const columnsData = [
-  { title: "繰上返済の哲学", desc: "流動性・機会費用・団信・運用のトレードオフから考える", href: "scenarios.html#column" },
-];
+const columnsData = [];
 
 /* ---------- 共通ヘルパー ---------- */
 const $ = sel => document.querySelector(sel);
