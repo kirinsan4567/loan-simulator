@@ -120,6 +120,10 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-report__title:first-child { margin-top: 4px; }
 .ki-chartwrap { position: relative; height: 340px; background: var(--ki-card); border: 1px solid var(--ki-line); border-radius: var(--ki-radius); padding: 12px 10px 6px; }
 .ki-report__note { font-size: .8rem; color: var(--ki-sub); margin: 10px 2px 0; }
+.ki-report__period { font-size: .8rem; font-weight: 500; color: var(--ki-sub); margin-left: 6px; }
+.ki-data-period { display: inline-block; font-size: .82rem; font-weight: 700; color: var(--ki-accent); background: #eef3f6; border-radius: 999px; padding: 4px 12px; margin: 0 0 14px; }
+.ki-report__desc { font-size: .85rem; color: var(--ki-sub); line-height: 1.75; margin: 10px 2px 4px; }
+.ki-report__desc b { color: var(--ki-ink); font-weight: 700; }
 @media (max-width: 600px){ .ki-chartwrap { height: 280px; } }
 .ki-cardlink { display:flex; flex-direction:column; gap:6px; padding:16px 18px; background:var(--ki-card); border:1px solid var(--ki-line); border-radius:var(--ki-radius); text-decoration:none; color:var(--ki-ink); transition: border-color .15s, transform .15s; }
 .ki-cardlink:hover { border-color: var(--ki-accent); transform: translateY(-2px); }
@@ -172,7 +176,8 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
       <a href="#news">ニュース</a>
       <a href="#press">プレスリリース</a>
       <a href="#pics">Kirin Pics</a>
-      <a href="#reports">分析レポート</a>
+      <a href="#market">マーケット</a>
+      <a href="#reports">分析・レポート</a>
       <a href="#columns">コラム</a>
       <span class="ki-nav__sep">|</span>
       <a href="index.html" class="ki-nav__ext">住宅ローン返済シミュレーター ↗</a>
@@ -218,20 +223,33 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
         <div id="picsGrid" class="ki-pics"></div>
       </section>
 
-      <!-- 分析レポート：金利・為替・株価の月次推移グラフ -->
-      <section id="reports" class="ki-section">
+      <!-- マーケット：金利・為替・株価の月次推移グラフ -->
+      <section id="market" class="ki-section">
         <div class="ki-section__head">
-          <h2 class="ki-section__title">分析レポート</h2>
-          <span class="ki-section__en">Reports</span>
+          <h2 class="ki-section__title">マーケット</h2>
+          <span class="ki-section__en">Market</span>
         </div>
+        <p class="ki-data-period" id="dataPeriod"></p>
         <div id="reportsBody">
-          <h3 class="ki-report__title">金利の推移（変動・固定・政策金利・長期金利）</h3>
+          <h3 class="ki-report__title">金利の推移（変動・固定・政策金利・長期金利）<span class="ki-report__period" id="ratesPeriod"></span></h3>
           <div class="ki-chartwrap"><canvas id="chartRates"></canvas></div>
-          <h3 class="ki-report__title">ドル円・日経平均の推移</h3>
+          <p class="ki-report__desc">
+            <b>変動金利・固定3年・固定10年</b>は各行の<b>店頭表示金利（基準金利）</b>です。実際に借りる際の適用金利は、ここから<b>引き下げ幅（優遇幅）</b>を差し引いた水準になります（例：変動は店頭2.475%でも、優遇後はおおむね0.3〜0.7%程度）。<b>政策金利</b>は日銀の政策金利、<b>10年国債</b>は長期金利の代表指標です。
+          </p>
+          <h3 class="ki-report__title">ドル円・日経平均の推移<span class="ki-report__period" id="macroPeriod"></span></h3>
           <div class="ki-chartwrap"><canvas id="chartMacro"></canvas></div>
           <p class="ki-report__note">月次データ。凡例をクリックすると各系列の表示/非表示を切り替えられます。</p>
         </div>
         <div id="reportsState" class="ki-state" hidden></div>
+      </section>
+
+      <!-- 分析・レポート -->
+      <section id="reports" class="ki-section">
+        <div class="ki-section__head">
+          <h2 class="ki-section__title">分析・レポート</h2>
+          <span class="ki-section__en">Reports</span>
+        </div>
+        <p class="ki-state">準備中</p>
       </section>
 
       <!-- コラム（手動：columnsData） -->
@@ -366,6 +384,13 @@ async function renderReports(){
       vr.push(toNum(r[1])); f3.push(toNum(r[2])); f10.push(toNum(r[3]));
       pol.push(toNum(r[4])); jgb.push(toNum(r[5])); usd.push(toNum(r[6])); nk.push(toNum(r[7]));
     }
+    const fmt = s => s.replace('-', '/');
+    const period = L.length ? `（${fmt(L[0])}〜${fmt(L[L.length-1])}）` : '';
+    const rp = $('#ratesPeriod'), mp = $('#macroPeriod');
+    if (rp) rp.textContent = period;
+    if (mp) mp.textContent = period;
+    const dp = $('#dataPeriod');
+    if (dp && L.length) dp.textContent = `データ期間：${fmt(L[0])}〜${fmt(L[L.length-1])}（月次）`;
     const base = {
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
