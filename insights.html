@@ -54,6 +54,9 @@
 }
 .ki-nav a:hover { color: var(--ki-accent); background: rgba(31,86,115,.08); }
 .ki-nav a.ki-nav--home { color: var(--ki-accent); }
+.ki-nav__sep { align-self: center; color: var(--ki-sub); opacity: .45; padding: 0 2px; user-select: none; }
+.ki-nav a.ki-nav__ext { color: #fff; background: var(--ki-accent); font-weight: 700; }
+.ki-nav a.ki-nav__ext:hover { color: #fff; background: var(--ki-accent); opacity: .9; }
 
 /* レイアウト：左メイン＋右サイドバー */
 .ki-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
@@ -166,7 +169,8 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
       <a href="#pics">Kirin Pics</a>
       <a href="#reports">分析レポート</a>
       <a href="#columns">コラム</a>
-      <a href="index.html" class="ki-nav--home">住宅ローン返済シミュレーター</a>
+      <span class="ki-nav__sep">|</span>
+      <a href="index.html" class="ki-nav__ext">住宅ローン返済シミュレーター ↗</a>
     </nav>
   </div>
 </header>
@@ -254,13 +258,8 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
    ============================================================ */
 /* 1) 右サイドバー：自分のX投稿（@kirinsan4567）。埋め込みで内容表示・クリックでXへ。 */
 const myXPosts = [
-  "https://x.com/kirinsan4567/status/2054187727458058293",
-  "https://x.com/kirinsan4567/status/2054572866918809670",
-  "https://x.com/kirinsan4567/status/2069822071358771578",
   "https://x.com/kirinsan4567/status/1864640000455069871",
-  "https://x.com/kirinsan4567/status/1883059198927450123",
-  "https://x.com/kirinsan4567/status/1880762996919836984",
-  "https://x.com/kirinsan4567/status/1842827932349440210"
+  "https://x.com/kirinsan4567/status/1883059198927450123"
 ];
 
 /* 2) Kirin Pics：注目のXポスト（埋め込み）＋記事（リンクカード） */
@@ -277,6 +276,7 @@ const picArticles = [
 
 /* 3) コラム（手動） */
 const columnsData = [
+  { title: "住宅ローンのコラム（Xで読む）", desc: "KIRINのXコラム記事", href: "https://x.com/kirinsan4567/article/2054187727458058293" },
   { title: "繰上返済の哲学", desc: "流動性・機会費用・団信・運用のトレードオフから考える", href: "scenarios.html#column" },
 ];
 
@@ -314,12 +314,16 @@ function loadTweets(){
 }
 
 function renderCards(target, data){
-  $(target).innerHTML = data.map(c => `
-    <a class="ki-cardlink" href="${esc(c.href)}">
+  $(target).innerHTML = data.map(c => {
+    const ext = /^https?:/.test(c.href || "");
+    const attr = ext ? ' target="_blank" rel="noopener"' : '';
+    const go = ext ? '開く ↗' : '詳しく見る →';
+    return `<a class="ki-cardlink" href="${esc(c.href)}"${attr}>
       <h3>${esc(c.title)}</h3>
       <p>${esc(c.desc||"")}</p>
-      <span class="ki-cardlink__go">詳しく見る →</span>
-    </a>`).join("");
+      <span class="ki-cardlink__go">${go}</span>
+    </a>`;
+  }).join("");
 }
 
 /* ---------- ニュースの描画（data/news.json を fetch） ---------- */
