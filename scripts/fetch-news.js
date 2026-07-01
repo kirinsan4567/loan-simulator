@@ -307,5 +307,9 @@ function loadExisting() {
   fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
   fs.writeFileSync(OUT_PATH, JSON.stringify(all, null, 2));
 
+  // 更新時刻を記録（ページの「最終更新」表示用。HTML編集ではなくAction実行時のみ更新される）
+  const META_PATH = "data/news_updated.json";
+  fs.writeFileSync(META_PATH, JSON.stringify({ updatedAt: new Date().toISOString(), count: all.length }, null, 2));
+
   console.log(`\n新規 ${added}件 / 合計 ${all.length}件 を ${OUT_PATH} に保存しました。`);
 })();
