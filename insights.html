@@ -389,53 +389,56 @@ const picArticles = [
 
 /* 3) コラム（手動） */
 /* 「都心タワマン」はXのコラム記事。トップ画像付きの記事カードで表示。 */
-const columnFeature = null;
-const columnsData = [];
 
-/* ---------- 共通ヘルパー ---------- */
-const $ = sel => document.querySelector(sel);
-function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function fmtDate(iso){ const d=new Date(iso); if(isNaN(d)) return ""; return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`; }
+const columnFeature = [
+  {
+    title: "（2つ目のコラムタイトル）",
+    url: "https://x.com/xxxxxx2",
+    image: "column-2.jpg"
+  },
+  {
+    title: "（3つ目のコラムタイトル）",
+    url: "https://x.com/xxxxxx3",
+    image: "column-3.jpg"
+  }
+];
 
-/* ---------- X投稿の描画（コラムにパネル埋め込み＋コラム記事カード） ---------- */
+/* 1つ目は非表示にする */
 function renderX(){
   const el = $('#columnsX');
-  if (!columnFeature) return;
-  const feat = columnFeature ? `
-    <a class="ki-embed ki-xart" href="${esc(columnFeature.url)}" target="_blank" rel="noopener">
-      <div class="ki-xart__img"><img src="${esc(columnFeature.image)}" alt="" loading="lazy"></div>
-      <div class="ki-xart__body">
-        <span class="ki-xart__badge"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> コラム</span>
-        <h3 class="ki-xart__title">${esc(columnFeature.title)}</h3>
-        <span class="ki-xart__go">Xで読む ↗</span>
-      </div>
-    </a>` : '';
+  if (!el) return;
+
+  const feat = columnFeature
+    .filter((_, i) => i !== 0)   // ★ここで1つ目を完全除外
+    .map(item => `
+      <a class="ki-embed ki-xart" href="${esc(item.url)}" target="_blank" rel="noopener">
+        <div class="ki-xart__img">
+          <img src="${esc(item.image)}" alt="" loading="lazy">
+        </div>
+        <div class="ki-xart__body">
+          <span class="ki-xart__badge">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            コラム
+          </span>
+          <h3 class="ki-xart__title">${esc(item.title)}</h3>
+          <span class="ki-xart__go">Xで読む ↗</span>
+        </div>
+      </a>
+    `).join("");
+
   const posts = myXPosts.map(u =>
-    `<div class="ki-embed"><blockquote class="twitter-tweet" data-dnt="true"><a href="${esc(u)}"></a></blockquote></div>`
+    `<div class="ki-embed">
+      <blockquote class="twitter-tweet" data-dnt="true">
+        <a href="${esc(u)}"></a>
+      </blockquote>
+    </div>`
   ).join("");
+
   el.innerHTML = feat + posts;
 }
-
-/* ---------- Pics（Xポスト埋め込み＋記事カード） ---------- */
-function renderPics(){
-  const el = $('#picsGrid');
-  const tweets = picTweets.map(u =>
-    `<div class="ki-embed"><blockquote class="twitter-tweet" data-dnt="true"><a href="${esc(u)}"></a></blockquote></div>`
-  ).join("");
-  const arts = picArticles.map(a =>
-    `<a class="ki-cardlink" href="${esc(a.url)}" target="_blank" rel="noopener">
-       <h3>${esc(a.source)}の記事</h3>
-       <span class="ki-cardlink__go">記事を見る →</span>
-     </a>`
-  ).join("");
-  el.innerHTML = (tweets + arts) || `<p class="ki-state">準備中</p>`;
-}
-
-/* X埋め込みウィジェットの読み込み（widgets.js が用意でき次第レンダリング） */
-function loadTweets(){
-  if (window.twttr && window.twttr.widgets) { window.twttr.widgets.load(); }
-  else { setTimeout(loadTweets, 300); }
-}
+  
 
 /* ---------- 分析レポート：金利/為替/株価の月次グラフ ---------- */
 function whenChartReady(cb){
