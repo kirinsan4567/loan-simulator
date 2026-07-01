@@ -415,6 +415,12 @@ async function renderReports(){
     };
     const ds = (label, data, color, axis) => ({ label, data, borderColor:color, backgroundColor:color, borderWidth:1.6, tension:0.15, spanGaps:false, yAxisID: axis || 'y' });
 
+    // 4グラフでプロット領域の左右端を揃えるため、軸幅を固定する
+    const LW = 66, RW = 74;
+    const fitL = s => { s.width = LW; };
+    const fitR = s => { s.width = RW; };
+    const spacerR = () => ({ position:'right', display:true, grid:{ drawOnChartArea:false }, ticks:{ display:false }, afterFit: fitR });
+
     if (rateChart) rateChart.destroy();
     rateChart = new Chart($('#chartRates'), {
       type:'line',
@@ -426,7 +432,8 @@ async function renderReports(){
         ds('10年国債', jgb, '#7a5aa0')
       ]},
       options:{ ...base, scales:{ ...base.scales,
-        y:{ ticks:{ callback:v=>v+'%', font:{ size:10 } }, title:{ display:true, text:'金利(%)' } } } }
+        y:{ ticks:{ callback:v=>v+'%', font:{ size:10 } }, title:{ display:true, text:'金利(%)' }, afterFit: fitL },
+        y1: spacerR() } }
     });
 
     if (macroChart) macroChart.destroy();
@@ -437,12 +444,12 @@ async function renderReports(){
         ds('日経平均', nk, '#3a6ea5', 'y1')
       ]},
       options:{ ...base, scales:{ ...base.scales,
-        y:{ position:'left', ticks:{ font:{ size:10 } }, title:{ display:true, text:'ドル円' } },
-        y1:{ position:'right', ticks:{ font:{ size:10 } }, grid:{ drawOnChartArea:false }, title:{ display:true, text:'日経平均' } } } }
+        y:{ position:'left', ticks:{ font:{ size:10 } }, title:{ display:true, text:'ドル円' }, afterFit: fitL },
+        y1:{ position:'right', ticks:{ font:{ size:10 } }, grid:{ drawOnChartArea:false }, title:{ display:true, text:'日経平均' }, afterFit: fitR } } }
     });
     if (state) state.hidden = true;
 
-    const yenTicks = { ticks:{ callback:v=>Number(v).toLocaleString(), font:{ size:10 } }, title:{ display:true, text:'70㎡価格（万円）' } };
+    const yenY = () => ({ ticks:{ callback:v=>Number(v).toLocaleString(), font:{ size:10 } }, title:{ display:true, text:'70㎡価格（万円）' }, afterFit: fitL });
 
     if (city3Chart) city3Chart.destroy();
     city3Chart = new Chart($('#chartCity3'), {
@@ -452,7 +459,7 @@ async function renderReports(){
         ds('大阪6区', osaka, '#2f8f4e'),
         ds('名古屋3区', nagoya, '#2f6fb0')
       ]},
-      options:{ ...base, scales:{ ...base.scales, y: yenTicks } }
+      options:{ ...base, scales:{ ...base.scales, y: yenY(), y1: spacerR() } }
     });
 
     if (tokyoChart) tokyoChart.destroy();
@@ -464,7 +471,7 @@ async function renderReports(){
         ds('城南・城西6区', jyonan, '#2f8f4e'),
         ds('城北・城東11区', jyohoku, '#2f6fb0')
       ]},
-      options:{ ...base, scales:{ ...base.scales, y: yenTicks } }
+      options:{ ...base, scales:{ ...base.scales, y: yenY(), y1: spacerR() } }
     });
   } catch (e) {
     if (state){ state.hidden = false; state.textContent = 'グラフデータ(data/market.csv)を読み込めませんでした。'; }
