@@ -20,7 +20,7 @@
 <!-- site.css が Zen Kaku Gothic New を読み込んでいれば下記は不要（重複しても無害） -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
 /* ===========================================================
@@ -57,6 +57,9 @@
 }
 .ki-brand { font-weight: 700; font-size: 1.15rem; letter-spacing: .02em; text-decoration: none; color: var(--ki-ink); white-space: nowrap; }
 .ki-brand span { color: var(--ki-accent); }
+.ki-brandrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ki-brand__sep { width: 1px; height: 15px; background: var(--ki-line); flex: none; }
+.ki-brand__tag { font-size: .8rem; font-weight: 500; color: var(--ki-accent); }
 .ki-nav { display: flex; gap: 4px; flex-wrap: wrap; }
 .ki-nav a {
   text-decoration: none; color: var(--ki-sub); font-size: .88rem; font-weight: 500;
@@ -68,20 +71,26 @@
 .ki-nav a.ki-nav__ext { color: #fff; background: var(--ki-accent); font-weight: 700; }
 .ki-nav a.ki-nav__ext:hover { color: #fff; background: var(--ki-accent); opacity: .9; }
 
-/* レイアウト：1カラム（右サイドバーは廃止し、Xはコラムへ移設） */
-.ki-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
-.ki-grid { display: block; }
+/* レイアウト：左メイン＋右レール（マーケット速報） */
+.ki-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 20px 80px; }
+.ki-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 32px; align-items: start; }
 .ki-main { min-width: 0; }
+.ki-aside { position: sticky; top: calc(var(--ki-header-h, 96px) + 16px); }
 
 /* セクション */
 .ki-section { scroll-margin-top: calc(var(--ki-header-h, 96px) + 16px); margin-bottom: 44px; }
-.ki-section__head { display: flex; align-items: baseline; gap: 12px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--ki-ink); }
-.ki-section__title { font-size: 1.4rem; font-weight: 700; margin: 0; }
+.ki-section__head { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--ki-line); }
+.ki-section__title { font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--ki-accent); display: inline-flex; align-items: center; }
+.ki-section__title::before { content: ""; width: 9px; height: 9px; background: var(--ki-accent); border-radius: 2px; margin-right: 9px; flex: none; }
 .ki-section__en { font-size: .72rem; letter-spacing: .18em; color: var(--ki-sub); text-transform: uppercase; }
+.ki-head-more { margin-left: auto; align-self: center; font-size: .76rem; font-weight: 700; color: var(--ki-accent); text-decoration: none; white-space: nowrap; }
+.ki-head-more:hover { text-decoration: underline; }
 
 /* ニュース一覧（読みやすい幅に絞ってコンパクトに） */
 .ki-news { list-style: none; margin: 0; padding: 0; max-width: 640px; }
-.ki-news__item { padding: 6px 2px; border-bottom: 1px solid var(--ki-line); display: flex; flex-direction: column; gap: 2px; }
+.ki-news__item { padding: 6px 2px; border-bottom: 1px solid var(--ki-line); display: flex; gap: 10px; align-items: baseline; }
+.ki-news__no { flex: none; font-family: "Space Grotesk", system-ui, sans-serif; font-size: .78rem; font-weight: 600; color: var(--ki-accent); min-width: 1.6em; text-align: right; font-variant-numeric: tabular-nums; }
+.ki-news__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .ki-news__title { color: var(--ki-ink); text-decoration: none; font-weight: 500; font-size: .94rem; line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
@@ -119,6 +128,14 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 /* Kirin Pics */
 .ki-pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap: 16px; align-items: start; }
 .ki-embed { min-width: 0; }
+.ki-xart { display:flex; flex-direction:column; text-decoration:none; color:var(--ki-ink); border:1px solid var(--ki-line); border-radius:14px; overflow:hidden; background:#fff; transition:border-color .15s, transform .15s; }
+.ki-xart:hover { border-color:var(--ki-accent); transform:translateY(-2px); }
+.ki-xart__img { aspect-ratio:16/9; background:#e9edf0; }
+.ki-xart__img img { width:100%; height:100%; object-fit:cover; display:block; }
+.ki-xart__body { padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
+.ki-xart__badge { display:inline-flex; align-items:center; gap:5px; font-size:.72rem; font-weight:700; color:var(--ki-sub); }
+.ki-xart__title { font-size:1rem; font-weight:700; margin:0; line-height:1.4; }
+.ki-xart__go { font-size:.82rem; font-weight:700; color:var(--ki-accent); }
 .ki-embed .twitter-tweet { margin: 0 !important; }
 .ki-pic { position: relative; aspect-ratio: 4/3; border-radius: var(--ki-radius); overflow: hidden; background:#e9edf0; }
 .ki-pic img { width:100%; height:100%; object-fit: cover; display:block; }
@@ -147,6 +164,9 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
 .ki-aside__title { font-size:1rem; font-weight:700; margin:0; }
 .ki-follow { font-size:.8rem; font-weight:700; text-decoration:none; color:#fff; background:#000; padding:6px 14px; border-radius:999px; }
 .ki-follow--inline { margin-left: auto; align-self: center; }
+.ki-follow--sm { font-size:.72rem; padding:4px 11px; }
+.ki-ticker { border:1px solid var(--ki-line); border-radius:12px; overflow:hidden; background:#fff; }
+.ki-ticker__note { font-size:.68rem; color:var(--ki-sub); margin:8px 2px 0; line-height:1.6; }
 .ki-xfeed { display:flex; flex-direction:column; gap:14px; max-height: calc(100vh - 140px); overflow:auto; padding-right:4px; }
 .ki-xcard { background:var(--ki-card); border:1px solid var(--ki-line); border-radius:var(--ki-radius); padding:14px; }
 .ki-xcard__top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
@@ -166,6 +186,11 @@ a.ki-news__title:hover { color: var(--ki-accent); text-decoration: underline; }
   .ki-grid { grid-template-columns: 1fr; }
   .ki-aside { position: static; }
   .ki-xfeed { max-height: none; }
+}
+
+@media (max-width: 640px) {
+  .ki-brand__sep { display: none; }
+  .ki-brand__tag { flex-basis: 100%; font-size: .76rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -192,7 +217,11 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
      ============================================================ -->
 <header class="ki-header">
   <div class="ki-header__inner">
-    <a class="ki-brand" href="insights.html">KIRIN <span>Insights</span></a>
+    <div class="ki-brandrow">
+      <a class="ki-brand" href="insights.html">KIRIN <span>Insights</span></a>
+      <span class="ki-brand__sep" aria-hidden="true"></span>
+      <span class="ki-brand__tag">不動産と住宅ローンの『いま』を読む</span>
+    </div>
     <nav class="ki-nav">
       <a href="#news">ニュース</a>
       <a href="#press">プレスリリース</a>
@@ -217,6 +246,7 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
         <div class="ki-section__head">
           <h2 class="ki-section__title">ニュース</h2>
           <span class="ki-section__en">News</span>
+          <a class="ki-head-more" href="insights-archive.html" target="_blank" rel="noopener">カレンダーで見る ↗</a>
         </div>
         <p class="ki-updated" id="newsUpdated"></p>
         <ul id="newsList" class="ki-news"></ul>
@@ -229,6 +259,7 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
         <div class="ki-section__head">
           <h2 class="ki-section__title">プレスリリース</h2>
           <span class="ki-section__en">Press</span>
+          <a class="ki-head-more" href="press-archive.html" target="_blank" rel="noopener">カレンダーで見る ↗</a>
         </div>
         <p class="ki-updated" id="pressUpdated"></p>
         <div id="pressFilter" class="ki-devfilter"></div>
@@ -297,6 +328,54 @@ footer.site-footer { background: rgba(255,255,255,.72); border-top: 1px solid #e
 
     </main>
 
+    <!-- ===== 右：マーケット速報（TradingViewの準リアルタイム相場） ===== -->
+    <aside class="ki-aside">
+      <div class="ki-aside__head">
+        <h2 class="ki-aside__title">マーケット速報</h2>
+        <a class="ki-follow ki-follow--sm" href="https://x.com/kirinsan4567" target="_blank" rel="noopener">Follow</a>
+      </div>
+      <div class="ki-ticker">
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
+          {
+            "width": "100%",
+            "height": 620,
+            "symbolsGroups": [
+              { "name": "為替", "symbols": [
+                { "name": "FX_IDC:USDJPY", "displayName": "ドル円" },
+                { "name": "FX_IDC:EURJPY", "displayName": "ユーロ円" }
+              ]},
+              { "name": "株価指数", "symbols": [
+                { "name": "TVC:NI225", "displayName": "日経平均" },
+                { "name": "OSE:NK1!", "displayName": "日経平均先物（時間外）" },
+                { "name": "TSE:TOPIX", "displayName": "TOPIX" },
+                { "name": "TVC:DJI", "displayName": "NYダウ" },
+                { "name": "CBOT_MINI:YM1!", "displayName": "ダウ先物" }
+              ]},
+              { "name": "金利", "symbols": [
+                { "name": "TVC:JP10Y", "displayName": "日本10年国債" },
+                { "name": "TVC:US10Y", "displayName": "米国10年国債" }
+              ]},
+              { "name": "商品", "symbols": [
+                { "name": "COMEX:GC1!", "displayName": "金先物" },
+                { "name": "TVC:USOIL", "displayName": "WTI原油" }
+              ]},
+              { "name": "暗号資産", "symbols": [
+                { "name": "BITFLYER:BTCJPY", "displayName": "ビットコイン（円）" }
+              ]}
+            ],
+            "showSymbolLogo": false,
+            "isTransparent": true,
+            "colorTheme": "light",
+            "locale": "ja"
+          }
+          </script>
+        </div>
+      </div>
+      <p class="ki-ticker__note">相場：TradingView（準リアルタイム／取引所により遅延あり・参考値）</p>
+    </aside>
+
   </div>
 </div>
 
@@ -344,8 +423,13 @@ const picArticles = [
 ];
 
 /* 3) コラム（手動） */
+/* 「都心タワマン」はXのコラム記事。トップ画像付きの記事カードで表示。 */
+const columnFeature = {
+  title: "都心タワマンをカツカツで買うリスクのお話",
+  url: "https://x.com/kirinsan4567/article/2054187727458058293",
+  image: "column-towerman.jpg"   /* ★リポジトリ直下にこのファイル名で表紙画像を置いてください */
+};
 const columnsData = [
-  { title: "都心タワマンをカツカツで買うリスクのお話", desc: "Xで読む", href: "https://x.com/kirinsan4567/article/2054187727458058293" },
   { title: "繰上返済の哲学", desc: "流動性・機会費用・団信・運用のトレードオフから考える", href: "scenarios.html#column" },
 ];
 
@@ -354,13 +438,23 @@ const $ = sel => document.querySelector(sel);
 function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtDate(iso){ const d=new Date(iso); if(isNaN(d)) return ""; return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`; }
 
-/* ---------- X投稿の描画（コラムにパネル埋め込み） ---------- */
+/* ---------- X投稿の描画（コラムにパネル埋め込み＋コラム記事カード） ---------- */
 function renderX(){
   const el = $('#columnsX');
   if (!el) return;
-  el.innerHTML = myXPosts.map(u =>
+  const feat = columnFeature ? `
+    <a class="ki-embed ki-xart" href="${esc(columnFeature.url)}" target="_blank" rel="noopener">
+      <div class="ki-xart__img"><img src="${esc(columnFeature.image)}" alt="" loading="lazy"></div>
+      <div class="ki-xart__body">
+        <span class="ki-xart__badge"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> コラム</span>
+        <h3 class="ki-xart__title">${esc(columnFeature.title)}</h3>
+        <span class="ki-xart__go">Xで読む ↗</span>
+      </div>
+    </a>` : '';
+  const posts = myXPosts.map(u =>
     `<div class="ki-embed"><blockquote class="twitter-tweet" data-dnt="true"><a href="${esc(u)}"></a></blockquote></div>`
   ).join("");
+  el.innerHTML = feat + posts;
 }
 
 /* ---------- Pics（Xポスト埋め込み＋記事カード） ---------- */
@@ -530,7 +624,7 @@ function renderCards(target, data){
 /* ---------- ニュースの描画（data/news.json を fetch） ---------- */
 const NEWS_RECENT_MAX = 20; // デフォルト表示件数（残りはカレンダーページへ）
 
-function newsItemHTML(n){
+function newsItemHTML(n, i){
   const tags = (n.tags||[]).map(t => `<span class="ki-tag" data-t="${esc(t)}">${esc(t)}</span>`).join("");
   const hasLink = n.url && n.url !== "#";
   const title = hasLink
@@ -538,12 +632,15 @@ function newsItemHTML(n){
     : `<span class="ki-news__title">${esc(n.title)}</span>`;
   const summary = n.summary ? `<div class="ki-news__summary">${esc(n.summary)}</div>` : "";
   return `<li class="ki-news__item">
-      ${title}
-      ${summary}
-      <div class="ki-news__meta">
-        <span class="ki-news__date">${fmtDate(n.date)}</span>
-        ${n.source ? `<span class="ki-news__source">${esc(n.source)}</span>` : ""}
-        <span class="ki-tags">${tags}</span>
+      <span class="ki-news__no">${(i ?? 0) + 1}</span>
+      <div class="ki-news__body">
+        ${title}
+        ${summary}
+        <div class="ki-news__meta">
+          <span class="ki-news__date">${fmtDate(n.date)}</span>
+          ${n.source ? `<span class="ki-news__source">${esc(n.source)}</span>` : ""}
+          <span class="ki-tags">${tags}</span>
+        </div>
       </div>
     </li>`;
 }
@@ -552,7 +649,7 @@ function fillList(items, listSel, stateSel, moreSel, emptyMsg){
   const list = $(listSel), state = $(stateSel), more = $(moreSel);
   more.hidden = true;
   if(!items.length){ state.textContent = emptyMsg; state.hidden = false; return; }
-  list.innerHTML = items.slice(0, NEWS_RECENT_MAX).map(newsItemHTML).join("");
+  list.innerHTML = items.slice(0, NEWS_RECENT_MAX).map((n,i) => newsItemHTML(n,i)).join("");
   state.hidden = true;
   more.hidden = items.length <= NEWS_RECENT_MAX; // 残りがある時だけカレンダー導線を表示
 }
