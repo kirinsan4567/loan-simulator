@@ -403,30 +403,27 @@ const columnFeature = [
   }
 ];
 
-/* 1つ目は非表示にする */
 function renderX(){
   const el = $('#columnsX');
   if (!el) return;
 
-  const feat = columnFeature
-    .filter((_, i) => i !== 0)   // ★ここで1つ目を完全除外
-    .map(item => `
-      <a class="ki-embed ki-xart" href="${esc(item.url)}" target="_blank" rel="noopener">
-        <div class="ki-xart__img">
-          <img src="${esc(item.image)}" alt="" loading="lazy">
-        </div>
-        <div class="ki-xart__body">
-          <span class="ki-xart__badge">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-            </svg>
-            コラム
-          </span>
-          <h3 class="ki-xart__title">${esc(item.title)}</h3>
-          <span class="ki-xart__go">Xで読む ↗</span>
-        </div>
-      </a>
-    `).join("");
+  const feat = columnFeature.map(item => `
+    <a class="ki-embed ki-xart" href="${esc(item.url)}" target="_blank" rel="noopener">
+      <div class="ki-xart__img">
+        <img src="${esc(item.image)}" alt="" loading="lazy">
+      </div>
+      <div class="ki-xart__body">
+        <span class="ki-xart__badge">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+          コラム
+        </span>
+        <h3 class="ki-xart__title">${esc(item.title)}</h3>
+        <span class="ki-xart__go">Xで読む ↗</span>
+      </div>
+    </a>
+  `).join("");
 
   const posts = myXPosts.map(u =>
     `<div class="ki-embed">
@@ -438,7 +435,6 @@ function renderX(){
 
   el.innerHTML = feat + posts;
 }
-  
 
 /* ---------- 分析レポート：金利/為替/株価の月次グラフ ---------- */
 function whenChartReady(cb){
