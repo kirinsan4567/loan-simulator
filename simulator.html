@@ -2014,6 +2014,16 @@ function renderPrepaySteps(errorIndices = []) {
   });
 }
 
+// 元利均等の年金公式を逆算し、「今の残高を今の払い額で払い続けたら、あと何ヶ月で完済するか」を返す。
+// 期間短縮後の支払額軽減で、当初満期基準に巻き戻さないようにするための残存期間算出に使う。
+function impliedRemainingMonths(bal, rate, payment) {
+  if (bal <= 0 || payment <= 0) return 0;
+  if (rate === 0) return bal / payment;
+  const ratio = 1 - (bal * rate) / payment;
+  if (ratio <= 0) return null; // 払い額が利息すら賄えない異常値（呼び出し側でフォールバック）
+  return -Math.log(ratio) / Math.log(1 + rate);
+}
+
 // 繰り上げ返済ありのシミュレーション（青線データ生成）
 function calcPrepayLine(principal, term, repayType, startYM, use5yr, use125, rateSeries, totalMonths, reviewSet) {
   // prepayMapを再構築
@@ -2039,7 +2049,11 @@ function calcPrepayLine(principal, term, repayType, startYM, use5yr, use125, rat
     ? (r0 === 0 ? balance / totalMonths : (balance * r0) / (1 - Math.pow(1 + r0, -totalMonths))) : 0;
   let lastFixedPayment = currentPayment;
   let pendingRev = null;
-  let shortenMinPayment = 0; // 期間短縮後、5年見直しで払い額を下げないための最低額
+  // 「今の返済ペース（払い額）のまま続けた場合、何ヶ月目に完済する計画か」という目標値。
+  // 通常は当初満期(totalMonths)のまま。期間短縮の繰上げ返済が入るたびに前倒しで更新され、
+  // 以後の5年ルール見直しや支払額軽減の計算はこの値を残存期間の基準にする
+  // （totalMonths基準のままだと、期間短縮の前倒し効果が後続の計算で打ち消されてしまう）。
+  let plannedPayoffMonth = totalMonths;
 
   const payP = [], payI = [], balP = [], remI = [], cumP = [], cumI = [];
   const firstPrepayIndex = pmap.size > 0 ? Math.min(...pmap.keys()) : null;
@@ -2054,10 +2068,8 @@ function calcPrepayLine(principal, term, repayType, startYM, use5yr, use125, rat
 
     if (repayType === 'equal_payment' && use5yr && m > 0 && m % 60 === 0 && pendingRev !== null) {
       balance += unpaidInterest; unpaidInterest = 0;
-      let newPay = pendingRev;
-      if (shortenMinPayment > 0) newPay = Math.max(newPay, shortenMinPayment);
-      currentPayment = newPay; lastFixedPayment = newPay; pendingRev = null;
-      prevPayment = newPay; // 5年見直し後のprevPaymentを更新（繰上返済の前後比較に必要）
+      currentPayment = pendingRev; lastFixedPayment = pendingRev; pendingRev = null;
+      prevPayment = currentPayment; // 5年見直し後のprevPaymentを更新（繰上返済の前後比較に必要）
     }
 
     let intPart = balance * mr;
@@ -2089,16 +2101,25 @@ function calcPrepayLine(principal, term, repayType, startYM, use5yr, use125, rat
         balance -= amt;
         cumPrincipal += amt; // 一括返済額を累計に加算（グラフ上で上ジャンプを表現）
         if (pp.type === 'reduce_payment' && repayType === 'equal_payment') {
-          const remM2 = totalMonths - m - 1;
           const mr2 = rateSeries[m + 1] !== undefined ? rateSeries[m + 1] : mr;
-          if (remM2 > 0 && balance > 0) {
+          // 「今まで通りの完済目標月（plannedPayoffMonth）」までの残り月数を基準に、
+          // 軽減後の新しい払い額を計算する。totalMonths（当初満期）基準のままにすると、
+          // 過去の期間短縮で稼いだ前倒し効果が軽減の適用時に打ち消され、
+          // 返済期間が当初水準まで伸び戻ってしまうため、必ずこの目標値を使う。
+          const remM2 = Math.max(1, plannedPayoffMonth - (m + 1));
+          if (balance > 0) {
             const np = mr2 === 0 ? balance / remM2 : (balance * mr2) / (1 - Math.pow(1 + mr2, -remM2));
             paymentChanges.push({ index: m, before: Math.round(prevPayment), after: Math.round(np) });
             currentPayment = np; lastFixedPayment = np; prevPayment = np;
-            shortenMinPayment = 0; // 支払額軽減が明示的に選ばれた場合は期間短縮の最低払い額制約を解除
+            // plannedPayoffMonth はそのまま据え置く（軽減は完済目標を変えず、払い額だけ下げる）
           }
         } else if (pp.type === 'shorten') {
-          shortenMinPayment = Math.max(shortenMinPayment, currentPayment);
+          // 払い額は変えず、完済目標月を「今の払い額のまま払い続けたら完済する月」まで前倒しする
+          const n = impliedRemainingMonths(balance, mr, currentPayment);
+          if (n !== null) {
+            const newPlanned = (m + 1) + n;
+            plannedPayoffMonth = Math.min(plannedPayoffMonth, newPlanned);
+          }
         }
       }
     }
@@ -2122,9 +2143,9 @@ function calcPrepayLine(principal, term, repayType, startYM, use5yr, use125, rat
     remI.push(Math.round(fi));
     cumP.push(Math.round(cumPrincipal)); cumI.push(Math.round(cumInterest));
 
-    // 案C前期末計算
+    // 案C前期末計算（残り月数は当初満期ではなく、期間短縮を反映した完済目標月を基準にする）
     if (repayType === 'equal_payment' && use5yr && (m + 1) % 60 === 0 && m + 1 < totalMonths) {
-      const remM4 = totalMonths - (m + 1);
+      const remM4 = Math.max(1, plannedPayoffMonth - (m + 1));
       const nr2 = rateSeries[m + 1] !== undefined ? rateSeries[m + 1] : mr;
       const effB = balance + unpaidInterest;
       let np = nr2 === 0 ? effB / remM4 : (effB * nr2) / (1 - Math.pow(1 + nr2, -remM4));
