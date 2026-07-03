@@ -505,9 +505,15 @@
 
   /* ホーム導線（右上） */
   .header-top{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%}
+  .header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto}
   .home-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;background:var(--surface);white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s}
   .home-btn:hover{background:var(--bg);border-color:var(--text)}
   @media (max-width:600px){.home-btn{font-size:12px;padding:5px 9px}}
+  .insights-btn{display:inline-flex;align-items:center;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN',sans-serif;font-size:13px;font-weight:400;text-decoration:none;border:1px solid #1f5673;border-radius:8px;padding:6px 12px;background:#ffffff;white-space:nowrap;flex-shrink:0;transition:opacity .15s}
+  .insights-btn:hover{opacity:.75}
+  .insights-btn .ib-kirin{color:#000000}
+  .insights-btn .ib-insights{color:#1f5673}
+  @media (max-width:600px){.insights-btn{font-size:12px;padding:5px 9px}}
 
   .prepay-note{font-size:11.5px;color:#c0392b;line-height:1.6;margin:5px 0 8px}
   .prepay-note a{color:#c0392b;text-decoration:underline;font-weight:600}
@@ -515,7 +521,7 @@
 </head>
 <body>
 <header>
-  <div class="header-top"><h1>住宅ローン返済シミュレーター<a href="guide.html" target="_blank" rel="noopener" title="使い方ガイドを開く" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:8px;border:1.5px solid var(--accent);border-radius:50%;color:var(--accent);font-size:13px;font-weight:700;text-decoration:none;vertical-align:middle;line-height:1;">?</a></h1><a class="home-btn" href="index.html">← ホーム</a></div>
+  <div class="header-top"><h1>住宅ローン返済シミュレーター<a href="guide.html" target="_blank" rel="noopener" title="使い方ガイドを開く" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:8px;border:1.5px solid var(--accent);border-radius:50%;color:var(--accent);font-size:13px;font-weight:700;text-decoration:none;vertical-align:middle;line-height:1;">?</a></h1><div class="header-actions"><a class="home-btn" href="index.html">← ホーム</a><a class="insights-btn" href="https://kirinsan4567.github.io/insights/" target="_blank" rel="noopener"><span class="ib-kirin">KIRIN</span> <span class="ib-insights">Insights</span></a></div></div>
   <span>変動・固定 / 5年・125%ルール / 繰り上げ返済 / パターン・金利シナリオの比較・保存に対応</span>
   <div class="slot-area">
     <div class="pattern-row">
