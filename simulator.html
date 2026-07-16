@@ -518,6 +518,10 @@
   .prepay-note{font-size:11.5px;color:#c0392b;line-height:1.6;margin:5px 0 8px}
   .prepay-note a{color:#c0392b;text-decoration:underline;font-weight:600}
 </style>
+<style>
+  .ad-banner-mobile { display: none; }
+  @media (max-width: 900px) { .ad-banner-mobile { display: block; } }
+</style>
 </head>
 <body>
 <header>
@@ -564,6 +568,12 @@
 
 <div class="layout">
   <aside class="panel" id="panel">
+    <div style="margin:2px 0 12px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:transparent;text-align:center;">
+      <div style="font-size:10px;color:var(--sub);margin-bottom:6px;">[提携モゲチェック広告]</div>
+      <a href="https://px.a8.net/svt/ejp?a8mat=4B8110+4A7AGI+3SUE+15PEXD" rel="nofollow">
+      <img border="0" width="320" height="50" alt="" src="https://www22.a8.net/svt/bgt?aid=260715060259&wid=001&eno=01&mid=s00000017735007005000&mc=1" style="max-width:100%;height:auto;"></a>
+      <img border="0" width="1" height="1" src="https://www11.a8.net/0.gif?a8mat=4B8110+4A7AGI+3SUE+15PEXD" alt="">
+    </div>
     <div class="section-title" id="sec-basic" onclick="toggleSectionCollapse('sec-basic')"><span>ローン基本情報 <span id="basicPatternLabel" style="font-size:11px;font-weight:500;color:var(--sub);"></span></span> <span style="display:flex;gap:4px;" onclick="event.stopPropagation()"><button class="collapse-btn" style="font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);width:auto;" onclick="resetToDefaults()">✕ クリア</button><button class="collapse-btn" id="scbtn-sec-basic" onclick="event.stopPropagation();toggleSectionCollapse('sec-basic')">－</button></span></div>
     <div id="sec-basic-content">
     <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">
@@ -907,12 +917,24 @@
     <button class="btn-add" onclick="resetEventSteps()" title="デフォルトシナリオに戻す">⚙ デフォルト設定</button>
     </div>
 
+    <div style="margin:14px 0 0;padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:transparent;text-align:center;">
+      <div style="font-size:10px;color:var(--sub);margin-bottom:6px;">[提携モゲチェック広告]</div>
+      <a href="https://px.a8.net/svt/ejp?a8mat=4B8110+4ASQ2A+3SUE+65ME9" rel="nofollow">
+      <img border="0" width="336" height="280" alt="" src="https://www23.a8.net/svt/bgt?aid=260715060260&wid=001&eno=01&mid=s00000017735001034000&mc=1" style="max-width:100%;height:auto;"></a>
+      <img border="0" width="1" height="1" src="https://www11.a8.net/0.gif?a8mat=4B8110+4ASQ2A+3SUE+65ME9" alt="">
+    </div>
     <button class="btn-calc" style="margin-top:18px;" onclick="runSimulation()">シミュレーション実行</button>
     <button class="btn-add" style="margin-top:10px;width:100%;text-align:center;" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲ トップへ戻る</button>
   </aside>
 
   <main class="results" id="results">
     <!-- スマホ：設定パネルへのジャンプリンク（モバイルでのみ表示） -->
+    <div class="ad-banner-mobile" style="margin:0 0 14px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:transparent;text-align:center;">
+      <div style="font-size:10px;color:var(--sub);margin-bottom:6px;">[提携モゲチェック広告]</div>
+      <a href="https://px.a8.net/svt/ejp?a8mat=4B8110+4A7AGI+3SUE+15PEXD" rel="nofollow">
+      <img border="0" width="320" height="50" alt="" src="https://www22.a8.net/svt/bgt?aid=260715060259&wid=001&eno=01&mid=s00000017735007005000&mc=1" style="max-width:100%;height:auto;"></a>
+      <img border="0" width="1" height="1" src="https://www11.a8.net/0.gif?a8mat=4B8110+4A7AGI+3SUE+15PEXD" alt="">
+    </div>
     <a class="jump-link" onclick="(() => { const panel = document.getElementById('panel'); const header = document.querySelector('header'); const offset = header ? header.offsetHeight : 0; const top = panel.getBoundingClientRect().top + window.scrollY - offset; window.scrollTo({top, behavior:'smooth'}); })();">
       ⚙️ 自分の条件で試す（設定はこちら）
     </a>
