@@ -40,6 +40,7 @@
 <meta name="twitter:image" content="https://kirinsan4567.github.io/loan-simulator/icon.jpg">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="kirin-loan-engine.js"></script>
 <style>
   :root {
     --bg: #f8f7f4;
@@ -1586,12 +1587,24 @@ function exportData() {
   SCENARIO_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v) data[k] = JSON.parse(v); });
   // 折りたたみ状態
   ['chart_collapse','panel_collapse'].forEach(k => { const v = localStorage.getItem(k); if (v) data[k] = JSON.parse(v); });
+  // 繰り上げ返済を反映した残高・利息(直近の画面表示分のみ。②③が計算し直さず参照できるように)。
+  // ①自体の挙動・見た目には影響しない、書き出しファイルへの追加情報。
+  if (lastPrepaySnapshot && data['plan_' + lastPrepaySnapshot.forSlot]) {
+    data['plan_' + lastPrepaySnapshot.forSlot].prepayAdjustedSchedule = {
+      startYM: lastPrepaySnapshot.startYM,
+      labels: lastPrepaySnapshot.labels,
+      balancePrincipalData: lastPrepaySnapshot.balancePrincipalData,
+      remainingInterestData: lastPrepaySnapshot.remainingInterestData,
+      cumInterestData: lastPrepaySnapshot.cumInterestData,
+      endIndex: lastPrepaySnapshot.endIndex
+    };
+  }
   const now = new Date();
-  const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+  const ymd = String(now.getFullYear()).slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `loanSim_${ts}.json`;
+  a.download = `data_住宅ローン返済シミュレーター_${ymd}.json`;
   a.click();
 }
 
@@ -1855,6 +1868,8 @@ function buildAppliedRateSeries(startYM, totalMonths, reviewSet) {
 
 /* ========== 繰り上げ返済 ========== */
 let prepaySteps = [];
+// ②③向けに書き出す「繰り上げ返済を反映した残高・利息」のキャッシュ(calculate()で更新)
+let lastPrepaySnapshot = null;
 
 function togglePrepayCompare() {
   const cb = document.getElementById('usePrepay');
@@ -2824,11 +2839,12 @@ function calculate() {
     return;
   }
 
-  // ★追加：見直し月だけで金利が動く系列を事前に構築
+  // ★追加：見直し月だけで金利が動く系列を事前に構築（繰り上げ返済比較ライン用に維持）
   const reviewSet = getReviewMonthsSet();
   const rateSeries = buildAppliedRateSeries(startYM, totalMonths, reviewSet);
 
-  // 繰り上げ返済イベントをmonthインデックス→{amount,type}のMapに変換
+  // 繰り上げ返済イベントをmonthインデックス→{amount,type}のMapに変換（比較ライン用に維持。
+  // 主要な残高計算そのものには影響しない＝以前からの仕様）
   const usePrepay = document.getElementById('usePrepay').checked;
   const prepayMap = new Map();
   if (usePrepay && prepaySteps.length > 0) {
@@ -2841,177 +2857,33 @@ function calculate() {
     });
   }
 
-  const labels = [];
-  const rateData = [];
-  const payPrincipalData = [];  
-  const payInterestData = [];   
-  const balancePrincipalData = []; 
-  const balanceUnpaidData = [];    
-  const remainingInterestData = [];   // ★追加：残利息額（将来支払う利息の予測値）
-  const cumPrincipalData = [];  
-  const cumInterestData = [];   
-  const monthlyPayData = [];    // 月々分のみの返済額（ボーナス分を除く・ダッシュボードの月額指標用）
-
-  // ===== ボーナス払い設定 =====
-  const bonusPrincipalAll = Math.min(getBonusPrincipalYen(), principal);
-  const bonusMonthsSet = getBonusMonthsSet();
-  const startMonthNum = parseInt(startYM.split('-')[1], 10);
-  const bonusTracker = makeBonusTracker(bonusPrincipalAll, bonusMonthsSet, startMonthNum, totalMonths, repayType);
-  const mPrincipal = principal - (bonusTracker.active ? bonusPrincipalAll : 0); // 月々分の元本
-
-  let balance = mPrincipal;
-  let unpaidInterest = 0;
-  let currentPayment = 0;
-  let lastFixedPayment = 0; 
-  let totalInterest = 0;
-  let totalPayment = 0;
-  let unpaidCount = 0;
-  let cumPrincipal = 0;
-  let cumInterest = 0;
-  let pendingPaymentRevision = null; // 案C：前期末に計算し翌期頭に適用する5年ルール払い額
-
   const initRate = parseFloat(document.getElementById('initRate').value) || 0;
-  const r0 = initRate / 100 / 12; 
+  const applyDelay = parseInt(document.getElementById('applyDelay').value) || 0;
 
-  if (repayType === 'equal_payment') {
-    currentPayment = r0 === 0 ? (balance / totalMonths) : (balance * r0) / (1 - Math.pow(1 + r0, -totalMonths));
-    lastFixedPayment = currentPayment;
-  }
-  
+  // ===== KIRIN共通ローンエンジン(kirin-loan-engine.js)による計算 =====
+  // 不動産売却益計算シミュレーター(baikyaku)側からも同じエンジンを読み込んで使うため、
+  // 主要な返済計算はここに一本化されている。修正する場合はkirin-loan-engine.js側を直すこと。
+  const bonusOn = bonusIsOn();
+  const bonusModeEl = document.getElementById('bonusInputMode');
+  const bonusMode = bonusModeEl ? bonusModeEl.value : 'ratio';
+  const bonusValueRaw = document.getElementById('bonusValue')?.value || '';
+  const bonusValue = parseFloat(bonusValueRaw.replace(/,/g,'')) || 0;
 
-  for (let m = 0; m < totalMonths; m++) {
-    const monthlyRate = rateSeries[m];
-    const annualRate = monthlyRate * 12 * 100;
+  const simResult = KirinLoanEngine.runLoanSimulation({
+    principalYen: principal, term, repayType, startYM, initRate, use5yr, use125,
+    eventSteps: eventSteps,
+    reviewMonths: Array.from(reviewSet),
+    applyDelay,
+    bonusOn, bonusMode, bonusValue,
+    bonusMonths: bonusMonths
+  });
 
-    const [y, mm] = startYM.split('-').map(Number);
-    const d = new Date(y, mm - 1 + m, 1);
-    labels.push(`${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`);
-    rateData.push(+annualRate.toFixed(4));
-
-    const remainingMonths = totalMonths - m;
-
-    // 案C：5年ルール見直し月頭で未払い利息を残高に繰り入れてから新払い額を適用
-    if (repayType === 'equal_payment' && use5yr && m > 0 && m % 60 === 0 && pendingPaymentRevision !== null) {
-      balance += unpaidInterest;
-      unpaidInterest = 0;
-      currentPayment = pendingPaymentRevision;
-      lastFixedPayment = currentPayment;
-      pendingPaymentRevision = null;
-    }
-
-    let interestPart = balance * monthlyRate;
-    let principalPart = 0;
-    let payment = currentPayment;
-
-    if (repayType === 'equal_payment') {
-      if (!use5yr) {
-        payment = monthlyRate === 0 ? (balance / remainingMonths) : (balance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -remainingMonths));
-      }
-
-      // 厳密な未払い利息（残利息）のシミュレーションロジック
-      if (payment < interestPart) {
-        unpaidInterest += (interestPart - payment);
-        interestPart = payment; 
-        principalPart = 0;
-        unpaidCount++;
-      } else {
-        let surplus = payment - interestPart;
-        if (unpaidInterest > 0) {
-          const clear = Math.min(surplus, unpaidInterest);
-          unpaidInterest -= clear;
-          surplus -= clear;
-        }
-        principalPart = surplus;
-      }
-    } else {
-      principalPart = mPrincipal / totalMonths;
-      payment = principalPart + interestPart;
-    }
-
-    if (balance <= principalPart) {
-      principalPart = balance;
-      balance = 0;
-    } else {
-      balance -= principalPart;
-    }
-
-    // 月々分のみ（毎月の返済額グラフ・繰上げ効果検出・ダッシュボード月額指標で使用）
-    monthlyPayData.push(Math.round(principalPart + interestPart));
-    payPrincipalData.push(Math.round(principalPart));
-    payInterestData.push(Math.round(interestPart));
-
-    // ボーナス払い（選択月のみ）— 累計・総額・残高・控除に反映（毎月の返済額グラフには出さない）
-    const bonusStep = bonusTracker.step(m, monthlyRate);
-
-    cumPrincipal += principalPart + bonusStep.principal;
-    cumInterest += interestPart + bonusStep.interest;
-
-    // 残高＝月々分＋ボーナス分
-    balancePrincipalData.push(Math.round(balance + bonusTracker.getBalance()));
-    balanceUnpaidData.push(Math.round(unpaidInterest));
-
-    // ★追加：残利息額＝「今の残高・今の金利のまま完済まで返済し続けた場合に、
-    //         これから先に支払うことになる利息の合計」を毎月再計算する。
-    //         （5年ルール等の負の元本償却で発生する「未払い利息」とは別概念）
-    {
-      const remMonths = totalMonths - m - 1;
-      const nextRate = rateSeries[m + 1] !== undefined ? rateSeries[m + 1] : monthlyRate;
-      let futureInterest = 0;
-      if (remMonths > 0 && balance > 0) {
-        const pmt = nextRate > 0
-          ? (balance * nextRate) / (1 - Math.pow(1 + nextRate, -remMonths))
-          : (balance / remMonths);
-        futureInterest = Math.max(0, pmt * remMonths - balance);
-      }
-      futureInterest += bonusTracker.remainingInterest(nextRate);
-      remainingInterestData.push(Math.round(futureInterest));
-    }
-
-    cumPrincipalData.push(Math.round(cumPrincipal));
-    cumInterestData.push(Math.round(cumInterest));
-
-    // 案C：前期最終月(m%60===59)の返済完了後に次期払い額を先行計算
-    if (repayType === 'equal_payment' && use5yr && (m + 1) % 60 === 0 && m + 1 < totalMonths) {
-      const remM = totalMonths - (m + 1);
-      const nextRate = rateSeries[m + 1] !== undefined ? rateSeries[m + 1] : monthlyRate;
-      const effBal = balance + unpaidInterest;
-      let nextPay = nextRate === 0 ? (effBal / remM) : (effBal * nextRate) / (1 - Math.pow(1 + nextRate, -remM));
-      if (use125 && nextPay > lastFixedPayment * 1.25) nextPay = lastFixedPayment * 1.25;
-      pendingPaymentRevision = nextPay;
-    }
-
-    totalInterest += interestPart + bonusStep.interest;
-    totalPayment += payment + bonusStep.payment;
-
-    if (balance <= 0 && unpaidInterest <= 0 && bonusTracker.getBalance() <= 0.5) {
-      const cutAt = m + 1;
-      labels.splice(cutAt);
-      rateData.splice(cutAt);
-      payPrincipalData.splice(cutAt);
-      payInterestData.splice(cutAt);
-      balancePrincipalData.splice(cutAt);
-      balanceUnpaidData.splice(cutAt);
-      remainingInterestData.splice(cutAt);
-      cumPrincipalData.splice(cutAt);
-      cumInterestData.splice(cutAt);
-      monthlyPayData.splice(cutAt);
-      break;
-    }
-  }
-
-  // 現在の返済額（今月=0月目・月々分のみ）
-  const currentMonthlyPayment = monthlyPayData[0] || 0;
-
-  // 5年ルール時: 次の返済額変更タイミングと金額（月々分のみで判定）
-  let nextChangePayment = null, nextChangeLabel = null;
-  let maxPayment = 0, maxPaymentLabel = null;
-  const totalPayData = monthlyPayData.slice();
-  for (let i = 1; i < totalPayData.length; i++) {
-    if (totalPayData[i] > maxPayment) { maxPayment = totalPayData[i]; maxPaymentLabel = labels[i]; }
-    if (nextChangePayment === null && Math.abs(totalPayData[i] - totalPayData[0]) > 1) {
-      nextChangePayment = totalPayData[i]; nextChangeLabel = labels[i];
-    }
-  }
+  const {
+    labels, rateData, payPrincipalData, payInterestData, balancePrincipalData, balanceUnpaidData,
+    remainingInterestData, cumPrincipalData, cumInterestData, monthlyPayData,
+    totalInterest, totalPayment, totalUnpaid, unpaidCount, finalBalance,
+    currentMonthlyPayment, nextChangePayment, nextChangeLabel, maxPayment, maxPaymentLabel
+  } = simResult;
 
   // TODAY縦線のインデックス: BASE_YM(今月)が labels の何番目か
   const todayIndex = ymToOffset(startYM, BASE_YM);
@@ -3020,9 +2892,22 @@ function calculate() {
     ? calcPrepayLine(principal, term, repayType, startYM, use5yr, use125, rateSeries, totalMonths, reviewSet)
     : null;
 
+  // ②不動産売却益計算シミュレーター・③すみかえNAVIが「繰り上げ返済を反映した残高・利息」を
+  // そのまま参照できるよう、直近の計算結果をキャッシュしておく(exportData()で使用)。
+  // 繰り上げ返済の計算ロジック自体は今まで通りここ(①)にのみ存在し、他ツールに複製しない。
+  lastPrepaySnapshot = prepayLine ? {
+    forSlot: activeSlot,
+    startYM: startYM,
+    labels: labels.slice(0, prepayLine.balancePrincipalData.length),
+    balancePrincipalData: prepayLine.balancePrincipalData,
+    remainingInterestData: prepayLine.remainingInterestData,
+    cumInterestData: prepayLine.cumInterestData,
+    endIndex: prepayLine.endIndex
+  } : null;
+
   renderResults({
     labels, rateData, payPrincipalData, payInterestData, balancePrincipalData, balanceUnpaidData, remainingInterestData, cumPrincipalData, cumInterestData,
-    totalInterest, totalPayment, totalUnpaid: unpaidInterest, unpaidCount, principal, finalBalance: balance + unpaidInterest + bonusTracker.getBalance(),
+    totalInterest, totalPayment, totalUnpaid, unpaidCount, principal, finalBalance,
     todayIndex,
     currentMonthlyPayment, nextChangePayment, nextChangeLabel, maxPayment, maxPaymentLabel,
     prepayLine
