@@ -21,10 +21,11 @@
 
 <title>住宅ローン返済シミュレーター</title>
 <meta name="apple-mobile-web-app-title" content="住宅ローン返済シミュレーター">
-<link rel="icon" type="image/png" href="KIRIN_SIMULATOR_ICON2.jpg">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpolygon points='20,20 20,3 35,20' fill='%23C98A93'/%3E%3Cpolygon points='20,20 35,20 20,37' fill='%237A2E32'/%3E%3Cpolygon points='20,20 20,37 5,20' fill='%234F1D22'/%3E%3Cpolygon points='20,20 5,20 20,3' fill='%232E0F13'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 
 <!-- iPhone ホーム画面用 -->
-<link rel="apple-touch-icon" sizes="180x180" href="KIRIN_SIMULATOR_ICON2.jpg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta name="description" content="変動金利住宅ローンの将来の金利上昇シナリオ・5年ルール・125%ルールまで再現できる返済シミュレーター。借入金額や金利を自分の条件に変えて試せます。">
 
 <!-- OGP（Xにリンクを貼ったときのカード表示用） -->
@@ -510,14 +511,20 @@
   .home-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;background:var(--surface);white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s}
   .home-btn:hover{background:var(--bg);border-color:var(--text)}
   @media (max-width:600px){.home-btn{font-size:12px;padding:5px 9px}}
-  .insights-btn{display:inline-flex;align-items:center;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN',sans-serif;font-size:13px;font-weight:400;text-decoration:none;border:1px solid #1f5673;border-radius:8px;padding:6px 12px;background:#ffffff;white-space:nowrap;flex-shrink:0;transition:opacity .15s}
-  .insights-btn:hover{opacity:.75}
-  .insights-btn .ib-kirin{color:#000000}
-  .insights-btn .ib-insights{color:#1f5673}
-  @media (max-width:600px){.insights-btn{font-size:12px;padding:5px 9px}}
+  .portal-btn{display:inline-flex;align-items:center;gap:4px;font-family:inherit;font-size:13px;font-weight:600;text-decoration:none;border:1.5px solid #1F3864;border-radius:14px;padding:6px 12px;background:#FFFFFF;color:#1F3864;white-space:nowrap;flex-shrink:0;transition:background .15s}
+  .portal-btn:hover{background:#EEF3FA}
+  @media (max-width:600px){.portal-btn{font-size:12px;padding:5px 9px}}
 
   .prepay-note{font-size:11.5px;color:#c0392b;line-height:1.6;margin:5px 0 8px}
   .prepay-note a{color:#c0392b;text-decoration:underline;font-weight:600}
+
+  .calc-basis-fixedbar{
+    position:sticky; top:0; z-index:60;
+    display:flex; align-items:center; gap:12px;
+    background:var(--bg); padding:8px 14px; border:1px solid var(--border); border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  }
+  .calc-basis-title{ font-weight:700; color:var(--accent); font-size:14px; white-space:nowrap; }
 </style>
 <style>
   .ad-banner-mobile { display: none; }
@@ -526,7 +533,7 @@
 </head>
 <body>
 <header>
-  <div class="header-top"><h1>住宅ローン返済シミュレーター<a href="guide.html" target="_blank" rel="noopener" title="使い方ガイドを開く" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:8px;border:1.5px solid var(--accent);border-radius:50%;color:var(--accent);font-size:13px;font-weight:700;text-decoration:none;vertical-align:middle;line-height:1;">?</a></h1><div class="header-actions"><a class="home-btn" href="index.html">← ホーム</a><a class="insights-btn" href="https://kirinsan4567.github.io/insights/" target="_blank" rel="noopener"><span class="ib-kirin">KIRIN</span> <span class="ib-insights">Insights</span></a></div></div>
+  <div class="header-top"><h1>住宅ローン返済シミュレーター<a href="guide.html" target="_blank" rel="noopener" title="使い方ガイドを開く" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:8px;border:1.5px solid var(--accent);border-radius:50%;color:var(--accent);font-size:13px;font-weight:700;text-decoration:none;vertical-align:middle;line-height:1;">?</a></h1><div class="header-actions"><a class="home-btn" href="index.html">← ホーム</a><a class="portal-btn" href="https://kirinsan4567.github.io/portal/" target="_blank" rel="noopener">アプリポータル ↗</a></div></div>
   <span>変動・固定 / 5年・125%ルール / 繰り上げ返済 / パターン・金利シナリオの比較・保存に対応</span>
   <div class="slot-area">
     <div class="pattern-row">
@@ -577,6 +584,14 @@
     </div>
     <div class="section-title" id="sec-basic" onclick="toggleSectionCollapse('sec-basic')"><span>ローン基本情報 <span id="basicPatternLabel" style="font-size:11px;font-weight:500;color:var(--sub);"></span></span> <span style="display:flex;gap:4px;" onclick="event.stopPropagation()"><button class="collapse-btn" style="font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);width:auto;" onclick="resetToDefaults()">✕ クリア</button><button class="collapse-btn" id="scbtn-sec-basic" onclick="event.stopPropagation();toggleSectionCollapse('sec-basic')">－</button></span></div>
     <div id="sec-basic-content">
+    <div class="field" style="margin-bottom:12px;">
+      <label>ローン契約者</label>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="slot-btn saved" id="personTagSelfBtn" onclick="setPersonTag('self')" title="この計算は本人のものとして保存・出力する" style="flex:1;width:auto;white-space:nowrap;">本人</button>
+        <button type="button" class="slot-btn" id="personTagSpouseBtn" onclick="setPersonTag('spouse')" title="この計算は配偶者のものとして保存・出力する" style="flex:1;width:auto;white-space:nowrap;">配偶者</button>
+      </div>
+      <div id="personTagNotice" style="display:none;font-size:11.5px;line-height:1.7;color:var(--sub);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-top:8px;"></div>
+    </div>
     <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">
       <div class="field" style="flex:1;margin-bottom:0;">
         <label>借入金額（万円）<span class="info-tip" tabindex="0">?<span class="tip">10万円単位（10万円未満は切り捨て）</span></span></label>
@@ -808,8 +823,34 @@
           </label>
         </div>
       </div>
+      <div class="field-group-label" style="margin-top:10px;">住宅ローン控除の借入限度額 <span class="info-icon" onclick="showDeductionInfo()" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border:1.5px solid var(--accent);border-radius:50%;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;">?</span></div>
       <div class="field">
-        <label>控除対象残高上限</label>
+        <label>入居年</label>
+        <select id="deductYear" onchange="onDeductionInputsChange()" style="margin-top:4px;">
+          <option value="2019-2021">2019〜2021年</option>
+          <option value="2022-2023">2022〜2023年</option>
+          <option value="2024-2027" selected>2024〜2027年</option>
+          <option value="2028-2030">2028〜2030年</option>
+        </select>
+      </div>
+      <div class="field" id="householdTypeField">
+        <label>世帯区分</label>
+        <select id="householdType" onchange="onDeductionInputsChange()" style="margin-top:4px;">
+          <option value="general">一般世帯</option>
+          <option value="childcare">子育て世帯・若者夫婦世帯（19歳未満の子がいる、または夫婦のいずれかが40歳未満）</option>
+        </select>
+      </div>
+      <div class="field" id="homePerfField">
+        <label>住宅性能</label>
+        <select id="homePerf" onchange="onDeductionInputsChange()" style="margin-top:4px;">
+          <option value="certified">認定長期優良・低炭素住宅</option>
+          <option value="zeh">ZEH水準省エネ住宅</option>
+          <option value="energy">省エネ基準適合住宅</option>
+          <option value="other">その他（省エネ基準未満・一般住宅）</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>控除対象残高上限（自動計算）</label>
         <select id="deductionLimit" onchange="calculate()" style="margin-top:4px;">
           <option value="50000000">5,000万円（認定住宅ZEH・2021年以前認定住宅）</option>
           <option value="45000000">4,500万円（長期優良・低炭素住宅 2022年〜）</option>
@@ -817,6 +858,7 @@
           <option value="30000000">3,000万円（省エネ基準適合・中古認定住宅 2022年〜）</option>
           <option value="20000000">2,000万円（省エネ基準・中古一般 2024年〜）</option>
         </select>
+        <div class="hint" id="deductionLimitNote" style="margin-top:4px;font-size:11.5px;color:var(--sub);"></div>
       </div>
     </div>
     </div>
@@ -929,6 +971,94 @@
   </aside>
 
   <main class="results" id="results">
+    <div id="deductionInfoWrap" style="display:none;">
+      <button onclick="hideDeductionInfo()" style="display:inline-block;width:auto;padding:5px 12px;font-size:12px;font-weight:700;background:#fff;color:var(--accent);border:1.5px solid var(--accent);border-radius:6px;cursor:pointer;margin-bottom:10px;">← 戻る</button>
+      <h2 style="font-size:17px;font-weight:800;margin:0 0 6px;color:var(--text);">住宅ローン控除の借入限度額について</h2>
+      <p style="font-size:12px;color:#B8860B;background:#FCEFD8;border:1px solid #B8860B;border-radius:6px;padding:6px 10px;display:inline-block;margin:0 0 14px;">本ページの内容は2026年8月時点の公開情報に基づく概算です。制度は改正されることがあるため、最終判断の前に国税庁・税理士にご確認ください。</p>
+      <div style="max-width:760px;font-size:13px;line-height:1.9;">
+        <h3>新築住宅の借入限度額（控除率・年度別）</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:16px;">
+          <tr style="background:var(--surface);">
+            <th style="border:1px solid var(--border);padding:6px;text-align:left;">入居年</th>
+            <th style="border:1px solid var(--border);padding:6px;text-align:left;">控除率</th>
+            <th style="border:1px solid var(--border);padding:6px;text-align:left;">控除期間</th>
+            <th style="border:1px solid var(--border);padding:6px;text-align:left;">世帯区分</th>
+            <th style="border:1px solid var(--border);padding:6px;text-align:right;">認定長期優良<br>・低炭素住宅</th>
+            <th style="border:1px solid var(--border);padding:6px;text-align:right;">ZEH水準<br>省エネ住宅</th>
+            <th style="border:1px solid var(--border);padding:6px;text-align:right;">省エネ基準<br>適合住宅</th>
+            <th style="border:1px solid var(--border);padding:6px;text-align:right;">その他<br>（省エネ基準未満）</th>
+          </tr>
+          <tr>
+            <td style="border:1px solid var(--border);padding:6px;">2019〜2021年</td>
+            <td style="border:1px solid var(--border);padding:6px;">1.0%</td>
+            <td style="border:1px solid var(--border);padding:6px;">13年</td>
+            <td style="border:1px solid var(--border);padding:6px;">－（該当なし）</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">5,000万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">－（該当なし）</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">－（該当なし）</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">4,000万円</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid var(--border);padding:6px;">2022〜2023年</td>
+            <td style="border:1px solid var(--border);padding:6px;">0.7%</td>
+            <td style="border:1px solid var(--border);padding:6px;">13年</td>
+            <td style="border:1px solid var(--border);padding:6px;">－（該当なし）</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">5,000万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">4,500万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">4,000万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">3,000万円</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid var(--border);padding:6px;" rowspan="2">2024〜2027年</td>
+            <td style="border:1px solid var(--border);padding:6px;" rowspan="2">0.7%</td>
+            <td style="border:1px solid var(--border);padding:6px;" rowspan="2">13年</td>
+            <td style="border:1px solid var(--border);padding:6px;">一般世帯</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">4,500万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">3,500万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">3,000万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">対象外<br>（2023年までに建築確認済みなら2,000万円）</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid var(--border);padding:6px;">子育て世帯など</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">5,000万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">4,500万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">4,000万円</td>
+            <td style="border:1px solid var(--border);padding:6px;text-align:right;">対象外<br>（2023年までに建築確認済みなら2,000万円）</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid var(--border);padding:6px;">2028〜2030年</td>
+            <td style="border:1px solid var(--border);padding:6px;" colspan="6">2026年8月時点では未定。省エネ基準適合・その他は新築で原則対象外（2027年末までに建築確認済みなら経過措置2,000万円・控除期間10年）</td>
+          </tr>
+        </table>
+
+        <h3>所得・床面積・立地の要件</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px;">
+          <tr><td style="border:1px solid var(--border);padding:6px;width:90px;font-weight:700;background:var(--surface);">所得</td><td style="border:1px solid var(--border);padding:6px;">合計所得金額2,000万円以下（2021年以前は3,000万円以下）。「年収」ではなく所得控除後の金額で判定します</td></tr>
+          <tr><td style="border:1px solid var(--border);padding:6px;font-weight:700;background:var(--surface);">床面積</td><td style="border:1px solid var(--border);padding:6px;">2026年8月時点：40㎡以上（所得1,000万円超、または子育て世帯等の上乗せ利用者は50㎡以上）</td></tr>
+          <tr><td style="border:1px solid var(--border);padding:6px;font-weight:700;background:var(--surface);">立地</td><td style="border:1px solid var(--border);padding:6px;">2028年以降入居分から、災害レッドゾーンの新築住宅は対象外</td></tr>
+        </table>
+        <p style="font-size:11.5px;color:var(--sub);">※床面積要件は変遷があります。2021年以前：50㎡以上（緩和なし）／2022〜2025年：原則50㎡、所得1,000万円以下なら40㎡に緩和／2026年以降：40㎡が原則に変更。※子育て世帯等＝19歳未満の子がいる、または夫婦のいずれかが40歳未満の世帯。</p>
+
+        <h3>その他の要件</h3>
+        <p>主として居住する住宅であること／引渡しから6ヶ月以内に居住／<b>住宅ローン自体の返済期間が10年以上</b>あること（上の表の「控除期間」＝控除を受けられる年数とは別の話です）／店舗併用住宅は床面積の1/2以上が居住用。</p>
+
+        <h3 style="color:#B8860B;">併用不可の特例（重要）</h3>
+        <p style="background:#FCEFD8;border:1px solid #B8860B;border-radius:8px;padding:8px 10px;">
+          <b>3,000万円特別控除・買換え特例を使うと、買い替え先の新居では住宅ローン控除が使えません。</b>
+        </p>
+        <p style="font-size:11.5px;color:var(--sub);">※この表・要件は新築住宅のものです。中古（既存）住宅には別の限度額・要件が定められています。</p>
+        <h3>出典</h3>
+        <ul style="font-size:11px;color:var(--sub);padding-left:18px;">
+          <li><a href="https://www.mlit.go.jp/jutakukentiku/house/jutakukentiku_house_tk2_000017.html" target="_blank" rel="noopener">国土交通省「住宅：住宅ローン減税」</a>（現行ページ、要件全般）</li>
+          <li><a href="https://www.mlit.go.jp/jutakukentiku/house/shienjigyo_r6-06.html" target="_blank" rel="noopener">国土交通省「住宅ローン減税」</a>（2024・2025年入居の限度額）</li>
+          <li><a href="https://www.mlit.go.jp/report/press/house02_hh_000189.html" target="_blank" rel="noopener">国交省 報道発表（令和6年度改正）</a>（2022・2023年の水準）</li>
+          <li><a href="https://www.mlit.go.jp/report/press/house02_hh_000206.html" target="_blank" rel="noopener">国交省 報道発表（令和7年度改正）</a>（子育て世帯等の定義）</li>
+          <li><a href="https://www.mlit.go.jp/page/content/001975596.pdf" target="_blank" rel="noopener">国交省「令和8年度税制改正概要」PDF</a>（2026年以降・要件詳細）</li>
+          <li><a href="https://www.netbk.co.jp/contents/lineup/home-loan/column/02/" target="_blank" rel="noopener">住信SBIネット銀行</a>／<a href="https://www.joyobank.co.jp/woman/column/201412_07.html" target="_blank" rel="noopener">常陽銀行</a>（2019〜2021年の制度）</li>
+          <li><a href="https://suumo.jp/article/oyakudachi/oyaku/ms_shinchiku/ms_money/jutakuloan_genzei/" target="_blank" rel="noopener">SUUMO 2026年版記事</a>／<a href="https://finance.recruit.co.jp/article/n241/" target="_blank" rel="noopener">「はじめての住宅ローン」</a>（床面積要件の恒久化の経緯）</li>
+        </ul>
+      </div>
+    </div>
     <!-- スマホ：設定パネルへのジャンプリンク（モバイルでのみ表示） -->
     <div class="ad-banner-mobile" style="margin:0 0 14px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:transparent;text-align:center;">
       <div style="font-size:10px;color:var(--sub);margin-bottom:6px;">[提携モゲチェック広告]</div>
@@ -1011,11 +1141,11 @@ const defaultEvents = [
   { ym: "2024-07-31", bump: 0.15, policyRate: 0.25 },
   { ym: "2025-01-24", bump: 0.25, policyRate: 0.50 },
   { ym: "2025-12-19", bump: 0.25, policyRate: 0.75 },
-  { ym: "2026-06-16", bump: 0.25, policyRate: 1.00 },
-  { ym: "2026-09-18", bump: 0.25, policyRate: 1.25 },
-  { ym: "2027-09-17", bump: 0.25, policyRate: 1.50 },
-  { ym: "2028-09-15", bump: 0.25, policyRate: 1.75 },
-  { ym: "2029-09-14", bump: 0.25, policyRate: 2.00 }
+  { ym: "2026-06-17", bump: 0.25, policyRate: 1.00 },
+  { ym: "2026-12-18", bump: 0.25, policyRate: 1.25 },
+  { ym: "2027-12-17", bump: 0.25, policyRate: 1.50 },
+  { ym: "2028-12-15", bump: 0.25, policyRate: 1.75 },
+  { ym: "2029-06-20", bump: 0.25, policyRate: 2.00 }
 ];
 
 let eventSteps = defaultEvents.map(e => ({ ...e }));
@@ -1484,7 +1614,7 @@ function updateScenarioSlotDropdown() {
   // A〜J パターン（localStorage OR slotCache、自分以外）
   SLOT_KEYS.forEach(k => {
     if (k === activeSlot) return;
-    const fromLS = localStorage.getItem('plan_' + k);
+    const fromLS = localStorage.getItem(planKey(k));
     const fromCache = slotCache[k];
     const data = fromLS ? JSON.parse(fromLS) : fromCache || null;
     if (data && data.eventSteps && data.eventSteps.length > 0) {
@@ -1520,7 +1650,7 @@ function loadScenarioFromSlot() {
     data = { eventSteps: defaultEvents.map(e => ({...e})) };
   } else if (sel.value.startsWith('slot_')) {
     const k = sel.value.replace('slot_', '');
-    const fromLS = localStorage.getItem('plan_' + k);
+    const fromLS = localStorage.getItem(planKey(k));
     const fromCache = slotCache[k];
     data = fromLS ? JSON.parse(fromLS) : fromCache || null;
     if (!data) return;
@@ -1579,10 +1709,90 @@ function deleteRateScenario(all) {
   updateScenarioSaveDropdown();
 }
 
+// 「本人／配偶者」の切替。ペアローンで夫婦それぞれの条件が違う場合に、
+// どちらのデータかを分かるようにし、出力ファイル名にも反映する。
+// 中身の計算ロジックには影響しない(あくまでタグ付けと保存先の区別のためだけの機能)。
+let personTag = localStorage.getItem('personTag') || 'self';
+if(personTag !== 'spouse') personTag = 'self';
+// パターン(A〜J)の保存先も本人／配偶者で分ける。本人は従来どおり'plan_A'等(既存データをそのまま使える)、
+// 配偶者は'spouse_plan_A'等に保存する。以前は保存先が共通だったため、配偶者の内容を保存すると
+// 本人のパターンが上書きされ、「本人」と書かれた出力ファイルに配偶者のローンが入ってしまう不具合があった。
+function planKey(k){ return (personTag === 'spouse' ? 'spouse_plan_' : 'plan_') + k; }
+// 未保存の編集内容(パターン切替時の一時キャッシュ)と、表示中のパターンも本人／配偶者ごとに持つ
+const slotCacheByPerson = { self:null, spouse:null };
+// 本人／配偶者は、見た目は同じ入力欄を使うが、中身は別々に保存・復元する
+// (これまでは同じ入力欄を共有しているだけで、切り替えても中身が別れておらず、
+// 「配偶者に切り替えても本人の内容がそのまま残っている」ように見えるバグがあった)。
+// 「空欄」はページ読み込み時のサンプルデータではなく、明示的に空の状態として定義する。
+const BLANK_FORM_TEMPLATE = {
+  principal: '', bonusOnOff: 'off', bonusInputMode: 'ratio', bonusValue: '', bonusMonths: [7,12],
+  term: '35', initRate: '', repayType: 'equal_payment', startYear: '', startMonth: '',
+  rule5yr: false, rule125: false, applyDelay: '0', reviewMonths: [4,10],
+  eventSteps: [], prepaySteps: [], rateType: 'variable',
+  useDeduction: false, deductionRate: '0.007', deductionYears: '13', deductionLimit: '50000000'
+};
+
+function setPersonTag(tag){
+  const newTag = (tag === 'spouse') ? 'spouse' : 'self';
+  if(newTag === personTag){ updatePersonTagButtons(); updatePersonTagNotice(); return; }
+  // 切り替え前のタグの入力内容を、そのタグ専用の保存領域に退避する
+  try{ localStorage.setItem('personFormState_'+personTag, JSON.stringify(collectSettings())); }catch(e){}
+  try{ localStorage.setItem('personActiveSlot_'+personTag, activeSlot || 'A'); }catch(e){}
+  slotCacheByPerson[personTag] = Object.assign({}, slotCache);
+  Object.keys(slotCache).forEach(k => delete slotCache[k]);
+  personTag = newTag;
+  localStorage.setItem('personTag', personTag);
+  Object.assign(slotCache, slotCacheByPerson[personTag] || {});
+  const restoredSlot = localStorage.getItem('personActiveSlot_'+personTag);
+  activeSlot = (restoredSlot && SLOT_KEYS.indexOf(restoredSlot) >= 0) ? restoredSlot : 'A';
+  // 切り替え先のタグに保存済みのデータがあれば復元、無ければ空欄(初期状態)に戻す
+  const saved = localStorage.getItem('personFormState_'+personTag);
+  try{
+    applySettings(saved ? JSON.parse(saved) : BLANK_FORM_TEMPLATE);
+  }catch(e){}
+  updatePersonTagButtons();
+  updatePersonTagNotice();
+  if(typeof renderSlotBtns === 'function') renderSlotBtns();
+  if(typeof updateScenarioSlotDropdown === 'function') updateScenarioSlotDropdown();
+  calculate();
+}
+function updatePersonTagNotice(){
+  const box = document.getElementById('personTagNotice');
+  if(!box) return;
+  if(personTag !== 'spouse'){ box.style.display = 'none'; return; }
+  box.style.display = '';
+  const hasSelfData = !!localStorage.getItem('personFormState_self');
+  box.innerHTML = '借入条件（金融機関・金利・返済期間・金利変更月・5年/125%ルールなど）が本人と異なる場合は、下記をご自身の内容に変更してください。<br>'
+    + `<label style="display:flex;align-items:center;gap:6px;margin-top:6px;cursor:${hasSelfData?'pointer':'not-allowed'};opacity:${hasSelfData?'1':'0.5'};"><input type="checkbox" id="sameAsSelfCb" ${hasSelfData?'':'disabled'} onchange="onSameAsSelfToggle(this)"> 本人と同じ条件にする（借入額だけ自分で入力）</label>`
+    + (hasSelfData ? '' : '<span style="font-size:11px;">（先に「本人」タブで内容を入力してください）</span>');
+}
+function onSameAsSelfToggle(cb){
+  if(!cb.checked) return; // チェックを外しても、入力済みの内容はそのまま残す(何も破壊しない)
+  const raw = localStorage.getItem('personFormState_self');
+  if(!raw){ cb.checked = false; return; }
+  let s;
+  try{ s = JSON.parse(raw); }catch(e){ return; }
+  const principalBefore = document.getElementById('principal').value; // 配偶者が既に入れていた借入額は残す
+  const sKeepPrincipal = Object.assign({}, s, { principal: principalBefore }); // 借入額だけは上書きしない
+  applySettings(sKeepPrincipal);
+  document.getElementById('principal').focus();
+  calculate();
+}
+function updatePersonTagButtons(){
+  const selfBtn = document.getElementById('personTagSelfBtn');
+  const spouseBtn = document.getElementById('personTagSpouseBtn');
+  if(!selfBtn || !spouseBtn) return;
+  selfBtn.classList.toggle('active', personTag === 'self');
+  selfBtn.classList.toggle('saved', personTag === 'self');
+  spouseBtn.classList.toggle('active', personTag === 'spouse');
+  spouseBtn.classList.toggle('saved', personTag === 'spouse');
+}
+document.addEventListener('DOMContentLoaded', ()=>{ updatePersonTagButtons(); updatePersonTagNotice(); });
+
 function exportData() {
   const data = {};
   // スロット
-  SLOT_KEYS.forEach(k => { const v = localStorage.getItem('plan_' + k); if (v) data['plan_' + k] = JSON.parse(v); });
+  SLOT_KEYS.forEach(k => { const v = localStorage.getItem(planKey(k)); if (v) data['plan_' + k] = JSON.parse(v); });
   // シナリオ
   SCENARIO_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v) data[k] = JSON.parse(v); });
   // 折りたたみ状態
@@ -1599,12 +1809,15 @@ function exportData() {
       endIndex: lastPrepaySnapshot.endIndex
     };
   }
+  // 本人／配偶者のどちらのデータかを、②③側が自動で見分けられるようにタグ付けする
+  data.personTag = personTag;
   const now = new Date();
   const ymd = String(now.getFullYear()).slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+  const personLabel = personTag === 'spouse' ? '配偶者' : '本人';
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `data_住宅ローン返済シミュレーター_${ymd}.json`;
+  a.download = `data_住宅ローン返済シミュレーター_${personLabel}_${ymd}.json`;
   a.click();
 }
 
@@ -1616,12 +1829,26 @@ function importData(input) {
     try {
       const data = JSON.parse(e.target.result);
       if (!confirm('現在の全設定を上書きして読み込みますか？')) { input.value = ''; return; }
-      Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, JSON.stringify(v)));
+      // ファイルの本人／配偶者に切り替えてから、そのパターン保存先に書き込む(タグの無い旧ファイルは本人扱い)
+      const fileTag = (data.personTag === 'spouse') ? 'spouse' : 'self';
+      if (fileTag !== personTag) setPersonTag(fileTag);
+      Object.entries(data).forEach(([k, v]) => {
+        if (k === 'personTag') return;
+        const m = /^plan_([A-Z])$/.exec(k);
+        localStorage.setItem(m ? planKey(m[1]) : k, JSON.stringify(v));
+      });
+      // personTagは上の汎用ループでJSON.stringifyされてしまう(文字列だが値が'"spouse"'のように
+      // クォート付きになる)ため、読み込んだファイルの値で明示的に上書きする。
+      if(data.personTag){
+        personTag = (data.personTag === 'spouse') ? 'spouse' : 'self';
+        localStorage.setItem('personTag', personTag);
+        updatePersonTagButtons();
+      }
       renderSlotBtns();
       updateScenarioSlotDropdown();
       updateScenarioSaveDropdown();
       // スロットAを読み込み
-      const savedA = localStorage.getItem('plan_A');
+      const savedA = localStorage.getItem(planKey('A'));
       if (savedA) applySettings(JSON.parse(savedA));
       loadCollapseState();
       alert('読み込み完了しました。');
@@ -2258,10 +2485,10 @@ function renumberSlots() {
   const newData = {};
   slotOrder.forEach((key, i) => {
     const newKey = SLOT_KEYS[i];
-    const saved = localStorage.getItem('plan_' + key);
-    if (saved) newData['plan_' + newKey] = saved;
+    const saved = localStorage.getItem(planKey(key));
+    if (saved) newData[planKey(newKey)] = saved;
   });
-  SLOT_KEYS.forEach(k => localStorage.removeItem('plan_' + k));
+  SLOT_KEYS.forEach(k => localStorage.removeItem(planKey(k)));
   Object.entries(newData).forEach(([k,v]) => localStorage.setItem(k, v));
   slotOrder = [...SLOT_KEYS];
   saveSlotOrder();
@@ -2388,11 +2615,11 @@ function pasteSlot() {
 }
 
 function deleteCurrentSlot() {
-  const hasData = !!(localStorage.getItem('plan_' + activeSlot) || slotCache[activeSlot]);
+  const hasData = !!(localStorage.getItem(planKey(activeSlot)) || slotCache[activeSlot]);
   const hasInput = parseFloat((document.getElementById('principal').value || '').replace(/,/g, '')) > 0;
   if (!hasData && !hasInput) return;
   if (!confirm(`パターン${activeSlot}のデータを消去しますか？`)) return;
-  localStorage.removeItem('plan_' + activeSlot);
+  localStorage.removeItem(planKey(activeSlot));
   delete slotCache[activeSlot];
   // 設定・ダッシュボード・グラフを未保存パターンと同じ状態に戻す
   ['principal','initRate','rateType'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; }); { const _t=document.getElementById('term'); if(_t) _t.value='35'; const _r=document.getElementById('repayType'); if(_r) _r.value='equal_payment'; } if(typeof resetBonusToOff==='function') resetBonusToOff();
@@ -2414,10 +2641,10 @@ function deleteCurrentSlot() {
 }
 
 function deleteAllSlots() {
-  const hasSaved = SLOT_KEYS.some(k => localStorage.getItem('plan_' + k));
+  const hasSaved = SLOT_KEYS.some(k => localStorage.getItem(planKey(k)));
   if (!hasSaved) return;
   if (!confirm('全パターン（A〜J）のデータを消去しますか？')) return;
-  SLOT_KEYS.forEach(k => { localStorage.removeItem('plan_' + k); delete slotCache[k]; });
+  SLOT_KEYS.forEach(k => { localStorage.removeItem(planKey(k)); delete slotCache[k]; });
   slotOrder = [...SLOT_KEYS];
   saveSlotOrder();
   activeSlot = 'A';
@@ -2449,7 +2676,7 @@ function saveCurrentSlot() {
     if (data) {
       const p = parseFloat((data.principal || '').replace(/,/g, ''));
       if (p > 0) {
-        localStorage.setItem('plan_' + key, JSON.stringify(data));
+        localStorage.setItem(planKey(key), JSON.stringify(data));
         savedCount++;
       }
     }
@@ -2468,7 +2695,7 @@ function settingsFingerprint(s) {
 }
 
 function hasUnsavedChanges() {
-  const saved = localStorage.getItem('plan_' + activeSlot);
+  const saved = localStorage.getItem(planKey(activeSlot));
   if (!saved) return false; // 未保存スロットは変更扱いしない
   return settingsFingerprint(collectSettings()) !== settingsFingerprint(JSON.parse(saved));
 }
@@ -2515,7 +2742,7 @@ function switchSlot(key) {
   const exBtn = document.getElementById('exBtn');
   if (exBtn) { exBtn.classList.remove('active'); exBtn.classList.add('saved'); }
   const cached = slotCache[key];
-  const fromLS = localStorage.getItem('plan_' + key);
+  const fromLS = localStorage.getItem(planKey(key));
   const data = cached || (fromLS ? JSON.parse(fromLS) : null);
   if (data) {
     applySettings(data);
@@ -2567,7 +2794,7 @@ function renderSlotBtns() {
   }
 
   slotOrder.forEach((key, orderIdx) => {
-    const saved = localStorage.getItem('plan_' + key);
+    const saved = localStorage.getItem(planKey(key));
     const isActive = key === activeSlot;
     const showAsSaved = !!saved && (!isActive || !hasUnsavedChanges());
     const btn = document.createElement('button');
@@ -2638,7 +2865,7 @@ function onAxisUnifyChange() {
 function computeUnifiedAxes() {
   const results = { payMax: 0, balMax: 0, cumMax: 0, labelCount: 0, rateMax: 0 };
   SLOT_KEYS.forEach(k => {
-    const saved = localStorage.getItem('plan_' + k);
+    const saved = localStorage.getItem(planKey(k));
     if (!saved) return;
     try {
       const s = JSON.parse(saved);
@@ -2809,6 +3036,100 @@ function updateSectionCollapseBtn(id, collapsed) {
 
 let charts = {};
 let chartSteps = {}; // グラフのY軸stepSizeをrender後も参照できるよう保持
+
+// 住宅ローン控除の借入限度額(新築)。出典は右側の情報パネル(showDeductionInfo)を参照。
+// 2019〜2021年はZEH水準・省エネ基準適合という区分自体が存在しなかったため、
+// 「認定長期優良・低炭素住宅」と「その他(一般住宅)」の2区分のみ。世帯区分による差もない。
+// 2028〜2030年は具体的な金額が情報源によって食い違い、確度の高い一次資料を確認できなかった
+// ため、金額は出さず国税庁の確認を案内する。
+const DEDUCTION_LIMIT_TABLE = {
+  '2019-2021': {
+    certified: { general: 50000000, childcare: 50000000 },
+    other:     { general: 40000000, childcare: 40000000 }
+  },
+  '2022-2023': {
+    certified: { general: 50000000, childcare: 50000000 },
+    zeh:       { general: 45000000, childcare: 45000000 },
+    energy:    { general: 40000000, childcare: 40000000 },
+    other:     { general: 30000000, childcare: 30000000 }
+  },
+  '2024-2027': {
+    certified: { general: 45000000, childcare: 50000000 },
+    zeh:       { general: 35000000, childcare: 45000000 },
+    energy:    { general: 30000000, childcare: 40000000 },
+    other:     { general: 0,        childcare: 0 } // 原則対象外。2023年までに建築確認済みなら経過措置で2,000万円(詳細は情報パネル参照)
+  }
+};
+const HOME_PERF_LABELS = {
+  certified: '認定長期優良・低炭素住宅', zeh: 'ZEH水準省エネ住宅',
+  energy: '省エネ基準適合住宅', other: 'その他（省エネ基準未満・一般住宅）'
+};
+
+function onDeductionInputsChange(){
+  const year = document.getElementById('deductYear').value;
+  const householdField = document.getElementById('householdTypeField');
+  const homePerfSelect = document.getElementById('homePerf');
+  const limitSelect = document.getElementById('deductionLimit');
+  const note = document.getElementById('deductionLimitNote');
+
+  const prevPerfValue = homePerfSelect.value;
+  if(year==='2019-2021' || year==='2022-2023'){
+    householdField.style.display = 'none'; // この期間は世帯区分による上乗せ制度自体が無い(2024年新設)
+    // 住宅性能の選択肢：2019〜2021年は「認定」「その他(一般)」の2つのみ、2022〜2023年は4区分
+    homePerfSelect.innerHTML = (year==='2019-2021')
+      ? '<option value="certified">認定長期優良・低炭素住宅</option><option value="other">一般住宅（それ以外）</option>'
+      : '<option value="certified">認定長期優良・低炭素住宅</option><option value="zeh">ZEH水準省エネ住宅</option><option value="energy">省エネ基準適合住宅</option><option value="other">その他（省エネ基準未満・一般住宅）</option>';
+  } else if(year==='2028-2030'){
+    householdField.style.display = '';
+    homePerfSelect.innerHTML = '<option value="certified">認定長期優良・低炭素住宅</option><option value="zeh">ZEH水準省エネ住宅</option><option value="energy">省エネ基準適合住宅（新築は原則対象外）</option><option value="other">その他（省エネ基準未満）</option>';
+  } else {
+    householdField.style.display = '';
+    homePerfSelect.innerHTML = '<option value="certified">認定長期優良・低炭素住宅</option><option value="zeh">ZEH水準省エネ住宅</option><option value="energy">省エネ基準適合住宅</option><option value="other">その他（省エネ基準未満・一般住宅）</option>';
+  }
+  // 選択肢を再構築しても、同じ値がまだ選べるならその選択を保持する(無ければ先頭に戻る)
+  if(Array.from(homePerfSelect.options).some(o=>o.value===prevPerfValue)){
+    homePerfSelect.value = prevPerfValue;
+  }
+
+  const household = householdField.style.display==='none' ? 'general' : document.getElementById('householdType').value;
+  const perf = homePerfSelect.value;
+
+  if(year==='2028-2030'){
+    note.innerHTML = '2028年以降の具体的な金額は、2026年8月時点では未定です。下の欄に直接入力してください（詳しくは「?」をご覧ください）。';
+    return;
+  }
+
+  const table = DEDUCTION_LIMIT_TABLE[year];
+  const row = table[perf] || table.other;
+  const limitYen = row[household];
+  limitSelect.innerHTML = `<option value="${limitYen}">${(limitYen/10000).toLocaleString('ja-JP')}万円</option>`;
+  limitSelect.value = String(limitYen);
+
+  let noteText = `${year.replace('-','〜')}年入居・${HOME_PERF_LABELS[perf]||perf}・${household==='childcare'?'子育て世帯等':'一般世帯'}の借入限度額です。`;
+  if(year==='2024-2027' && perf==='other' && limitYen===0){
+    noteText += '原則、住宅ローン控除の対象外です。ただし2023年までに新築の建築確認を受けている場合は、経過措置で2,000万円が適用されることがあります（該当する場合は下の欄に2000万円を直接入力してください）。';
+  }
+  note.textContent = noteText;
+  calculate();
+}
+document.addEventListener('DOMContentLoaded', ()=>{ try{ onDeductionInputsChange(); }catch(e){} });
+
+function showDeductionInfo(){
+  const wrap = document.getElementById('deductionInfoWrap');
+  const results = document.getElementById('results');
+  if(!wrap || !results) return;
+  Array.from(results.children).forEach(c=>{ if(c!==wrap) c.style.display='none'; });
+  wrap.style.display = '';
+  results.scrollTop = 0;
+  window.scrollTo(0,0);
+}
+function hideDeductionInfo(){
+  const wrap = document.getElementById('deductionInfoWrap');
+  const results = document.getElementById('results');
+  if(!wrap || !results) return;
+  wrap.style.display = 'none';
+  Array.from(results.children).forEach(c=>{ if(c!==wrap) c.style.display=''; });
+}
 
 function calculate() {
   const principal = parseFloat(document.getElementById('principal').value.replace(/,/g,'')) * 10000;
