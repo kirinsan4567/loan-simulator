@@ -1732,24 +1732,52 @@ const BLANK_FORM_TEMPLATE = {
   useDeduction: false, deductionRate: '0.007', deductionYears: '13', deductionLimit: '50000000'
 };
 
+// 指定した本人／配偶者・パターンのデータ(一時キャッシュ優先、無ければ保存済み)を返す。無ければnull。
+function getPersonSlotData(tag, slot){
+  if(!slot) return null;
+  const cache = (tag === personTag) ? slotCache : (slotCacheByPerson[tag] || {});
+  if(cache[slot]) return cache[slot];
+  const raw = localStorage.getItem((tag === 'spouse' ? 'spouse_plan_' : 'plan_') + slot);
+  if(!raw) return null;
+  try{ return JSON.parse(raw); }catch(e){ return null; }
+}
+// 「本人と同じ条件にする」の参照元：本人が最後に表示していたパターン(ex.の場合や未設定はA)
+function getSelfReferenceData(){
+  let slot = localStorage.getItem('personActiveSlot_self');
+  if(!slot || SLOT_KEYS.indexOf(slot) < 0) slot = 'A';
+  return getPersonSlotData('self', slot);
+}
 function setPersonTag(tag){
   const newTag = (tag === 'spouse') ? 'spouse' : 'self';
   if(newTag === personTag){ updatePersonTagButtons(); updatePersonTagNotice(); return; }
-  // 切り替え前のタグの入力内容を、そのタグ専用の保存領域に退避する
-  try{ localStorage.setItem('personFormState_'+personTag, JSON.stringify(collectSettings())); }catch(e){}
-  try{ localStorage.setItem('personActiveSlot_'+personTag, activeSlot || 'A'); }catch(e){}
+  // 切り替え前のタグの編集中の内容を、表示中のパターンの一時キャッシュに退避する(パターン切替と同じ扱い)。
+  // ex.(サンプル)表示中はどのパターンにも書き込まない。以前は ex. の内容をそのまま退避し、
+  // 戻ったときに「パターンA」として復元していたため、パターンAが ex. の条件で上書きされる不具合があった。
+  if (activeSlot) {
+    const p = parseFloat((document.getElementById('principal').value || '').replace(/,/g, ''));
+    if (p > 0) {
+      slotCache[activeSlot] = collectSettings();
+      try{ localStorage.setItem('personFormState_'+personTag, JSON.stringify(slotCache[activeSlot])); }catch(e){}
+    }
+  }
+  try{ localStorage.setItem('personActiveSlot_'+personTag, activeSlot || 'ex'); }catch(e){}
   slotCacheByPerson[personTag] = Object.assign({}, slotCache);
   Object.keys(slotCache).forEach(k => delete slotCache[k]);
   personTag = newTag;
   localStorage.setItem('personTag', personTag);
   Object.assign(slotCache, slotCacheByPerson[personTag] || {});
   const restoredSlot = localStorage.getItem('personActiveSlot_'+personTag);
-  activeSlot = (restoredSlot && SLOT_KEYS.indexOf(restoredSlot) >= 0) ? restoredSlot : 'A';
-  // 切り替え先のタグに保存済みのデータがあれば復元、無ければ空欄(初期状態)に戻す
-  const saved = localStorage.getItem('personFormState_'+personTag);
-  try{
-    applySettings(saved ? JSON.parse(saved) : BLANK_FORM_TEMPLATE);
-  }catch(e){}
+  if (restoredSlot === 'ex') {
+    // ex. 表示中に切り替えた場合は ex. に戻す(パターンAには触れない)
+    activeSlot = null;
+    switchToExample();
+  } else {
+    activeSlot = (restoredSlot && SLOT_KEYS.indexOf(restoredSlot) >= 0) ? restoredSlot : 'A';
+    // 復元元はパターンの一時キャッシュ→保存済みデータのみ。どちらも無ければ空欄。
+    // (別保存の personFormState からは復元しない。消去したパターンの古い内容が切替で復活する原因になるため)
+    const data = getPersonSlotData(personTag, activeSlot);
+    try{ applySettings(data || BLANK_FORM_TEMPLATE); }catch(e){}
+  }
   updatePersonTagButtons();
   updatePersonTagNotice();
   if(typeof renderSlotBtns === 'function') renderSlotBtns();
@@ -1761,17 +1789,15 @@ function updatePersonTagNotice(){
   if(!box) return;
   if(personTag !== 'spouse'){ box.style.display = 'none'; return; }
   box.style.display = '';
-  const hasSelfData = !!localStorage.getItem('personFormState_self');
+  const hasSelfData = !!getSelfReferenceData();
   box.innerHTML = '借入条件（金融機関・金利・返済期間・金利変更月・5年/125%ルールなど）が本人と異なる場合は、下記をご自身の内容に変更してください。<br>'
     + `<label style="display:flex;align-items:center;gap:6px;margin-top:6px;cursor:${hasSelfData?'pointer':'not-allowed'};opacity:${hasSelfData?'1':'0.5'};"><input type="checkbox" id="sameAsSelfCb" ${hasSelfData?'':'disabled'} onchange="onSameAsSelfToggle(this)"> 本人と同じ条件にする（借入額だけ自分で入力）</label>`
     + (hasSelfData ? '' : '<span style="font-size:11px;">（先に「本人」タブで内容を入力してください）</span>');
 }
 function onSameAsSelfToggle(cb){
   if(!cb.checked) return; // チェックを外しても、入力済みの内容はそのまま残す(何も破壊しない)
-  const raw = localStorage.getItem('personFormState_self');
-  if(!raw){ cb.checked = false; return; }
-  let s;
-  try{ s = JSON.parse(raw); }catch(e){ return; }
+  const s = getSelfReferenceData();
+  if(!s){ cb.checked = false; return; }
   const principalBefore = document.getElementById('principal').value; // 配偶者が既に入れていた借入額は残す
   const sKeepPrincipal = Object.assign({}, s, { principal: principalBefore }); // 借入額だけは上書きしない
   applySettings(sKeepPrincipal);
@@ -2615,6 +2641,11 @@ function pasteSlot() {
 }
 
 function deleteCurrentSlot() {
+  if (activeSlot === null) {
+    showSlotMsg('ex. パターンは消去できません');
+    setTimeout(() => showSlotMsg(''), 1500);
+    return;
+  }
   const hasData = !!(localStorage.getItem(planKey(activeSlot)) || slotCache[activeSlot]);
   const hasInput = parseFloat((document.getElementById('principal').value || '').replace(/,/g, '')) > 0;
   if (!hasData && !hasInput) return;
