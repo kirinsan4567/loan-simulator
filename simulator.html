@@ -3835,7 +3835,16 @@ function renderResults(d) {
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: legendTopEnd,
-        tooltip: { callbacks: { afterBody: items => {
+        tooltip: { callbacks: {
+          // 残利息額のデータセットは塗り分けのため「元本残高＋残利息」を積み上げた値を持っている。
+          // 標準ラベルだとその合計値が出てしまうため、残利息額だけは本来の値を表示する。
+          label: item => {
+            const v = item.dataset.label === '残利息額'
+              ? (d.remainingInterestData[item.dataIndex] || 0)
+              : (item.parsed.y || 0);
+            return item.dataset.label + ': ' + Math.round(v).toLocaleString('ja-JP');
+          },
+          afterBody: items => {
           if (!items.length) return '';
           const idx = items[0].dataIndex;
           return '合計: ' + Math.round((d.balancePrincipalData[idx]||0)+(d.remainingInterestData[idx]||0)).toLocaleString('ja-JP') + '円';
