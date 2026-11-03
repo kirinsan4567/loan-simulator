@@ -1729,7 +1729,8 @@ const BLANK_FORM_TEMPLATE = {
   term: '35', initRate: '', repayType: 'equal_payment', startYear: '', startMonth: '',
   rule5yr: false, rule125: false, applyDelay: '0', reviewMonths: [4,10],
   eventSteps: [], prepaySteps: [], rateType: 'variable',
-  useDeduction: false, deductionRate: '0.007', deductionYears: '13', deductionLimit: '50000000'
+  useDeduction: false, deductionRate: '0.007', deductionYears: '13',
+  deductYear: '2024-2027', householdType: 'general', homePerf: 'certified', deductionLimit: '45000000'
 };
 
 // 指定した本人／配偶者・パターンのデータ(一時キャッシュ優先、無ければ保存済み)を返す。無ければnull。
@@ -2562,7 +2563,11 @@ function collectSettings() {
     useDeduction: document.getElementById('useDeduction') ? document.getElementById('useDeduction').checked : false,
     deductionRate: deductRateEl ? deductRateEl.value : '0.007',
     deductionYears: deductYearsEl ? deductYearsEl.value : '13',
-    deductionLimit: document.getElementById('deductionLimit') ? document.getElementById('deductionLimit').value : '50000000',
+    // 控除上限の算出元(入居年・世帯区分・住宅性能)も保存する。上限額だけでは復元時に条件が再現できないため
+    deductYear: document.getElementById('deductYear') ? document.getElementById('deductYear').value : '2024-2027',
+    householdType: document.getElementById('householdType') ? document.getElementById('householdType').value : 'general',
+    homePerf: document.getElementById('homePerf') ? document.getElementById('homePerf').value : 'certified',
+    deductionLimit: document.getElementById('deductionLimit') ? document.getElementById('deductionLimit').value : '45000000',
     title: generateSlotTitle()
   };
 }
@@ -2609,9 +2614,7 @@ function applySettings(s) {
     const el = document.querySelector(`input[name="deductionYears"][value="${s.deductionYears}"]`);
     if (el) el.checked = true;
   }
-  if (s.deductionLimit && document.getElementById('deductionLimit')) {
-    document.getElementById('deductionLimit').value = s.deductionLimit;
-  }
+  if (document.getElementById('deductYear')) restoreDeductionLimitInputs(s);
   onRule5yrChange();
   onPrepayChange();
   syncReviewMonthsUI();
@@ -3096,12 +3099,15 @@ const HOME_PERF_LABELS = {
   energy: '省エネ基準適合住宅', other: 'その他（省エネ基準未満・一般住宅）'
 };
 
-function onDeductionInputsChange(){
+// preferredLimit: 手動選択になる区分(2028〜2030年、2024〜2027年の「その他」)で残したい上限額。
+// 省略時は現在の選択値を残す。自動算出の区分では常に算出値を使う(上限は条件から決まる値のため)。
+function onDeductionInputsChange(preferredLimit){
   const year = document.getElementById('deductYear').value;
   const householdField = document.getElementById('householdTypeField');
   const homePerfSelect = document.getElementById('homePerf');
   const limitSelect = document.getElementById('deductionLimit');
   const note = document.getElementById('deductionLimitNote');
+  const keepLimit = String(preferredLimit != null ? preferredLimit : limitSelect.value);
 
   const prevPerfValue = homePerfSelect.value;
   if(year==='2019-2021' || year==='2022-2023'){
@@ -3124,24 +3130,71 @@ function onDeductionInputsChange(){
 
   const household = householdField.style.display==='none' ? 'general' : document.getElementById('householdType').value;
   const perf = homePerfSelect.value;
+  const fmt = v => v===0 ? '0円（控除対象外）' : (v/10000).toLocaleString('ja-JP')+'万円';
+  const setOptions = (values, fallback) => {
+    limitSelect.innerHTML = values.map(v=>`<option value="${v}">${fmt(v)}</option>`).join('');
+    limitSelect.value = values.map(String).indexOf(keepLimit) >= 0 ? keepLimit : String(fallback);
+  };
 
   if(year==='2028-2030'){
-    note.innerHTML = '2028年以降の具体的な金額は、2026年8月時点では未定です。下の欄に直接入力してください（詳しくは「?」をご覧ください）。';
+    // 金額が未定のため、想定される金額から選んでもらう(以前は「直接入力」と案内しながら入力欄が無かった)
+    const ref = (DEDUCTION_LIMIT_TABLE['2024-2027'][perf] || {})[household] || 0;
+    setOptions([50000000,45000000,40000000,35000000,30000000,20000000,0], ref);
+    note.innerHTML = '2028年以降の具体的な金額は、2026年8月時点では未定です。下の欄で想定する金額を選んでください（詳しくは「?」をご覧ください）。';
+    calculate();
     return;
   }
 
   const table = DEDUCTION_LIMIT_TABLE[year];
   const row = table[perf] || table.other;
   const limitYen = row[household];
-  limitSelect.innerHTML = `<option value="${limitYen}">${(limitYen/10000).toLocaleString('ja-JP')}万円</option>`;
-  limitSelect.value = String(limitYen);
-
   let noteText = `${year.replace('-','〜')}年入居・${HOME_PERF_LABELS[perf]||perf}・${household==='childcare'?'子育て世帯等':'一般世帯'}の借入限度額です。`;
   if(year==='2024-2027' && perf==='other' && limitYen===0){
-    noteText += '原則、住宅ローン控除の対象外です。ただし2023年までに新築の建築確認を受けている場合は、経過措置で2,000万円が適用されることがあります（該当する場合は下の欄に2000万円を直接入力してください）。';
+    // 経過措置(2023年までに建築確認)の2,000万円を選べるようにする
+    setOptions([0, 20000000], 0);
+    noteText += '原則、住宅ローン控除の対象外です。ただし2023年までに新築の建築確認を受けている場合は、経過措置で2,000万円が適用されることがあります（該当する場合は下の欄で2,000万円を選んでください）。';
+  } else {
+    setOptions([limitYen], limitYen);
   }
   note.textContent = noteText;
   calculate();
+}
+
+// 保存データから控除上限の入力欄(入居年・世帯区分・住宅性能・上限)を復元する
+function restoreDeductionLimitInputs(s){
+  const yearSel = document.getElementById('deductYear');
+  const hhSel = document.getElementById('householdType');
+  const perfSel = document.getElementById('homePerf');
+  const hasOpt = (sel, v) => Array.from(sel.options).some(o => o.value === v);
+  const savedLimit = (s.deductionLimit != null && s.deductionLimit !== '') ? String(s.deductionLimit) : null;
+
+  if (s.deductYear && hasOpt(yearSel, s.deductYear)) {
+    yearSel.value = s.deductYear;
+    if (s.householdType && hasOpt(hhSel, s.householdType)) hhSel.value = s.householdType;
+    onDeductionInputsChange(savedLimit);            // 入居年に合わせて住宅性能の選択肢を作り直す
+    if (s.homePerf && hasOpt(perfSel, s.homePerf)) perfSel.value = s.homePerf;
+  } else {
+    // 旧データ(上限額しか保存されていない)：上限額から世帯区分・住宅性能を逆引きする(2024〜2027年入居として扱う)
+    yearSel.value = '2024-2027';
+    onDeductionInputsChange(savedLimit);
+    const lim = parseInt(savedLimit, 10);
+    const t = DEDUCTION_LIMIT_TABLE['2024-2027'];
+    const order = [['certified','general'],['zeh','general'],['energy','general'],
+                   ['certified','childcare'],['zeh','childcare'],['energy','childcare']];
+    const hit = order.find(([p,h]) => t[p] && t[p][h] === lim);
+    if (hit) { perfSel.value = hit[0]; hhSel.value = hit[1]; }
+    else { perfSel.value = 'other'; hhSel.value = 'general'; } // 2,000万円(経過措置)など
+  }
+  onDeductionInputsChange(savedLimit);
+  // それでも一致しない保存額(旧UIの選択肢など)は、空欄にせず選択肢として残す
+  const limSel = document.getElementById('deductionLimit');
+  if (savedLimit && limSel.value !== savedLimit && !(s.deductYear)) {
+    const v = parseInt(savedLimit, 10);
+    if (v >= 0) {
+      limSel.insertAdjacentHTML('beforeend', `<option value="${v}">${(v/10000).toLocaleString('ja-JP')}万円（保存値）</option>`);
+      limSel.value = String(v);
+    }
+  }
 }
 document.addEventListener('DOMContentLoaded', ()=>{ try{ onDeductionInputsChange(); }catch(e){} });
 
